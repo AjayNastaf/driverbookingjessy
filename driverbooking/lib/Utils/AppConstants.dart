@@ -1,0 +1,19 @@
+import 'package:flutter/material.dart';
+
+class AppConstants {  // only use asset
+  static const String nastafLogo = 'assets/image/Nastaf-Logo.png';
+  static const String bgmain = 'assets/image/bg-Main.png';
+  static const String registration = 'assets/image/regis-tration.png';
+  static const String intro_one = 'assets/image/intro1.jpg';
+  static const String intro_two = 'assets/image/intro2.jpg';
+  static const String intro_three = 'assets/image/intro3.jpg';
+  static const String sample = 'assets/image/4.png';
+  static const String Refer_friend = 'assets/image/referfriend.jpg';
+
+
+  // static const String baseUrl = "http://192.168.0.109:8085";
+  // static const String baseUrl = "http://54.236.10.55:3000";
+  static const String baseUrl = "http://192.168.0.108:3000";
+  static const Color primaryColor = Colors.blue;
+  static const String ApiKey = "AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk";
+}
