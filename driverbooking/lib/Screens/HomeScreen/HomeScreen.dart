@@ -253,18 +253,6 @@ class _HomescreenState extends State<Homescreen> {
       // ),
       body: Stack(
         children: [
-          // Google Map
-          _currentPosition == null
-              ? Center(child: CircularProgressIndicator())
-              : GoogleMap(
-            onMapCreated: (controller) => _mapController = controller,
-            initialCameraPosition: CameraPosition(
-              target: _currentPosition!,
-              zoom: 15,
-            ),
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-          ),
 
           // Overlay Container
           Padding(
@@ -317,71 +305,6 @@ class _HomescreenState extends State<Homescreen> {
                 ],
               ),
             ),
-          ),
-          DraggableScrollableSheet(
-            initialChildSize: 0.3, // Initial size of the draggable section
-            minChildSize: 0.3, // Minimum size of the draggable section
-            maxChildSize: 0.7, // Maximum size of the draggable section
-            builder: (context, controller) {
-              return Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: Offset(0, -4),
-                    ),
-                  ],
-                ),
-                child: SingleChildScrollView(
-                  controller: controller,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Search Input
-
-                      TextFormField(
-                        controller: _searchController,
-
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          prefixIcon: Icon(Icons.search, color: Colors.grey),
-                          hintText: "Where to?",
-                          hintStyle: TextStyle(color: Colors.grey[600]),
-                          contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>Destinationlocationscreen()));
-                        },
-                      ),
-                      SizedBox(height: 16),
-
-                      // Sample Address List
-                      ListTile(
-                        title: Text("Chennai, Tamil Nadu, India"),
-                        leading: Icon(Icons.location_on, color: Colors.green),
-                      ),
-                      ListTile(
-                        title: Text("New York, NY, USA"),
-                        leading: Icon(Icons.location_on, color: Colors.green),
-                      ),
-                      ListTile(
-                        title: Text("London, England, UK"),
-                        leading: Icon(Icons.location_on, color: Colors.green),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
           ),
 
         ],
