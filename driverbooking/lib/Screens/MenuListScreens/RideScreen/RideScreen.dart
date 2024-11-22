@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vehiclebooking/Utils/AllImports.dart';
+import 'package:driverbooking/Utils/AllImports.dart';
 
 class Ridescreen extends StatefulWidget {
   const Ridescreen({super.key});

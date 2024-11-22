@@ -1,6 +1,6 @@
-# vehiclebooking
+# driverbooking
 
-A new vehiclebooking project.
+A new Flutter project.
 
 ## Getting Started
 

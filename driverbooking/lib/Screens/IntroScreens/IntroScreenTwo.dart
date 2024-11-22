@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vehiclebooking/Utils/AppConstants.dart';
+import 'package:driverbooking/Utils/AppConstants.dart';
 
 class IntroScreenTwo extends StatefulWidget {
   const IntroScreenTwo({super.key});

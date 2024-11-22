@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:vehiclebooking/Screens/HomeScreen/HomeScreen.dart';
-import 'package:vehiclebooking/Screens/IntroScreens/IntroScreenOne.dart';
-import 'package:vehiclebooking/Screens/IntroScreens/IntroScreenThree.dart';
-import 'package:vehiclebooking/Screens/IntroScreens/IntroScreenTwo.dart';
-import 'package:vehiclebooking/Screens/LoginScreen/Login_Screen.dart';
+import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
+import 'package:driverbooking/Screens/IntroScreens/IntroScreenOne.dart';
+import 'package:driverbooking/Screens/IntroScreens/IntroScreenThree.dart';
+import 'package:driverbooking/Screens/IntroScreens/IntroScreenTwo.dart';
+import 'package:driverbooking/Screens/LoginScreen/Login_Screen.dart';
 
 class Introscreenmain extends StatefulWidget {
   final String userId = '';

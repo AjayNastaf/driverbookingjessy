@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // Ensure this is imported correctly
-import 'package:vehiclebooking/Screens/Home.dart';
-import 'package:vehiclebooking/Screens/HomeScreen/MapScreen.dart';
+import 'package:driverbooking/Screens/Home.dart';
+import 'package:driverbooking/Screens/HomeScreen/MapScreen.dart';
 import '../Screens/HomeScreen/MapScreen.dart';
 import '../Utils/AppConstants.dart';
 import 'package:mailer/mailer.dart';

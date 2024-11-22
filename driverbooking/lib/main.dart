@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:vehiclebooking/Screens/HomeScreen/MapScreen.dart';
-import 'package:vehiclebooking/Screens/IntroScreens/IntroScreenMain.dart';
+import 'package:driverbooking/Screens/HomeScreen/MapScreen.dart';
+import 'package:driverbooking/Screens/IntroScreens/IntroScreenMain.dart';
 import './Screens/SplashScreen.dart';
 import './Screens/Home.dart';
 import './Screens/LoginScreen/Login_Screen.dart';

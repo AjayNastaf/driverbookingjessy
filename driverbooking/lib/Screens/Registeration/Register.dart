@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vehiclebooking/Screens/LoginScreen/Login_Screen.dart';
-import 'package:vehiclebooking/Screens/OtpScreen/OtpScreen.dart';
-import 'package:vehiclebooking/Utils/AppConstants.dart';
+import 'package:driverbooking/Screens/LoginScreen/Login_Screen.dart';
+import 'package:driverbooking/Screens/OtpScreen/OtpScreen.dart';
+import 'package:driverbooking/Utils/AppConstants.dart';
 import '../../Utils/AppTheme.dart';
 import 'dart:math';
-import 'package:vehiclebooking/Networks/Api_Service.dart';
-import 'package:vehiclebooking/Utils/AllImports.dart';
-import 'package:vehiclebooking/Bloc/AppBloc_Events.dart';
-import 'package:vehiclebooking/Bloc/AppBloc_State.dart';
-import 'package:vehiclebooking/Bloc/App_Bloc.dart';
+import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:driverbooking/Bloc/App_Bloc.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
