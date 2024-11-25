@@ -250,6 +250,35 @@ class ApiService {
   }
 
 
+  // updating user details
+  static Future<http.Response> updateUserDetails({required String userId, required String username, required String password, required String phonenumber, required String email,}) async {
+
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/updateUser'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'userId': userId,
+        'username': username,
+        'password': password,
+        'phonenumber': phonenumber,
+        'email': email
+      }),
+    );
+
+
+
+    // if (response.statusCode == 200) {
+    //   return true; // Login successful
+    // } else {
+    //   return false; // Login failed
+    // }
+    return response;
+
+
+
+  }
+
+
 }
 
 

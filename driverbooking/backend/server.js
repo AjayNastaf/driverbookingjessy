@@ -259,6 +259,55 @@ app.post("/getUserDetails", (req, res) => {
 });
 
 
+// Update user details
+app.post("/updateUser", (req, res) => {
+  const { userId, username, password, phonenumber, email } = req.body;
+
+  // Log received data for debugging
+  console.log("Received data:", { userId, username, password, phonenumber, email });
+
+  // Validate required fields
+  if (!userId || !username || !email) {
+    return res.status(400).send({ message: "User ID, username, and email are required" });
+  }
+
+  // Check if the user exists
+  const checkUserSql = "SELECT * FROM register WHERE id = ?";
+  db.query(checkUserSql, [userId], (err, results) => {
+    if (err) {
+      console.error("Error checking user:", err); // Detailed error log
+      return res.status(500).send({ message: "Database error while checking user" });
+    }
+
+    if (results.length === 0) {
+      console.log("User not found with ID:", userId);
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Update the user's information
+    const updateUserSql = `
+      UPDATE register
+      SET username = ?, password = ?, phone_number = ?, email = ?
+      WHERE id = ?`;
+
+    db.query(updateUserSql, [username, password, phonenumber, email, userId], (err, result) => {
+      if (err) {
+        console.error("Error updating user details:", err); // Detailed error log
+        return res.status(500).send({ message: "Failed to update user details" });
+      }
+
+      if (result.affectedRows > 0) {
+        console.log("User details updated successfully for ID:", userId);
+        res.status(200).send({ message: "User details updated successfully" });
+      } else {
+        console.log("No changes made to user details for ID:", userId);
+        res.status(400).send({ message: "No changes made to user details" });
+      }
+    });
+  });
+});
+
+
 
 
 

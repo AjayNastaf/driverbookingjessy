@@ -81,3 +81,34 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
     });
   }
 }
+
+
+class UpdateUserBloc extends Bloc<UpdateUserEvent, UpdateUserState> {
+  UpdateUserBloc() : super(UpdateUserInitial()) {
+    on<UpdateUserAttempt>(_onUpdateUserAtempt);
+  }
+}
+
+void _onUpdateUserAtempt(UpdateUserAttempt event, Emitter<UpdateUserState> emit) async {
+  emit(UpdateUserLoading());
+
+  print('iiiiiiidddddddddddddddddddddddddd: ${event.userId}');
+  try {
+    final response = await ApiService.updateUserDetails(
+      userId: event.userId,
+      username: event.username,
+      password: event.password,
+      phonenumber: event.phone,
+      email: event.email,
+    );
+    if (response.statusCode == 200) {
+      emit(UpdateUserCompleted());
+    } else {
+      print('ajay');
+      emit(UpdateUserFailure("Login failed, please check your credentialsssssssssss."));
+
+    }
+  } catch (e) {
+    emit(UpdateUserFailure("An error occurred: $e"));
+  }
+}

@@ -22,3 +22,21 @@ class RequestOtpAndRegister extends RegisterEvent {
     required this.phone,
   });
 }
+
+abstract class UpdateUserEvent{}
+
+class UpdateUserAttempt extends UpdateUserEvent {
+  final String userId;
+  final String username;
+  final String password;
+  final String email;
+  final String phone;
+
+  UpdateUserAttempt({
+    required this.userId,
+    required this.username,
+    required this.password,
+    required this.email,
+    required this.phone,
+  });
+}

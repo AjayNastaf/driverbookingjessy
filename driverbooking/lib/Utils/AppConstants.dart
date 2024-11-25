@@ -9,11 +9,12 @@ class AppConstants {  // only use asset
   static const String intro_three = 'assets/image/intro3.jpg';
   static const String sample = 'assets/image/4.png';
   static const String Refer_friend = 'assets/image/referfriend.jpg';
+  static const String driver_waiting = 'assets/image/driver-waiting.jpg';
 
 
   // static const String baseUrl = "http://192.168.0.109:8085";
   // static const String baseUrl = "http://54.236.10.55:3000";
-  static const String baseUrl = "http://192.168.0.108:3000";
+  static const String baseUrl = "http://192.168.0.104:3000";
   static const Color primaryColor = Colors.blue;
   static const String ApiKey = "AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk";
 }

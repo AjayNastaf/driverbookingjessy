@@ -1,15 +1,18 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:driverbooking/Bloc/App_Bloc.dart';
+import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
 
-class ProfileScreen extends StatefulWidget {
-  final String username;
-  final String password;
-  final String phonenumber;
-  final String email;
+class ProfileScreen extends StatelessWidget {
+  final String userId, username, password, phonenumber, email;
 
   const ProfileScreen({
     Key? key,
+    required this.userId,
     required this.username,
     required this.password,
     required this.phonenumber,
@@ -17,48 +20,58 @@ class ProfileScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => UpdateUserBloc(),
+      child: ProfileScreenContent(
+        userId: userId,
+        username: username,
+        password: password,
+        phonenumber: phonenumber,
+        email: email,
+      ),
+    );
+  }
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  // Controllers to manage input field values
-  late final TextEditingController nameController;
-  late final TextEditingController mobileController;
-  late final TextEditingController passwordController;
-  late final TextEditingController emailController;
+class ProfileScreenContent extends StatefulWidget {
+  final String userId, username, password, phonenumber, email;
 
-  bool isValueCorrect = false;
+  const ProfileScreenContent({
+    Key? key,
+    required this.userId,
+    required this.username,
+    required this.password,
+    required this.phonenumber,
+    required this.email,
+  }) : super(key: key);
 
-  File? _profileImage; // To store the selected image
-  final ImagePicker _picker = ImagePicker(); // ImagePicker instance
+  @override
+  State<ProfileScreenContent> createState() => _ProfileScreenContentState();
+}
+
+class _ProfileScreenContentState extends State<ProfileScreenContent> {
+  late TextEditingController nameController;
+  late TextEditingController mobileController;
+  late TextEditingController passwordController;
+  late TextEditingController emailController;
+
+  File? profileImage;
 
   @override
   void initState() {
     super.initState();
-    // Initialize the controllers with initial values from the widget
     nameController = TextEditingController(text: widget.username);
     mobileController = TextEditingController(text: widget.phonenumber);
     passwordController = TextEditingController(text: widget.password);
     emailController = TextEditingController(text: widget.email);
   }
 
-  @override
-  void dispose() {
-    // Dispose controllers to free up resources
-    nameController.dispose();
-    mobileController.dispose();
-    passwordController.dispose();
-    emailController.dispose();
-    super.dispose();
-  }
-
-  // Function to pick an image from the gallery or camera
-  Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source);
-
+  Future<void> pickImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
       setState(() {
-        _profileImage = File(pickedFile.path);
+        profileImage = File(pickedFile.path);
       });
     }
   }
@@ -66,143 +79,118 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey[300],
-                      backgroundImage: _profileImage != null
-                          ? FileImage(_profileImage!) as ImageProvider
-                          : null,
-                      child: _profileImage == null
-                          ? const Icon(
-                        Icons.person,
-                        size: 50,
-                        color: Colors.grey,
-                      )
-                          : null,
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.black),
-                        onPressed: () {
-                          // Show options to pick image
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return SafeArea(
-                                child: Wrap(
+      appBar: AppBar(title: const Text("Profile")),
+      body: BlocConsumer<UpdateUserBloc, UpdateUserState>(
+        listener: (context, state) {
+          if (state is UpdateUserCompleted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Details updated')),
+            );
+            Navigator.push(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: widget.userId)));
+          } else if (state is UpdateUserFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error)),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state is UpdateUserLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Center(
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: profileImage != null
+                            ? FileImage(profileImage!)
+                            : null,
+                        child: profileImage == null
+                            ? const Icon(Icons.person, size: 50)
+                            : null,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (_) {
+                                return Wrap(
                                   children: [
                                     ListTile(
                                       leading: const Icon(Icons.camera),
-                                      title: const Text('Camera'),
+                                      title: const Text("Camera"),
                                       onTap: () {
                                         Navigator.pop(context);
-                                        _pickImage(ImageSource.camera);
+                                        pickImage(ImageSource.camera);
                                       },
                                     ),
                                     ListTile(
                                       leading: const Icon(Icons.photo_library),
-                                      title: const Text('Gallery'),
+                                      title: const Text("Gallery"),
                                       onTap: () {
                                         Navigator.pop(context);
-                                        _pickImage(ImageSource.gallery);
+                                        pickImage(ImageSource.gallery);
                                       },
                                     ),
                                   ],
-                                ),
-                              );
-                            },
-                          );
-                        },
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildInputField("${widget.phonenumber}", nameController),
-              const SizedBox(height: 16),
-              _buildInputField("Mobile Number", mobileController, keyboardType: TextInputType.phone),
-              const SizedBox(height: 16),
-              _buildInputField("Password", passwordController, obscureText: true),
-              const SizedBox(height: 16),
-              _buildInputField("Email ID", emailController, keyboardType: TextInputType.emailAddress),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Checkbox(
-                    value: isValueCorrect,
-                    onChanged: (value) {
-                      setState(() {
-                        isValueCorrect = value ?? false;
-                      });
-                    },
+                    ],
                   ),
-                  const Text('Above Mentioned values are correct'),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Save changes logic
-                    print("Name: ${nameController.text}");
-                    print("Mobile: ${mobileController.text}");
-                    print("Password: ${passwordController.text}");
-                    print("Email: ${emailController.text}");
-                  },
-                  icon: const Icon(Icons.save),
-                  label: const Text("Save"),
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 20),
+                _buildTextField("Name", nameController),
+                const SizedBox(height: 10),
+                _buildTextField("Phone", mobileController),
+                const SizedBox(height: 10),
+                _buildTextField("Password", passwordController, obscureText: true),
+                const SizedBox(height: 10),
+                _buildTextField("Email", emailController),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<UpdateUserBloc>().add(
+                      UpdateUserAttempt(
+                        userId: widget.userId,
+                        username: nameController.text,
+                        password: passwordController.text,
+                        phone: mobileController.text,
+                        email: emailController.text,
+                      ),
+                    );
+                  },
+                  child: const Text("Save"),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildInputField(String label, TextEditingController controller,
-      {bool obscureText = false, TextInputType keyboardType = TextInputType.text}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 16, color: Colors.grey),
-        ),
-        const SizedBox(height: 4),
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-          ),
-        ),
-      ],
+  Widget _buildTextField(String label, TextEditingController controller,
+      {bool obscureText = false}) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
     );
   }
 }
