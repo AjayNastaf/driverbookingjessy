@@ -1,3 +1,4 @@
+import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
 import 'package:driverbooking/Screens/HomeScreen/MapScreen.dart';
@@ -35,7 +36,8 @@ class _MyAppState extends State<MyApp> {
         home: SplashScreen(),
           routes: {
           'home':(context)=> const Home(),
-            'login': (context) => const Login_Screen(),
+            // 'login': (context) => const Login_Screen(),
+            'login': (context) => const Homescreen(userId: "31"),
             'intro_screen': (context) => const Introscreenmain(),
           },
 

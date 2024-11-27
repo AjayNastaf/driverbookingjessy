@@ -1,3 +1,4 @@
+import 'package:driverbooking/Screens/BookingDetails/BookingDetails.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -297,6 +298,7 @@ class _HomescreenState extends State<Homescreen> {
               padding: const EdgeInsets.all(8.0),
               child: GestureDetector(
                 onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>Bookingdetails()));
 
                 },
                 child: Container(
@@ -312,14 +314,14 @@ class _HomescreenState extends State<Homescreen> {
                       Center(
                         child: Column(
                           children: [
-                            // Image Section
-                            Image.asset(
-                             AppConstants.driver_waiting, // Replace with your asset path
-                              height: 200.0,
-                              // width: 200.0,
-                              // width: double.infinity,
-                            ),
-                            SizedBox(height: 16.0), // Spacing between image and text
+                            // // Image Section
+                            // Image.asset(
+                            //  AppConstants.driver_waiting, // Replace with your asset path
+                            //   height: 200.0,
+                            //   // width: 200.0,
+                            //   // width: double.infinity,
+                            // ),
+                            // SizedBox(height: 16.0), // Spacing between image and text
 
                             // Row Section
                             Row(
@@ -410,218 +412,242 @@ class _HomescreenState extends State<Homescreen> {
             ),
 
             Padding(
+
               padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey, width: 1.0), // Border
-                  borderRadius: BorderRadius.circular(12.0), // Rounded corners
-                ),
-                padding: const EdgeInsets.all(16.0), // Inner padding
-                child: Column(
-                  children: [
-                    Center(
-                      child: Column(
-                        children: [
-                          // Image Section
-                          Image.asset(
-                            AppConstants.driver_waiting, // Replace with your asset path
-                            height: 200.0,
-                            // width: 200.0,
-                            // width: double.infinity,
-                          ),
-                          SizedBox(height: 16.0), // Spacing between image and text
+              child: GestureDetector(
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>Bookingdetails()));
 
-                          // Row Section
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Text Columns
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Out Station",
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 3.0),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "2024-11-25",
-                                        style: TextStyle(
-                                          fontSize: 14.0,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      SizedBox(width: 10.0,),
-                                      Text(
-                                        "5.39 PM",
-                                        style: TextStyle(
-                                          fontSize: 14.0,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
+                },
+                child: Container(
 
-                                    ],
-                                  )
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey, width: 1.0), // Border
+                    borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                  ),
+                  padding: const EdgeInsets.all(16.0), // Inner padding
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Column(
+                          children: [
+                            // Image Section
+                            // Image.asset(
+                            //   AppConstants.driver_waiting, // Replace with your asset path
+                            //   height: 200.0,
+                            //   // width: 200.0,
+                            //   // width: double.infinity,
+                            // ),
+                            // SizedBox(height: 16.0), // Spacing between image and text
 
-                                ],
-                              ),
-
-                              // Waiting Column with Text and Icon
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange.withOpacity(0.1),
-                                      border: Border.all(
-                                        color: Colors.orange,
-                                        width: 1.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 12.0,
-                                      vertical: 4.0,
-                                    ),
-                                    child: Text(
-                                      'Waiting',
+                            // Row Section
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Text Columns
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Out Station",
                                       style: TextStyle(
-                                        fontSize: 14.0,
-                                        color: Colors.orange,
-                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(height: 8.0),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.grey,
-                                    size: 16.0,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
+                                    SizedBox(height: 3.0),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "2024-11-25",
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        SizedBox(width: 10.0,),
+                                        Text(
+                                          "5.39 PM",
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+
+                                      ],
+                                    )
+
+                                  ],
+                                ),
+
+                                // Waiting Column with Text and Icon
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withOpacity(0.1),
+                                        border: Border.all(
+                                          color: Colors.orange,
+                                          width: 1.0,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 12.0,
+                                        vertical: 4.0,
+                                      ),
+                                      child: Text(
+                                        'Waiting',
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.0),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: Colors.grey,
+                                      size: 16.0,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
+
               ),
+
+
             ),
 
             Padding(
+
               padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey, width: 1.0), // Border
-                  borderRadius: BorderRadius.circular(12.0), // Rounded corners
-                ),
-                padding: const EdgeInsets.all(16.0), // Inner padding
-                child: Column(
-                  children: [
-                    Center(
-                      child: Column(
-                        children: [
-                          // Image Section
-                          Image.asset(
-                            AppConstants.driver_waiting, // Replace with your asset path
-                            height: 200.0,
-                            // width: 200.0,
-                            // width: double.infinity,
-                          ),
-                          SizedBox(height: 16.0), // Spacing between image and text
+              child: GestureDetector(
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>Bookingdetails()));
 
-                          // Row Section
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Text Columns
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Transfer",
-                                    style: TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: 3.0),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "2024-11-25",
-                                        style: TextStyle(
-                                          fontSize: 14.0,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      SizedBox(width: 10.0,),
-                                      Text(
-                                        "5.39 PM",
-                                        style: TextStyle(
-                                          fontSize: 14.0,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
+                },
+                child: Container(
 
-                                    ],
-                                  )
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey, width: 1.0), // Border
+                    borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                  ),
+                  padding: const EdgeInsets.all(16.0), // Inner padding
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Column(
+                          children: [
+                            // Image Section
+                            // Image.asset(
+                            //   AppConstants.driver_waiting, // Replace with your asset path
+                            //   height: 200.0,
+                            //   // width: 200.0,
+                            //   // width: double.infinity,
+                            // ),
+                            // SizedBox(height: 16.0), // Spacing between image and text
 
-                                ],
-                              ),
-
-                              // Waiting Column with Text and Icon
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange.withOpacity(0.1),
-                                      border: Border.all(
-                                        color: Colors.orange,
-                                        width: 1.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 12.0,
-                                      vertical: 4.0,
-                                    ),
-                                    child: Text(
-                                      'Waiting',
+                            // Row Section
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Text Columns
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Transfer",
                                       style: TextStyle(
-                                        fontSize: 14.0,
-                                        color: Colors.orange,
-                                        fontWeight: FontWeight.w500,
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ),
-                                  SizedBox(height: 8.0),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.grey,
-                                    size: 16.0,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
+                                    SizedBox(height: 3.0),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          "2024-11-25",
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        SizedBox(width: 10.0,),
+                                        Text(
+                                          "5.39 PM",
+                                          style: TextStyle(
+                                            fontSize: 14.0,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+
+                                      ],
+                                    )
+
+                                  ],
+                                ),
+
+                                // Waiting Column with Text and Icon
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.withOpacity(0.1),
+                                        border: Border.all(
+                                          color: Colors.orange,
+                                          width: 1.0,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8.0),
+                                      ),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 12.0,
+                                        vertical: 4.0,
+                                      ),
+                                      child: Text(
+                                        'Waiting',
+                                        style: TextStyle(
+                                          fontSize: 14.0,
+                                          color: Colors.orange,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.0),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      color: Colors.grey,
+                                      size: 16.0,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
                 ),
+
               ),
+
+
             ),
+
+
           ],
 
         ),
