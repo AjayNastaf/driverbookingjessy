@@ -1,4 +1,5 @@
 import 'package:driverbooking/Screens/BookingDetails/BookingDetails.dart';
+import 'package:driverbooking/Screens/MenuListScreens/History/History.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -195,6 +196,13 @@ class _HomescreenState extends State<Homescreen> {
               title: Text('Contact'),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context)=>Contactscreen()));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.supervised_user_circle_rounded),
+              title: Text('History'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>History()));
               },
             ),
             ListTile(
