@@ -6,7 +6,6 @@ import '../Networks/Api_Service.dart';
 import 'dart:math';
 import 'dart:convert';
 
-
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(LoginInitial()) {
     on<LoginAtempt>(_onLoginAtempt);
@@ -36,7 +35,6 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
 //
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   RegisterBloc() : super(RegisterInitial()) {
-
     on<RequestOtpAndRegister>((event, emit) async {
       emit(RegisterLoading());
 
@@ -54,7 +52,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
         );
 
         if (sendOtpEmailResult) {
-          print("OTP successfully sentttttttttttttttttttttttttttttttttttttttt.");
+          print("OTP successfully sent.");
 
           // Step 3: Proceed with Registration if OTP Sending Succeeds
           final success = await ApiService.registers(
@@ -72,8 +70,8 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
             emit(RegisterFailure("Registration failed."));
           }
         } else {
-          print("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff.");
-          emit(RequestOtpFailure("Failed to send OTP. Username or email might already be taken."));
+          emit(RequestOtpFailure(
+              "Failed to send OTP. Username or email might already be taken."));
         }
       } catch (error) {
         emit(RegisterFailure("An error occurred during registration: $error"));
@@ -82,14 +80,14 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   }
 }
 
-
 class UpdateUserBloc extends Bloc<UpdateUserEvent, UpdateUserState> {
   UpdateUserBloc() : super(UpdateUserInitial()) {
     on<UpdateUserAttempt>(_onUpdateUserAtempt);
   }
 }
 
-void _onUpdateUserAtempt(UpdateUserAttempt event, Emitter<UpdateUserState> emit) async {
+void _onUpdateUserAtempt(
+    UpdateUserAttempt event, Emitter<UpdateUserState> emit) async {
   emit(UpdateUserLoading());
 
   print('iiiiiiidddddddddddddddddddddddddd: ${event.userId}');
@@ -104,11 +102,154 @@ void _onUpdateUserAtempt(UpdateUserAttempt event, Emitter<UpdateUserState> emit)
     if (response.statusCode == 200) {
       emit(UpdateUserCompleted());
     } else {
-      print('ajay');
-      emit(UpdateUserFailure("Login failed, please check your credentialsssssssssss."));
-
+      emit(UpdateUserFailure("Login failed, please check your credentials."));
     }
   } catch (e) {
     emit(UpdateUserFailure("An error occurred: $e"));
   }
 }
+
+class CheckCurrentPasswordBloc
+    extends Bloc<CheckCurrentPasswordEvent, CheckCurrentPasswordState> {
+  CheckCurrentPasswordBloc() : super(CheckCurrentPasswordInitial()) {
+    on<CheckCurrentPasswordAttempt>(_onCheckCurrentPasswordAtempt);
+  }
+}
+
+void _onCheckCurrentPasswordAtempt(CheckCurrentPasswordAttempt event,
+    Emitter<CheckCurrentPasswordState> emit) async {
+  emit(CheckCurrentPasswordLoading());
+
+  try {
+    final response = await ApiService.checkCurrentPassword(
+        userId: event.userId, password: event.password);
+    if (response.statusCode == 200) {
+      emit(CheckCurrentPasswordCompleted());
+    } else {
+      emit(CheckCurrentPasswordFailure(
+          "Password verfication failed."));
+    }
+  } catch (e) {
+    emit(CheckCurrentPasswordFailure("An error occurred: $e"));
+  }
+}
+
+class UpdatePasswordBloc
+    extends Bloc<UpdatePasswordEvent, UpdatePasswordState> {
+  UpdatePasswordBloc() : super(UpdatePasswordInitial()) {
+    on<UpdatePasswordAttempt>(_onUpdatePasswordAtempt);
+  }
+}
+
+void _onUpdatePasswordAtempt(
+    UpdatePasswordAttempt event, Emitter<UpdatePasswordState> emit) async {
+  emit(UpdatePasswordLoading());
+
+  try {
+    final response = await ApiService.changePassword(
+        userId: event.userId, newPassword: event.newPassword);
+    if (response.statusCode == 200) {
+      emit(UpdatePasswordCompleted());
+    } else {
+      emit(UpdatePasswordFailure(
+          "Login failed, please check your credentials."));
+    }
+  } catch (e) {
+    emit(UpdatePasswordFailure("An error occurred: $e"));
+  }
+}
+
+class ForgotPasswordEmailVerificationBloc extends Bloc<
+    ForgotPasswordEmailVerificationEvent,
+    ForgotPasswordEmailVerificationState> {
+  ForgotPasswordEmailVerificationBloc()
+      : super(ForgotPasswordEmailVerificationInitial()) {
+    on<ForgotPasswordEmailVerificationAttempt>(
+        _onForgotPasswordEmailVerificationAtempt);
+  }
+}
+
+void _onForgotPasswordEmailVerificationAtempt(
+    ForgotPasswordEmailVerificationAttempt event,
+    Emitter<ForgotPasswordEmailVerificationState> emit) async {
+  emit(ForgotPasswordEmailVerificationLoading());
+
+  try {
+    final response = await ApiService.forgotPasswordEmailVerification(
+      email: event.email,
+    );
+    print(response);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final userId = data['userId'];
+      emit(ForgotPasswordEmailVerificationCompleted('$userId'));
+    } else {
+      emit(ForgotPasswordEmailVerificationFailure(
+          "Login failed, please check your credentials."));
+    }
+  } catch (e) {
+    emit(ForgotPasswordEmailVerificationFailure("An error occurred: $e"));
+  }
+}
+
+class CheckForgotPasswordOtpBloc
+    extends Bloc<CheckForgotPasswordOtpEvent, CheckForgotPasswordOtpState> {
+  CheckForgotPasswordOtpBloc() : super(CheckForgotPasswordOtpInitial()) {
+    on<CheckForgotPasswordOtpAttempt>(_onCheckForgotPasswordOtpAtempt);
+  }
+}
+
+void _onCheckForgotPasswordOtpAtempt(CheckForgotPasswordOtpAttempt event,
+    Emitter<CheckForgotPasswordOtpState> emit) async {
+  emit(CheckForgotPasswordOtpLoading());
+  try {
+    final response = await ApiService.checkForgotPasswordOtp(
+      email: event.email,
+    );
+    print(response);
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final otp = data['otp'];
+      if (event.otp == otp) {
+        emit(CheckForgotPasswordOtpCompleted());
+      } else {
+        emit(CheckForgotPasswordOtpFailure("Incorrect OTP"));
+      }
+    } else {
+      emit(CheckForgotPasswordOtpFailure(
+          "OTP verification failed"));
+    }
+  } catch (e) {
+    emit(CheckForgotPasswordOtpFailure("An error occurred: $e"));
+  }
+}
+
+
+class ChangePasswordForgotBloc
+    extends Bloc<ChangePasswordForgotEvent, ChangePasswordForgotState> {
+  ChangePasswordForgotBloc() : super(ChangePasswordForgotInitial()) {
+    on<ChangePasswordForgotAttempt>(_onChangePasswordForgotAtempt);
+  }
+}
+
+void _onChangePasswordForgotAtempt(ChangePasswordForgotAttempt event,
+    Emitter<ChangePasswordForgotState> emit) async {
+  emit(ChangePasswordForgotLoading());
+  try {
+    final response = await ApiService.changePasswordForgot(
+        userId: event.userId,
+        newPassword: event.newPassword
+    );
+    print(response);
+    if (response.statusCode == 200) {
+      emit(ChangePasswordForgotCompleted());
+    } else {
+      emit(ChangePasswordForgotFailure(
+          "Password update failed."));
+    }
+  } catch (e) {
+    emit(ChangePasswordForgotFailure("An error occurred: $e"));
+  }
+}
+
+

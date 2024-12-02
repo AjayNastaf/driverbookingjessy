@@ -1,3 +1,4 @@
+import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 
 class FAQScreen extends StatelessWidget {
@@ -12,7 +13,9 @@ class FAQScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FAQs'),
+        title: const Text('FAQs', style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),),
+        backgroundColor: AppTheme.Navblue1,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ListView.builder(
         itemCount: data.length,

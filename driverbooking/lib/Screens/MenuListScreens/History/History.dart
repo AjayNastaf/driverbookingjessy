@@ -1,3 +1,4 @@
+import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:excel/excel.dart';
@@ -84,7 +85,8 @@ class _HistoryState extends State<History> {
     final fileBytes = excel.save();
     if (fileBytes != null) {
       try {
-        final directory = Directory('/storage/emulated/0/Documents'); // Android Downloads folder
+        final directory = Directory(
+            '/storage/emulated/0/Documents'); // Android Downloads folder
         if (!await directory.exists()) {
           await directory.create(recursive: true);
         }
@@ -115,19 +117,25 @@ class _HistoryState extends State<History> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("History", style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFF373751),
+        title: const Text(
+            "History",
+            style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize)
+        ),
+        backgroundColor: AppTheme.Navblue1,
         iconTheme: const IconThemeData(
-          color: Colors.white, // Change back button (leading icon) color to white
+          color:
+              Colors.white, // Change back button (leading icon) color to white
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.download, color: Colors.white,),
+            icon: const Icon(
+              Icons.download,
+              color: Colors.white,
+            ),
             onPressed: downloadTableAsExcel,
             tooltip: "Download as Excel",
           ),
@@ -145,7 +153,7 @@ class _HistoryState extends State<History> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF373751),
+                    color: AppTheme.Navblue1,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -175,7 +183,7 @@ class _HistoryState extends State<History> {
                       icon: const Icon(Icons.date_range),
                       label: const Text("Pick Dates"),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF373751),
+                        backgroundColor: AppTheme.Navblue1,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -199,57 +207,58 @@ class _HistoryState extends State<History> {
                 padding: const EdgeInsets.all(8.0),
                 child: filteredData.isEmpty
                     ? const Center(
-                  child: Text(
-                    "No records found for the selected date range.",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                )
+                        child: Text(
+                          "No records found for the selected date range.",
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
                     : SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: DataTable(
-                    headingRowColor: MaterialStateProperty.resolveWith(
-                          (states) => Color(0xff1E99AD),
-                    ),
-                    columns: const [
-                      DataColumn(
-                        label: Text(
-                          "Date",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          headingRowColor: MaterialStateProperty.resolveWith(
+                            (states) => AppTheme.lightBlue,
                           ),
+                          columns: const [
+                            DataColumn(
+                              label: Text(
+                                "Date",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                "Description",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            DataColumn(
+                              label: Text(
+                                "Amount",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                          rows: filteredData.map((item) {
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(DateFormat('dd MMM yyyy')
+                                    .format(item['date']))),
+                                DataCell(Text(item['description'])),
+                                DataCell(Text("\$${item['amount']}")),
+                              ],
+                            );
+                          }).toList(),
                         ),
                       ),
-                      DataColumn(
-                        label: Text(
-                          "Description",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Text(
-                          "Amount",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                    rows: filteredData.map((item) {
-                      return DataRow(
-                        cells: [
-                          DataCell(Text(DateFormat('dd MMM yyyy').format(item['date']))),
-                          DataCell(Text(item['description'])),
-                          DataCell(Text("\$${item['amount']}")),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                ),
               ),
             ),
           ),

@@ -31,17 +31,12 @@ class ApiService {
       body: json.encode({'username': username, 'password': password}),
     );
 
-
-
     // if (response.statusCode == 200) {
     //   return true; // Login successful
     // } else {
     //   return false; // Login failed
     // }
     return response;
-
-
-
   }
   static Future<bool> registers({
     // required BuildContext context,
@@ -264,8 +259,22 @@ class ApiService {
         'email': email
       }),
     );
+    // if (response.statusCode == 200) {
+    //   return true; // Login successful
+    // } else {
+    //   return false; // Login failed
+    // }
+    return response;
+  }
 
+  //check current password
+  static Future<http.Response> checkCurrentPassword({required String userId, required String password}) async {
 
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/checkCurrentPassword'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'userId': userId, 'password': password}),
+    );
 
     // if (response.statusCode == 200) {
     //   return true; // Login successful
@@ -273,9 +282,131 @@ class ApiService {
     //   return false; // Login failed
     // }
     return response;
+  }
+
+  //change password
+  static Future<http.Response> changePassword({required String userId, required String newPassword}) async {
+
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/changePassword'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'userId': userId, 'newPassword': newPassword}),
+    );
+
+    // if (response.statusCode == 200) {
+    //   return true; // Login successful
+    // } else {
+    //   return false; // Login failed
+    // }
+    return response;
+  }
+
+  //Forgot Password Email Verification
+  static Future<http.Response> forgotPasswordEmailVerification({required String email}) async {
+
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/forgotPasswordEmailVerification'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email}),
+    );
+
+    // if (response.statusCode == 200) {
+    //   return true; // Login successful
+    // } else {
+    //   return false; // Login failed
+    // }
+    return response;
+  }
+
+  static Future<bool> forgotPasswordOtpEmailSentResult(String userId, String email, String forgotPasswordOtp) async {
 
 
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/addForgotPasswordOtp'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        // 'userId': userId,
+        'email': email,
+        'otp': forgotPasswordOtp
+      }),
+    );
+    print("Response API: ${response.statusCode}");
 
+    if (response.statusCode == 200) {
+      String username = 'ravi.vinoth997@gmail.com';
+      String password = 'yksidolaiaoaisuq';
+      final smtpServer = gmail(username, password); // Using Gmail's SMTP server
+      final message = Message()
+        ..from = Address(username, 'Nastaf Application')
+        ..recipients.add(email)
+        ..subject = 'Your OTP Code for forgot password'
+      // ..text = 'Your OTP code is: $otp';
+        ..text = '''
+            Hello,
+            Thank you for using Nastaf Application! For added security, we require you to verify your identity with a one-time password (OTP).
+            
+            Your OTP is: $forgotPasswordOtp
+            
+            Please enter this OTP within the next 10 minutes to complete your verification. For your security, do not share this code with anyone.
+            If you did not request this OTP, please contact our support team immediately.
+            
+            Thank you,
+            The Nastaf Team
+            ''';
+
+      try {
+        final sendReport = await send(message, smtpServer);
+        print('Message sent: ' + sendReport.toString());
+        return true;
+      } on MailerException catch (e) {
+        print('Message not sent.');
+        for (var p in e.problems) {
+          print('Problem: ${p.code}: ${p.msg}');
+        }
+        return false;
+      }
+    }else {
+      print("Error sending email: ${response.body}"); // Debugging the error
+
+      return false;// Registration failed
+    }
+      // Registration successful
+  }
+
+
+  //check Forgot Password
+  static Future<http.Response> checkForgotPasswordOtp({required String email}) async {
+
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/checkForgotPasswordOtp'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email}),
+    );
+
+    // if (response.statusCode == 200) {
+    //   return true; // Login successful
+    // } else {
+    //   return false; // Login failed
+    // }
+    return response;
+  }
+
+
+  //Change Password Forgot
+  static Future<http.Response> changePasswordForgot({required String userId, required String newPassword}) async {
+
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/changePasswordForgot'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'userId': userId, 'newPassword': newPassword}),
+    );
+
+    // if (response.statusCode == 200) {
+    //   return true; // Login successful
+    // } else {
+    //   return false; // Login failed
+    // }
+    return response;
   }
 
 

@@ -1,3 +1,4 @@
+import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -79,14 +80,24 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Profile")),
+      appBar: AppBar(
+        title: const Text(
+          "Profile",
+          style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
+        ),
+        backgroundColor: AppTheme.Navblue1,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: BlocConsumer<UpdateUserBloc, UpdateUserState>(
         listener: (context, state) {
           if (state is UpdateUserCompleted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Details updated')),
             );
-            Navigator.push(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: widget.userId)));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Homescreen(userId: widget.userId)));
           } else if (state is UpdateUserFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error)),
@@ -156,23 +167,34 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
                 const SizedBox(height: 10),
                 _buildTextField("Phone", mobileController),
                 const SizedBox(height: 10),
-                _buildTextField("Password", passwordController, obscureText: true),
+                _buildTextField("Password", passwordController,
+                    obscureText: true),
                 const SizedBox(height: 10),
                 _buildTextField("Email", emailController),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     context.read<UpdateUserBloc>().add(
-                      UpdateUserAttempt(
-                        userId: widget.userId,
-                        username: nameController.text,
-                        password: passwordController.text,
-                        phone: mobileController.text,
-                        email: emailController.text,
-                      ),
-                    );
+                          UpdateUserAttempt(
+                            userId: widget.userId,
+                            username: nameController.text,
+                            password: passwordController.text,
+                            phone: mobileController.text,
+                            email: emailController.text,
+                          ),
+                        );
                   },
-                  child: const Text("Save"),
+                  child: const Text(
+                    "Save",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.Navblue1,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ],
             ),

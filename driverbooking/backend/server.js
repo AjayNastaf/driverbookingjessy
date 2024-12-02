@@ -307,6 +307,199 @@ app.post("/updateUser", (req, res) => {
   });
 });
 
+// check current password
+app.post("/checkCurrentPassword", (req, res) => {
+  const { userId, password } = req.body;
+
+  console.log("Received data:", { userId, password });
+  const sql = "SELECT * FROM register WHERE id = ?";
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    if (results.length === 0) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Check password
+    const user = results[0];
+    if (user.password !== password) {
+        console.log('ssssssssssssssssss');
+        return res.status(401).send({ message: "Incorrect password" });
+    }
+
+    const userid = user.id;
+
+
+    res.status(200).send({
+        message: "Login successful",
+        userId: userid
+    });
+  });
+});
+
+// change password
+app.post("/changePassword", (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  console.log("Received new data:", { userId, newPassword });
+  const sql = "SELECT * FROM register WHERE id = ?";
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    if (results.length === 0) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    const updateUserSql = `
+          UPDATE register
+          SET password = ?
+          WHERE id = ?`;
+
+        db.query(updateUserSql, [ newPassword, userId], (err, result) => {
+          if (err) {
+            console.error("Error updating user details:", err); // Detailed error log
+            return res.status(500).send({ message: "Failed to update user details" });
+          }
+
+          if (result.affectedRows > 0) {
+            console.log("User details updated successfully for ID:", userId);
+            res.status(200).send({ message: "User details updated successfully" });
+          } else {
+            console.log("No changes made to user details for ID:", userId);
+            res.status(400).send({ message: "No changes made to user details" });
+          }
+        });
+
+
+  });
+});
+
+// Forgot Password Email Verification
+app.post("/forgotPasswordEmailVerification", (req, res) => {
+  const { email } = req.body;
+
+   console.log("Received new dataaaaaaaaaaaaaaaaaaaaa:", { email });
+
+  const sql = "SELECT * FROM register WHERE email = ?";
+
+  db.query(sql, [email], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    if (results.length === 0) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Check password
+    const user = results[0];
+
+    const userid = user.id;
+
+    res.status(200).send({
+        message: "Email Verified",
+        userId: userid
+    });
+  });
+});
+
+// add forgot password OTP
+app.post("/addForgotPasswordOtp", (req, res) => {
+  const { email, otp } = req.body;
+
+  // Check if username or email already exists
+//  const checkUserSql = "SELECT * FROM registeredotp WHERE username = ? OR email = ?";
+//  db.query(checkUserSql, [username, email], (err, results) => {
+//    if (err) {
+//      return res.status(500).send({ message: "Database error" });
+//    }
+
+
+
+    // Insert the new OTP
+    const insertForgotPasswordOtpSql = "INSERT INTO registeredotp ( email, otp) VALUES (?, ?)";
+    db.query(insertForgotPasswordOtpSql, [ email, otp], (err, result) => {
+      if (err) {
+        return res.status(500).send({ message: "Failed to register user" });
+      }
+      res.status(200).send({
+        message: "Otp inserted successfully",
+        userId: result.insertId,
+      });
+    });
+//  });
+});
+
+
+// Check Forgot Password Otp
+app.post("/checkForgotPasswordOtp", (req, res) => {
+  const { email } = req.body;
+
+  const sql = "SELECT * FROM registeredotp WHERE email = ? ORDER BY id DESC LIMIT 1";
+
+  db.query(sql, [email], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    if (results.length === 0) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Check password
+    const user = results[0];
+
+    const userid = user.id;
+    const otp = user.otp
+
+    res.status(200).send({
+        message: "Email Verified",
+        userId: userid,
+        otp: otp
+    });
+  });
+});
+
+
+// change password forgot
+app.post("/changePasswordForgot", (req, res) => {
+  const { userId, newPassword } = req.body;
+
+  console.log("Received new data:", { userId, newPassword });
+  const sql = "SELECT * FROM register WHERE id = ?";
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      return res.status(500).send(err);
+    }
+    if (results.length === 0) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    const updateUserSql = `
+          UPDATE register
+          SET password = ?
+          WHERE id = ?`;
+
+        db.query(updateUserSql, [ newPassword, userId], (err, result) => {
+          if (err) {
+            console.error("Error updating user details:", err); // Detailed error log
+            return res.status(500).send({ message: "Failed to update user details" });
+          }
+
+          if (result.affectedRows > 0) {
+            console.log("User details updated successfully for ID:", userId);
+            res.status(200).send({ message: "User details updated successfully" });
+          } else {
+            console.log("No changes made to user details for ID:", userId);
+            res.status(400).send({ message: "No changes made to user details" });
+          }
+        });
+
+  });
+});
 
 
 

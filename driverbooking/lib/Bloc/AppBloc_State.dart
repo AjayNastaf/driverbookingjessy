@@ -63,3 +63,85 @@ class UpdateUserFailure extends UpdateUserState {
 }
 
 
+
+
+abstract class CheckCurrentPasswordState{}
+
+class CheckCurrentPasswordInitial extends CheckCurrentPasswordState{}
+
+class CheckCurrentPasswordLoading extends CheckCurrentPasswordState{}
+
+class CheckCurrentPasswordCompleted extends CheckCurrentPasswordState{
+
+}
+
+class CheckCurrentPasswordFailure extends CheckCurrentPasswordState {
+  final String error;
+  CheckCurrentPasswordFailure(this.error);
+}
+
+
+abstract class UpdatePasswordState{}
+
+class UpdatePasswordInitial extends UpdatePasswordState{}
+
+class UpdatePasswordLoading extends UpdatePasswordState{}
+
+class UpdatePasswordCompleted extends UpdatePasswordState{
+
+}
+
+class UpdatePasswordFailure extends UpdatePasswordState {
+  final String error;
+  UpdatePasswordFailure(this.error);
+}
+
+
+abstract class ForgotPasswordEmailVerificationState{}
+
+class ForgotPasswordEmailVerificationInitial extends ForgotPasswordEmailVerificationState{}
+
+class ForgotPasswordEmailVerificationLoading extends ForgotPasswordEmailVerificationState{}
+
+class ForgotPasswordEmailVerificationCompleted extends ForgotPasswordEmailVerificationState{
+  final String userId;
+  ForgotPasswordEmailVerificationCompleted(this.userId);
+}
+
+class ForgotPasswordEmailVerificationFailure extends ForgotPasswordEmailVerificationState {
+  final String error;
+  ForgotPasswordEmailVerificationFailure(this.error);
+}
+
+
+abstract class CheckForgotPasswordOtpState{}
+
+class CheckForgotPasswordOtpInitial extends CheckForgotPasswordOtpState{}
+
+class CheckForgotPasswordOtpLoading extends CheckForgotPasswordOtpState{}
+
+class CheckForgotPasswordOtpCompleted extends CheckForgotPasswordOtpState{
+
+}
+
+class CheckForgotPasswordOtpFailure extends CheckForgotPasswordOtpState {
+  final String error;
+  CheckForgotPasswordOtpFailure(this.error);
+}
+
+abstract class ChangePasswordForgotState{}
+
+class ChangePasswordForgotInitial extends ChangePasswordForgotState{}
+
+class ChangePasswordForgotLoading extends ChangePasswordForgotState{}
+
+class ChangePasswordForgotCompleted extends ChangePasswordForgotState{
+
+}
+
+class ChangePasswordForgotFailure extends ChangePasswordForgotState {
+  final String error;
+  ChangePasswordForgotFailure(this.error);
+}
+
+
