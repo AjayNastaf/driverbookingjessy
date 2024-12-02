@@ -12,6 +12,10 @@ class Bookingdetails extends StatefulWidget {
 }
 
 class _BookingdetailsState extends State<Bookingdetails> {
+
+  String address = 'no 17 Thiruvalluvar puram, West Tambaram, irumbiliyur, chennai-45'; // The value you want to send
+
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -30,7 +34,6 @@ class _BookingdetailsState extends State<Bookingdetails> {
               columnWidths: {
                 0: FlexColumnWidth(1), // First column takes 1 part of space
                 1: FlexColumnWidth(1), // Second column takes 2 parts of space
-                // 2: FlexColumnWidth(1), // Third column takes 1 part of space
               },
               children: [
                 // Table Header
@@ -173,7 +176,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text('no 22 rajustreet'),
+                      child: Text(address),
                     ),
                   ],
                 ),
@@ -184,7 +187,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
             SizedBox(height: 20.0,),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>Pickupscreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>Pickupscreen(address: address)));
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0), // Add padding

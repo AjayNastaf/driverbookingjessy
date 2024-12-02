@@ -42,6 +42,10 @@ dependencies:
   intl: ^0.18.0
   excel: ^2.0.3
   path_provider: ^2.0.14
+  signature: ^5.2.1
+  geocoding: ^2.0.1
+  http: ^1.1.0
+  another_flushbar: ^1.10.28
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -77,6 +81,7 @@ flutter:
   assets:
     - assets/image/
     - assets/image/bg-Main.png
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
