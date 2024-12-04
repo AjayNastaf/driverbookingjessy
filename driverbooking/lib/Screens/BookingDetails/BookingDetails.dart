@@ -13,7 +13,7 @@ class Bookingdetails extends StatefulWidget {
 class _BookingdetailsState extends State<Bookingdetails> {
   String address =
       'no 17 Thiruvalluvar puram, West Tambaram, irumbiliyur, chennai-45';
-  String dropaddress = "Nungambakkam";
+  String Dropaddress = "Nungambakkam";
   @override
   void initState() {
     super.initState();
@@ -139,7 +139,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
                     _buildDetailTile(
                       context,
                       label: "Drop Location",
-                      value: dropaddress,
+                      value: Dropaddress,
                       icon: Icons.location_pin,
                       isLast: true,
                     ),
