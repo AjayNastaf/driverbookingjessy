@@ -9,10 +9,10 @@ import './Screens/LoginScreen/Login_Screen.dart';
 
 
 class MyApp extends StatefulWidget {
-  // final String userId;
-  const MyApp({super.key});
+  final String userId;
+  // const MyApp({super.key});
 
-  // const MyApp({super.key, required this.userId });
+  const MyApp({super.key, required this.userId });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -22,8 +22,8 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   // SizerUtil().init(); // Initializes the SizerUtil
 
-  runApp(MyApp());
-  // runApp(MyApp(userId: "12345")); // Pass a sample userId here
+  // runApp(MyApp());
+  runApp(MyApp(userId: "12345")); // Pass a sample userId here
 
 
 }
@@ -41,8 +41,8 @@ class _MyAppState extends State<MyApp> {
         home: SplashScreen(),
           routes: {
           'home':(context)=> const Home(),
-            'login': (context) => const Login_Screen(),
-            // 'login': (context) =>  Homescreen(userId: widget.userId),
+            // 'login': (context) => const Login_Screen(),
+            'login': (context) =>  Homescreen(userId: widget.userId),
             'intro_screen': (context) => const Introscreenmain(),
           },
 

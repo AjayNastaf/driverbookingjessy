@@ -4,6 +4,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:math' as math;
 import 'package:dio/dio.dart';
+import 'package:driverbooking/GlobalVariable/global_variable.dart' as globals;
+import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class Customerlocationreached extends StatefulWidget {
   const Customerlocationreached({super.key});
@@ -16,22 +21,52 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
-  // final LatLng _destination = LatLng(13.030037, 80.240037); // Chennai Central Railway Station
-  final LatLng _destination = LatLng(13.028159, 80.243306); // Chennai Central Railway Station
+  LatLng _destination = LatLng(13.028159, 80.243306); // Chennai Central Railway Station
   List<LatLng> _routeCoordinates = [];
   Stream<LocationData>? _locationStream;
   bool _hasReachedDestination = false;
+  List<TextEditingController> _otpControllers = [];
+  bool isOtpVerified = false;
+  bool isStartRideEnabled = false;
+  String? latitude;
+  String? longitude;
+
   @override
   void initState() {
     super.initState();
     _initializeLocationTracking();
 
+    _getLatLngFromAddress(globals.dropLocation);
+  }
+
+  Future<void> _getLatLngFromAddress(String dropLocation) async {
+    const String apiKey = AppConstants.ApiKey; // Replace with your API Key
+    final url =
+        'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(dropLocation)}&key=$apiKey';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['status'] == 'OK') {
+          final location = data['results'][0]['geometry']['location'];
+          setState(() {
+            _destination = LatLng(location['lat'], location['lng']);
+          });
+        } else {
+          print('Error: ${data['status']}');
+        }
+      } else {
+        print('Failed to fetch geocoding data');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
   }
 
   Future<void> _initializeLocationTracking() async {
     Location location = Location();
 
-    // Check for location permissions
     bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
@@ -44,67 +79,31 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
       if (permissionGranted != PermissionStatus.granted) return;
     }
 
-    // Fetch the initial location
     final initialLocation = await location.getLocation();
     _updateCurrentLocation(initialLocation);
 
-    // Listen to location changes
     _locationStream = location.onLocationChanged;
     _locationStream!.listen((newLocation) {
       _updateCurrentLocation(newLocation);
     });
   }
 
-  List<double> _recentDistances = [];
-
   void _updateCurrentLocation(LocationData locationData) {
     if (locationData.latitude != null && locationData.longitude != null) {
       final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
-      final distance = _calculateDistance(newLatLng, _destination);
-
-      // Smoothing: Store the last 5 distances
-      if (_recentDistances.length >= 5) _recentDistances.removeAt(0);
-      _recentDistances.add(distance);
-
-      // Check if the average of recent distances is below threshold
-      if (!_hasReachedDestination &&
-          _recentDistances.length == 5 &&
-          _recentDistances.reduce((a, b) => a + b) / _recentDistances.length < 20) {
-        setState(() {
-          _hasReachedDestination = true;
-        });
-      }
-
       setState(() {
         _currentLatLng = newLatLng;
       });
 
       _fetchRoute();
+      _updateCameraPosition();
     }
-  }
-
-  double _calculateDistance(LatLng start, LatLng end) {
-    const double earthRadius = 6371000; // Earth's radius in meters
-    final double dLat = _degreesToRadians(end.latitude - start.latitude);
-    final double dLng = _degreesToRadians(end.longitude - start.longitude);
-
-    final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(_degreesToRadians(start.latitude)) *
-            math.cos(_degreesToRadians(end.latitude)) *
-            math.sin(dLng / 2) *
-            math.sin(dLng / 2);
-    final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-    return earthRadius * c;
-  }
-
-  double _degreesToRadians(double degrees) {
-    return degrees * math.pi / 180;
   }
 
   Future<void> _fetchRoute() async {
     if (_currentLatLng == null) return;
 
-    const String apiKey = 'AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk'; // Replace with your API key
+    const String apiKey = AppConstants.ApiKey;
     final String url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=${_currentLatLng!.latitude},${_currentLatLng!.longitude}&destination=${_destination.latitude},${_destination.longitude}&key=$apiKey';
 
@@ -118,7 +117,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
           setState(() {
             _routeCoordinates = _decodePolyline(polyline);
           });
-          _adjustCameraBounds();
         } else {
           print('No routes found in API response.');
         }
@@ -162,23 +160,18 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     return polylineCoordinates;
   }
 
-  void _adjustCameraBounds() {
-    if (_currentLatLng == null || _routeCoordinates.isEmpty) return;
-
-    LatLngBounds bounds = LatLngBounds(
-      southwest: LatLng(
-        math.min(_currentLatLng!.latitude, _destination.latitude),
-        math.min(_currentLatLng!.longitude, _destination.longitude),
-      ),
-      northeast: LatLng(
-        math.max(_currentLatLng!.latitude, _destination.latitude),
-        math.max(_currentLatLng!.longitude, _destination.longitude),
-      ),
-    );
-
-    _mapController?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+  void _updateCameraPosition() {
+    if (_currentLatLng != null) {
+      _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: _currentLatLng!,
+            zoom: 15,
+          ),
+        ),
+      );
+    }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -201,6 +194,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                 Marker(
                   markerId: MarkerId('currentLocation'),
                   position: _currentLatLng!,
+                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+
                 ),
                 Marker(
                   markerId: MarkerId('destination'),
@@ -216,6 +211,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                     width: 5,
                   ),
               },
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
             ),
           Positioned(
             bottom: 0, // Aligns the bottom section
@@ -224,17 +221,57 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
             child: IgnorePointer(
               ignoring: false, // Allows interaction with the map below
               child: Container(
-                height: 100, // Adjust height as needed
+                // height: 100, // Adjust height as needed
                 padding: EdgeInsets.all(16),
                 color: Colors.white, // Semi-transparent background
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    //  Text(
+                    //   'Drop Location: ${globals.dropLocation}',
+                    //   style: TextStyle(fontSize: 18.0),
+                    // ),
+                    SizedBox(height: 10.0,),
+
+                    Row(
+                      children: [
+
+                        Column(
+                          children: [
+                            Icon(Icons.person_pin_circle, color: Colors.green, size: 30),
+                            Container(
+                              width: 2,
+                              height: 30,
+                              color: Colors.grey.shade400,
+                            ),
+                            Icon(Icons.location_on, color: Colors.red, size: 30),
+                          ],
+                        ),
+                        SizedBox(width: 12), // Space between icon and address
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Current Location',
+                                style: TextStyle(color: Colors.grey.shade800, fontSize: 20.0, fontWeight: FontWeight.w500),
+                              ),
+                              SizedBox(height: 32),
+                              Text(
+                                ' ${globals.dropLocation}',
+                                style: TextStyle(color: Colors.grey.shade800, fontSize: 20.0),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20.0,),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,

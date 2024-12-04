@@ -145,3 +145,22 @@ class ChangePasswordForgotFailure extends ChangePasswordForgotState {
 }
 
 
+
+
+abstract class CustomerOtpVerifyState{}
+
+class OtpVerifyStarts extends CustomerOtpVerifyState{}
+class OtpVerifyLoading extends CustomerOtpVerifyState{}
+class OtpVerifyCompleted extends CustomerOtpVerifyState{
+
+  final String otp;
+  OtpVerifyCompleted(this .otp);
+}
+class OtpVerifyFailed extends CustomerOtpVerifyState{
+  final String error;
+  OtpVerifyFailed(this.error);
+
+}
+
+
+

@@ -9,6 +9,10 @@ import 'package:dio/dio.dart';
 import 'package:driverbooking/Screens/TrackingPage/TrackingPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:driverbooking/Bloc/App_Bloc.dart';
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TrackingPage extends StatefulWidget {
   final String address;
@@ -22,7 +26,8 @@ class TrackingPage extends StatefulWidget {
 class _TrackingPageState extends State<TrackingPage> {
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
-  LatLng _destination = LatLng(13.028159, 80.243306); // Chennai Central Railway Station
+  LatLng _destination =
+      LatLng(13.028159, 80.243306); // Chennai Central Railway Station
   List<LatLng> _routeCoordinates = [];
   Stream<LocationData>? _locationStream;
   bool _hasReachedDestination = false;
@@ -176,6 +181,12 @@ class _TrackingPageState extends State<TrackingPage> {
     }
   }
 
+  void _clearOtpInputs() {
+    for (var controller in _otpControllers) {
+      controller.clear();
+    }
+  }
+
   @override
   void dispose() {
     for (var controller in _otpControllers) {
@@ -212,120 +223,167 @@ class _TrackingPageState extends State<TrackingPage> {
 
   void _checkOtpCompletion() {
     setState(() {
-      isStartRideEnabled = _otpControllers.every((controller) => controller.text.isNotEmpty);
+      isStartRideEnabled =
+          _otpControllers.every((controller) => controller.text.isNotEmpty);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Tracking Page'),
-      ),
-      body: Stack(
-        children: [
-          if (_currentLatLng != null)
-            GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _currentLatLng!,
-                zoom: 15,
-              ),
-              onMapCreated: (controller) {
-                _mapController = controller;
-              },
-              markers: {
-                Marker(
-                  markerId: MarkerId('currentLocation'),
-                  position: _currentLatLng!,
-                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+    return BlocProvider(
+      create: (_) => CustomerOtpVerifyBloc(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            "Tracking Page",
+            style: TextStyle(
+                color: Colors.white, fontSize: AppTheme.appBarFontSize),
+          ),
+          backgroundColor: AppTheme.Navblue1,
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: BlocListener<CustomerOtpVerifyBloc, CustomerOtpVerifyState>(
+          listener: (context, state) {
+            if (state is OtpVerifyCompleted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("OTP Verified Successfully!")),
+              );
+              setState(() {
+                isOtpVerified = true; // Mark OTP as verified
+              });
+            } else if (state is OtpVerifyFailed) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Customerlocationreached(),
+                ),
+              );
 
-                ),
-                Marker(
-                  markerId: MarkerId('destination'),
-                  position: _destination,
-                ),
-              },
-              polylines: {
-                if (_routeCoordinates.isNotEmpty)
-                  Polyline(
-                    polylineId: PolylineId('route'),
-                    points: _routeCoordinates,
-                    color: Colors.blue,
-                    width: 5,
-                  ),
-              },
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-            ),
-          Positioned(
-            bottom: 0, // Aligns the bottom section
-            left: 0,
-            right: 0,
-            child: IgnorePointer(
-              ignoring: false, // Allows interaction with the map below
-              child: Container(
-                height: 300, // Adjust height as needed
-                padding: EdgeInsets.all(16),
-                color: Colors.white, // Semi-transparent background
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(height: 30.0),
-                    Text(
-                      'Enter Customer OTP',
-                      style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
-                    ),
-                    Text('Latitude: $latitude, Longitude: $longitude'),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildOtpInput(0),
-                        _buildOtpInput(1),
-                        _buildOtpInput(2),
-                        _buildOtpInput(3),
-                      ],
-                    ),
-                    SizedBox(height: 40),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          String otp = _otpControllers.map((controller) => controller.text).join();
-                          if (otp == "1234") {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("OTP Verified Successfully!")),
-                            );
-                            setState(() {
-                              isOtpVerified = true;
-                            });
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Invalid OTP. Try again!")),
-                            );
-                          }
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>Customerlocationreached()));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.Navblue1,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.error)),
+              );
+              _clearOtpInputs();
+            }
+          },
+          child: BlocBuilder<CustomerOtpVerifyBloc, CustomerOtpVerifyState>(
+            builder: (context, state) {
+              // if (state is OtpVerifyLoading) {
+              //   return Center(child: CircularProgressIndicator());
+              // }
+              return Stack(
+                children: [
+                  if (_currentLatLng != null)
+                    GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: _currentLatLng!,
+                        zoom: 15,
+                      ),
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                      },
+                      markers: {
+                        Marker(
+                          markerId: MarkerId('currentLocation'),
+                          position: _currentLatLng!,
+                          icon: BitmapDescriptor.defaultMarkerWithHue(
+                              BitmapDescriptor.hueBlue),
                         ),
-                        child: Text(
-                          isOtpVerified ? 'Start Ride' : 'Verify OTP',
-                          style: TextStyle(fontSize: 20.0, color: Colors.white),
+                        Marker(
+                          markerId: MarkerId('destination'),
+                          position: _destination,
+                        ),
+                      },
+                      polylines: {
+                        if (_routeCoordinates.isNotEmpty)
+                          Polyline(
+                            polylineId: PolylineId('route'),
+                            points: _routeCoordinates,
+                            color: Colors.blue,
+                            width: 5,
+                          ),
+                      },
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
+                    ),
+                  Positioned(
+                    bottom: 0, // Aligns the bottom section
+                    left: 0,
+                    right: 0,
+                    child: IgnorePointer(
+                      ignoring: false, // Allows interaction with the map below
+                      child: Container(
+                        height: 300, // Adjust height as needed
+                        padding: EdgeInsets.all(16),
+                        color: Colors.white, // Semi-transparent background
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(height: 30.0),
+                            Text(
+                              'Enter Customer OTP',
+                              style: TextStyle(
+                                  fontSize: 23, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                _buildOtpInput(0),
+                                _buildOtpInput(1),
+                                _buildOtpInput(2),
+                                _buildOtpInput(3),
+                              ],
+                            ),
+                            SizedBox(height: 40),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (isOtpVerified) {
+                                    // Navigate to the next screen when "Start Ride" is clicked
+                                    _clearOtpInputs();
+
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            Customerlocationreached(),
+                                      ),
+                                    );
+                                  } else {
+                                    // Verify OTP when "Verify OTP" is clicked
+                                    final String otp = _otpControllers
+                                        .map((controller) => controller.text)
+                                        .join();
+                                    context
+                                        .read<CustomerOtpVerifyBloc>()
+                                        .add(OtpVerifyAttempt(otp: otp));
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.Navblue1,
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Text(
+                                  isOtpVerified ? 'Start Ride' : 'Verify OTP',
+                                  style: TextStyle(
+                                      fontSize: 20.0, color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
+                ],
+              );
+            },
           ),
-          // Add your other UI components here, such as OTP input, Start Ride button, etc.
-        ],
+        ),
       ),
     );
   }

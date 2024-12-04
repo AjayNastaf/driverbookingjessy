@@ -100,3 +100,14 @@ class ChangePasswordForgotAttempt extends ChangePasswordForgotEvent {
     required this.newPassword
   });
 }
+
+
+abstract class CustomerOtpVerifyEvent {}
+
+class OtpVerifyAttempt extends CustomerOtpVerifyEvent{
+  final String otp;
+  OtpVerifyAttempt({
+    required this.otp
+});
+}
+

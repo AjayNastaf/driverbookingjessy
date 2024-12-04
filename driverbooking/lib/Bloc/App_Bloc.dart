@@ -32,7 +32,44 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
   }
 }
 
-//
+
+class CustomerOtpVerifyBloc extends Bloc<CustomerOtpVerifyEvent , CustomerOtpVerifyState>{
+  CustomerOtpVerifyBloc():super(OtpVerifyStarts()){
+    on<OtpVerifyAttempt>(_onOtpVerifyAttempt);
+  }
+}
+
+void _onOtpVerifyAttempt(OtpVerifyAttempt event, Emitter<CustomerOtpVerifyState> emit)async{
+emit(OtpVerifyLoading());
+
+  try{
+    final response = await ApiService.customerotpverify(
+      otp: event.otp
+    );
+
+    if(response.statusCode == 200){
+      final data = jsonDecode(response.body);
+      final otp = data['otp'];
+      emit(OtpVerifyCompleted('$otp'));
+    }
+    else{
+      emit(OtpVerifyFailed("otp Verify Failed"));
+
+    }
+  }
+  catch(e){
+    emit(OtpVerifyFailed("An error occurred: $e"));
+
+  }
+}
+
+
+
+
+
+
+
+
 class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
   RegisterBloc() : super(RegisterInitial()) {
     on<RequestOtpAndRegister>((event, emit) async {

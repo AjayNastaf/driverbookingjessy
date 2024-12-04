@@ -131,8 +131,8 @@ class ApiService {
 
 
   static Future<bool> sendUsernamePasswordEmail(String registerUsername, String registerPassword, String recipientEmail) async {
-    String username = 'ravi.vinoth997@gmail.com';
-    String password = 'yksidolaiaoaisuq';
+    String username = '${AppConstants.mailerEmail}';
+    String password = '${AppConstants.mailerPassword}';
 
     final smtpServer = gmail(username, password); // Using Gmail's SMTP server
     final message = Message()
@@ -202,8 +202,8 @@ class ApiService {
 
 
     if (response.statusCode == 200) {
-      String username = 'ravi.vinoth997@gmail.com';
-      String password = 'yksidolaiaoaisuq';
+      String username = '${AppConstants.mailerEmail}';
+      String password = '${AppConstants.mailerPassword}';
       final smtpServer = gmail(username, password); // Using Gmail's SMTP server
       final message = Message()
         ..from = Address(username, 'Nastaf Application')
@@ -333,8 +333,8 @@ class ApiService {
     print("Response API: ${response.statusCode}");
 
     if (response.statusCode == 200) {
-      String username = 'ravi.vinoth997@gmail.com';
-      String password = 'yksidolaiaoaisuq';
+      String username = '${AppConstants.mailerEmail}';
+      String password = '${AppConstants.mailerPassword}';
       final smtpServer = gmail(username, password); // Using Gmail's SMTP server
       final message = Message()
         ..from = Address(username, 'Nastaf Application')
@@ -406,6 +406,19 @@ class ApiService {
     // } else {
     //   return false; // Login failed
     // }
+    return response;
+  }
+
+
+  static Future<http.Response> customerotpverify({required String otp, }) async {
+
+    final response = await http.post(
+      Uri.parse('${AppConstants.baseUrl}/customerotp'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'otp': otp,}),
+    );
+
+
     return response;
   }
 

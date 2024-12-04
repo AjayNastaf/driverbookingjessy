@@ -382,7 +382,7 @@ app.post("/changePassword", (req, res) => {
 app.post("/forgotPasswordEmailVerification", (req, res) => {
   const { email } = req.body;
 
-   console.log("Received new dataaaaaaaaaaaaaaaaaaaaa:", { email });
+   console.log("Received new data:", { email });
 
   const sql = "SELECT * FROM register WHERE email = ?";
 
@@ -504,6 +504,41 @@ app.post("/changePasswordForgot", (req, res) => {
 
 
 
+
+// Verify OTP API
+app.post("/customerotp", (req, res) => {
+  const { otp } = req.body;
+
+  // Check if OTP is provided
+  if (!otp) {
+    return res.status(400).json({ success: false, message: "OTP is required" });
+  }
+
+  // Query the database for the OTP
+  const query = "SELECT username FROM customer_otp WHERE otp = ?";
+  db.query(query, [otp], (err, result) => {
+    if (err) {
+      console.error("Error querying the database:", err);
+      return res.status(500).json({ success: false, message: "Database query error" });
+    }
+
+    if (result.length === 0) {
+      // OTP not found
+      return res.status(404).json({ success: false, message: "Invalid OTP" });
+    }
+
+    // OTP is valid
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+      username: result[0].username, // Include username if needed
+    });
+  });
+});
+
+
 app.listen(3000, () => {
   console.log("Server started on port 3000");
 });
+
+
