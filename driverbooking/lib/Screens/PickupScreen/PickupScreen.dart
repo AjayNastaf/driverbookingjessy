@@ -23,7 +23,12 @@ class _PickupscreenState extends State<Pickupscreen> {
   Widget build(BuildContext context) {
     return  Scaffold(
       appBar: AppBar(
-        title: Text("Pickup"),
+        title: const Text(
+          "Pick Up",
+          style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
+        ),
+        backgroundColor: AppTheme.Navblue1,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
