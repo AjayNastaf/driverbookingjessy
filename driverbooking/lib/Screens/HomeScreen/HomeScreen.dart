@@ -679,166 +679,42 @@ class _HomescreenState extends State<Homescreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Section 1: Local Ride
-            GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>Bookingdetails()));
-
+            buildSection(
+              context,
+              title: 'Local',
+              dateTime: '2024-11-25 5:39 PM',
+              buttonText: 'Waiting',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Bookingdetails()),
+                );
               },
-            child: Container(
-                margin: EdgeInsets.only(bottom: 16.0),
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 6.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Local',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-                    ),
-                    Divider(thickness: 1, color: Colors.grey.shade300),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '2024-11-25 5:39 PM',
-                          style: TextStyle(color: Colors.grey, fontSize: 14.0),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                          ),
-                          child: Text('Waiting'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
             ),
-
-
-            // Section 2: Out Station Ride
-            GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>Bookingdetails()));
-
+            buildSection(
+              context,
+              title: 'Out Station',
+              dateTime: '2024-11-25 5:39 PM',
+              buttonText: 'Waiting',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Bookingdetails()),
+                );
               },
-              child: Container(
-                margin: EdgeInsets.only(bottom: 16.0),
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 6.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Out Station',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-                    ),
-                    Divider(thickness: 1, color: Colors.grey.shade300),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '2024-11-25 5:39 PM',
-                          style: TextStyle(color: Colors.grey, fontSize: 14.0),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                          ),
-                          child: Text('Waiting'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
             ),
-
-
-            // Section 3: Transfer Ride
-            GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>Bookingdetails()));
-
+            buildSection(
+              context,
+              title: 'Transfer',
+              dateTime: '2024-11-25 5:39 PM',
+              buttonText: 'Waiting',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Bookingdetails()),
+                );
               },
-              child: Container(
-                margin: EdgeInsets.only(bottom: 16.0),
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 6.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Transfer',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
-                    ),
-                    Divider(thickness: 1, color: Colors.grey.shade300),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '2024-11-25 5:39 PM',
-                          style: TextStyle(color: Colors.grey, fontSize: 14.0),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                          ),
-                          child: Text('Waiting'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            )
+            ),
 
           ],
         ),

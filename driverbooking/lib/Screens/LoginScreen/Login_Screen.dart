@@ -82,21 +82,24 @@ class _Login_ScreenState extends State<Login_Screen> {
               ),
           body: BlocListener<LoginBloc, LoginState>(listener: (context, state) {
             if (state is LoginCompleted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Login Successful! User ID: ${state.userId}")),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text("Login Successful! User ID: ${state.userId}")),
+              // );
               Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Homescreen(userId: state.userId)),
               );
+              showSuccessSnackBar(context, "Login Successful! User ID: ${state.userId}");
 
               // Navigator.pushReplacement(
               //   context,
               //   MaterialPageRoute(builder: (context) => Introscreenmain(userId: state.userId)),
               // );
             } else if (state is LoginFailure) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(state.error)));
+              // ScaffoldMessenger.of(context)
+              //     .showSnackBar(SnackBar(content: Text(state.error)));
+
+              showFailureSnackBar(context, "${state.error}");
             }
           }, child:
               BlocBuilder<LoginBloc, LoginState>(builder: (context, state) {

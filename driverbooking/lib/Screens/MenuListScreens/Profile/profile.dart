@@ -91,17 +91,21 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
       body: BlocConsumer<UpdateUserBloc, UpdateUserState>(
         listener: (context, state) {
           if (state is UpdateUserCompleted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Details updated')),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text('Details updated')),
+            // );
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => Homescreen(userId: widget.userId)));
+
+                showInfoSnackBar(context, 'Details updated');
           } else if (state is UpdateUserFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error)),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text(state.error)),
+            // );
+
+            showFailureSnackBar(context, "${state.error}");
           }
         },
         builder: (context, state) {
@@ -163,14 +167,14 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildTextField("Name", nameController),
+                buildTextField("Name", nameController),
                 const SizedBox(height: 10),
-                _buildTextField("Phone", mobileController),
+                buildTextField("Phone", mobileController),
                 const SizedBox(height: 10),
-                _buildTextField("Password", passwordController,
+                buildTextField("Password", passwordController,
                     obscureText: true),
                 const SizedBox(height: 10),
-                _buildTextField("Email", emailController),
+                buildTextField("Email", emailController),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
@@ -204,15 +208,15 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller,
-      {bool obscureText = false}) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    );
-  }
+  // Widget _buildTextField(String label, TextEditingController controller,
+  //     {bool obscureText = false}) {
+  //   return TextField(
+  //     controller: controller,
+  //     obscureText: obscureText,
+  //     decoration: InputDecoration(
+  //       labelText: label,
+  //       border: const OutlineInputBorder(),
+  //     ),
+  //   );
+  // }
 }

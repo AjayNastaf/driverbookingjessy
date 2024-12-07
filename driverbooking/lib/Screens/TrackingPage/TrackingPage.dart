@@ -245,12 +245,13 @@ class _TrackingPageState extends State<TrackingPage> {
         body: BlocListener<CustomerOtpVerifyBloc, CustomerOtpVerifyState>(
           listener: (context, state) {
             if (state is OtpVerifyCompleted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("OTP Verified Successfully!")),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text("OTP Verified Successfully!")),
+              // );
               setState(() {
                 isOtpVerified = true; // Mark OTP as verified
               });
+              showSuccessSnackBar(context, "OTP Verified Successfully!");
             } else if (state is OtpVerifyFailed) {
               Navigator.push(
                 context,
@@ -259,9 +260,10 @@ class _TrackingPageState extends State<TrackingPage> {
                 ),
               );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.error)),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text(state.error)),
+              // );
+              showFailureSnackBar(context, '${state.error}');
               _clearOtpInputs();
             }
           },

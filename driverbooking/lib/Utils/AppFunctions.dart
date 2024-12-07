@@ -66,3 +66,237 @@ void showInfoSnackBar(BuildContext context, String message) {
 }
 
 
+
+// from DestinationLocationScreen
+final List<Map<String, String>> recentLocations = [
+  {
+    'title': 'Anna Salai, Chennai',
+    'subtitle': '123 Anna Salai, Chennai, Tamil Nadu 600002'
+  },
+  {
+    'title': 'Velachery Main Road, Chennai',
+    'subtitle': '45 Velachery Main Road, Chennai, Tamil Nadu 600042'
+  },
+  {
+    'title': 'OMR, Chennai',
+    'subtitle': '99 Old Mahabalipuram Road, Chennai, Tamil Nadu 600097'
+  },
+  {
+    'title': 'Poonamallee High Road, Chennai',
+    'subtitle': '78 Poonamallee High Road, Chennai, Tamil Nadu 600010'
+  },
+];
+
+
+
+//home page
+Widget buildSection(
+    BuildContext context, {
+      required String title,
+      required String dateTime,
+      required String buttonText,
+      required VoidCallback onTap,
+    }) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      margin: EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6.0,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+          ),
+          Divider(thickness: 1, color: Colors.grey.shade300),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                dateTime,
+                style: TextStyle(color: Colors.grey, fontSize: 14.0),
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+                child: Text(buttonText),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
+//profile page
+Widget buildTextField(String label, TextEditingController controller, {bool obscureText = false}) {
+  return TextField(
+    controller: controller,
+    obscureText: obscureText,
+    decoration: InputDecoration(
+      labelText: label,
+      border: const OutlineInputBorder(),
+    ),
+  );
+}
+
+
+
+// rideScreen'
+class CustomCard extends StatelessWidget {
+  final String name;
+  final String image;
+  final String vehicle;
+  final String price;
+  final String dateTime;
+  final String startAddress;
+  final String endAddress;
+
+  const CustomCard({
+    required this.name,
+    required this.image,
+    required this.vehicle,
+    required this.price,
+    required this.dateTime,
+    required this.startAddress,
+    required this.endAddress,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8), // Spacing
+      padding: const EdgeInsets.all(16), // Inner padding
+      decoration: BoxDecoration(
+        color: Colors.white, // Card background color
+        borderRadius: BorderRadius.circular(12), // Rounded corners
+        border: Border.all(color: Colors.grey.shade300), // Border color
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2), // Shadow color
+            blurRadius: 5,
+            offset: const Offset(0, 3), // Shadow position
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage(image), // Dynamic image
+              ),
+              const SizedBox(width: 12), // Space between avatar and details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          price,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      vehicle,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      dateTime,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16), // Space between rows
+          Row(
+            children: [
+              Column(
+                children: [
+                  const Icon(Icons.circle, color: Colors.green, size: 12),
+                  Container(
+                    width: 2,
+                    height: 30,
+                    color: Colors.grey.shade400,
+                  ),
+                  const Icon(Icons.location_on, color: Colors.red, size: 18),
+                ],
+              ),
+              const SizedBox(width: 12), // Space between icon and address
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      startAddress,
+                      style: TextStyle(
+                        color: Colors.grey.shade800,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      endAddress,
+                      style: TextStyle(
+                        color: Colors.grey.shade800,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+

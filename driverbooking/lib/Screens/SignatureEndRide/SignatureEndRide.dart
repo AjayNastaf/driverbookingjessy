@@ -1,6 +1,8 @@
 import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
+import 'package:driverbooking/Screens/SignatureEndRide/TollParkingUpload/TollParkingUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:signature/signature.dart';
+import 'package:driverbooking/Utils/AllImports.dart';
 
 class Signatureendride extends StatefulWidget {
   const Signatureendride({super.key});
@@ -31,17 +33,73 @@ class _SignatureendrideState extends State<Signatureendride> {
       final signature = await _signatureController.toPngBytes();
       if (signature != null) {
         // Do something with the signature (e.g., upload or save locally)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Signature saved successfully!")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Signature saved successfully!")),
+        // );
         Navigator.push(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "12")));
+        showSuccessSnackBar(context, "Signature saved successfully!");
+        _handleSubmitModal();
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please provide a signature.")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Please provide a signature.")),
+      // );
+      showFailureSnackBar(context, "Please provide a signature.");
     }
   }
+
+  void _handleSubmitModal() {
+    // Show the popup dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            'End Ride',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Are you sure you want to submit and end the ride?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.red, fontSize: 16),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // _handleUpload();
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload()));
+                // Navigator.of(context).pop(); // Close the dialog
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+              ),
+              child: Text(
+                'Upload',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // void _handleUpload() {
+  //   // Logic for handling the upload
+  //   print("Ride details uploaded.");
+  //   // Add your API call or relevant code here.
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +139,7 @@ class _SignatureendrideState extends State<Signatureendride> {
                 ),
                 ElevatedButton(
                   onPressed: _handleSubmit,
+                  // onPressed: _handleSubmitModal,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green, ),
                   child: Text("Submit & End Ride", style: TextStyle(color: Colors.white, fontSize: 18.0),),
                 ),

@@ -1,3 +1,4 @@
+import 'package:driverbooking/Screens/MenuListScreens/History/EditTripDetails/EditTripDetails.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -5,6 +6,7 @@ import 'package:excel/excel.dart';
 import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:driverbooking/Utils/AllImports.dart';
 
 class History extends StatefulWidget {
   const History({Key? key}) : super(key: key);
@@ -18,10 +20,15 @@ class _HistoryState extends State<History> {
   DateTime? toDate;
 
   final List<Map<String, dynamic>> allData = [
-    {'date': DateTime(2024, 11, 1), 'description': 'Order #1', 'amount': 100},
-    {'date': DateTime(2024, 11, 10), 'description': 'Order #2', 'amount': 200},
-    {'date': DateTime(2024, 11, 20), 'description': 'Order #3', 'amount': 300},
-    {'date': DateTime(2024, 11, 25), 'description': 'Order #4', 'amount': 150},
+    {'date': DateTime(2024, 11, 1), 'CustomerName': 'Ajay', 'FromTo': 'Tambaram - Central'},
+    {'date': DateTime(2024, 11, 1), 'CustomerName': 'Ajay', 'FromTo': 'Tambaram - Central'},
+    {'date': DateTime(2024, 11, 1), 'CustomerName': 'Ajay', 'FromTo': 'Tambaram - Central'},
+    {'date': DateTime(2024, 11, 1), 'CustomerName': 'Ajay', 'FromTo': 'Tambaram - Central'},
+
+
+
+
+
   ];
 
   List<Map<String, dynamic>> filteredData = [];
@@ -70,14 +77,14 @@ class _HistoryState extends State<History> {
     Sheet sheetObject = excel['History'];
 
     // Add headers
-    sheetObject.appendRow(["Date", "Description", "Amount"]);
+    sheetObject.appendRow(["Date", "CustomerName", "FromTo"]);
 
     // Add rows
     for (var row in filteredData) {
       sheetObject.appendRow([
         DateFormat('dd MMM yyyy').format(row['date']),
-        row['description'],
-        row['amount'],
+        row['CustomerName'],
+        row['FromTo'],
       ]);
     }
 
@@ -105,14 +112,16 @@ class _HistoryState extends State<History> {
         await file.writeAsBytes(fileBytes, flush: true);
 
         // Notify the user
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File downloaded to $filePath')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text('File downloaded to $filePath')),
+        // );
+        showInfoSnackBar(context, 'File downloaded to $filePath');
       } catch (e) {
         // Handle errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving file: $e')),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text('Error saving file: $e')),
+        // );
+        showFailureSnackBar(context, 'Error saving file: $e');
       }
     }
   }
@@ -195,6 +204,7 @@ class _HistoryState extends State<History> {
               ],
             ),
           ),
+
           const SizedBox(height: 20),
           Expanded(
             child: Card(
@@ -207,20 +217,24 @@ class _HistoryState extends State<History> {
                 padding: const EdgeInsets.all(8.0),
                 child: filteredData.isEmpty
                     ? const Center(
-                        child: Text(
-                          "No records found for the selected date range.",
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      )
-                    : SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: DataTable(
-                          headingRowColor: MaterialStateProperty.resolveWith(
-                            (states) => AppTheme.lightBlue,
-                          ),
-                          columns: const [
-                            DataColumn(
-                              label: Text(
+                  child: Text(
+                    "No records found for the selected date range.",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                )
+                    : Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Fixed Header Row
+                    Container(
+                      color: AppTheme.lightBlue,
+                      child: Row(
+                        children: const [
+                          Expanded(
+                            flex: 2, // Adjust flex for column width
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
                                 "Date",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -228,37 +242,107 @@ class _HistoryState extends State<History> {
                                 ),
                               ),
                             ),
-                            DataColumn(
-                              label: Text(
-                                "Description",
+                          ),
+                          Expanded(
+                            flex: 3, // Adjust flex for column width
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "Customer Name",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
                             ),
-                            DataColumn(
-                              label: Text(
-                                "Amount",
+                          ),
+                          Expanded(
+                            flex: 3, // Adjust flex for column width
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(
+                                "From To",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
                             ),
-                          ],
-                          rows: filteredData.map((item) {
-                            return DataRow(
-                              cells: [
-                                DataCell(Text(DateFormat('dd MMM yyyy')
-                                    .format(item['date']))),
-                                DataCell(Text(item['description'])),
-                                DataCell(Text("\$${item['amount']}")),
+                          ),
+                          Expanded(
+                            flex: 1, // Adjust flex for column width
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(
+                                Icons.remove_red_eye, // Use eye-like icon
+                                color: Colors.white, // Set color to white
+                                size: 24.0, // Optional: Adjust size if needed
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Scrollable Data Rows
+                    SizedBox(
+                      height: 200.0,
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: filteredData.map((item) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      DateFormat('dd MMM yyyy').format(item['date']),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(item['CustomerName']),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 3,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(item['FromTo']),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 2,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: TextButton(
+                                      onPressed: () {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context)=>EditTripDetails()));
+                                      },
+                                      child: Text(
+                                        "View",
+                                        style: TextStyle(fontSize: 16.0),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+
+
+
+
+
                               ],
                             );
                           }).toList(),
                         ),
                       ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

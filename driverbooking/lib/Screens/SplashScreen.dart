@@ -36,6 +36,6 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     // return  MapScreen();
-    return loadingscreen();
+    return LoadingScreen();
   }
 }

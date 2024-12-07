@@ -15,7 +15,7 @@ class AppConstants {  // only use asset
 
   // static const String baseUrl = "http://192.168.0.109:8085";
   // static const String baseUrl = "http://54.236.10.55:3000";
-  static const String baseUrl = "http://192.168.0.107:3000";
+  static const String baseUrl = "http://192.168.0.114:3000";
   static const Color primaryColor = Colors.blue;
   static const String ApiKey = "AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk";
   static const String mailerEmail = "ravi.vinoth997@gmail.com";

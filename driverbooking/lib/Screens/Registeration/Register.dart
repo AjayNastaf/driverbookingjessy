@@ -43,20 +43,22 @@ class _RegisterState extends State<Register> {
         body: BlocListener<RegisterBloc, RegisterState>(
           listener: (context, state) {
             if (state is RegisterSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Registration successful, OTP sent to your email.')),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text('Registration successful, OTP sent to your email.')),
+              // );
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => OtpScreen(email: _emailController.text)),
               );
+              showSuccessSnackBar(context, 'Registration successful, OTP sent to your email.');
             } else if (state is RegisterFailure) {
               showAlertDialog(context, state.error);
             }
             else if (state is RequestOtpFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Username already exist, Please login.')),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text('Username already exist, Please login.')),
+              // );
+              showFailureSnackBar(context, 'Username already exist, Please login.');
             }
           },
           child: SingleChildScrollView(
