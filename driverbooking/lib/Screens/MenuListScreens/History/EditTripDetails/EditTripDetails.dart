@@ -1,3 +1,4 @@
+import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:signature/signature.dart';
@@ -48,18 +49,60 @@ class _EditTripDetailsState extends State<EditTripDetails> {
   }
 
   Future<void> _uploadFile(String purpose) async {
-    // Add your file and camera upload logic here
-  }
-
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.camera_alt),
+              title: Text('Open Camera'),
+              onTap: () {
+                Navigator.pop(context);
+                // Add camera logic
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.file_upload),
+              title: Text('Upload File'),
+              onTap: () {
+                Navigator.pop(context);
+                // Add file upload logic
+              },
+            ),
+          ],
+        );
+      },
+    );  }
 
   void _submitDetails() {
     // Your logic to handle submit (e.g., saving the data, calling API)
     print("Details submitted");
     // For now, just showing a message as an example
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Details Submitted")));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "")));
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildInputField(String label, TextEditingController controller ,{bool isEnabled = true}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        enabled: isEnabled, // Controls whether the field is enabled or not
+        decoration: InputDecoration(
+          labelText: label,
+          filled: true,
+          fillColor: isEnabled ? Colors.white : Colors.grey[200], // Adjusts the color based on enabled state
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
@@ -67,24 +110,6 @@ class _EditTripDetailsState extends State<EditTripDetails> {
         style: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputField(String label, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: controller,
-        enabled: isEditable,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: isEditable ? Colors.white : Colors.grey[200],
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-          ),
         ),
       ),
     );
@@ -101,80 +126,77 @@ class _EditTripDetailsState extends State<EditTripDetails> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  isEditable = !isEditable;
-                  if (!isEditable) {
-                    _signatureController.clear();
-                  }
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-                backgroundColor: Colors.red, // Button color changes based on isEditable state
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.edit, color: AppTheme.white1),
-                  SizedBox(width: 8.0),
-                  Text(
-                    "Edit Details",
-                    style: TextStyle(color: AppTheme.white1, fontSize: 20.0),
-                  ),
-                ],
-              ),
-            ),
+            // ElevatedButton(
+            //   onPressed: () {
+            //     setState(() {
+            //       isEditable = !isEditable;
+            //       if (!isEditable) {
+            //         _signatureController.clear();
+            //       }
+            //     });
+            //   },
+            //   style: ElevatedButton.styleFrom(
+            //     minimumSize: const Size(double.infinity, 48),
+            //     backgroundColor: Colors.red, // Button color changes based on isEditable state
+            //   ),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       Icon(Icons.edit, color: AppTheme.white1),
+            //       SizedBox(width: 8.0),
+            //       Text(
+            //         "Edit Details",
+            //         style: TextStyle(color: AppTheme.white1, fontSize: 20.0),
+            //       ),
+            //     ],
+            //   ),
+            // ),
 
             const SizedBox(height: 16),
-            _buildSectionTitle("Trip Information"),
-            _buildInputField("Trip Sheet Number", tripSheetNumberController),
-            _buildInputField("Trip Date", tripDateController),
-            _buildInputField("Report Time", reportTimeController),
+            buildSectionTitle("Trip Information"),
+            _buildInputField("Trip Sheet Number", tripSheetNumberController, isEnabled: false),
+            _buildInputField("Trip Date", tripDateController, isEnabled: false),
+            _buildInputField("Report Time", reportTimeController, isEnabled: false),
             const SizedBox(height: 16),
-            _buildSectionTitle("Duty Information"),
-            _buildInputField("Duty Type", dutyTypeController),
-            _buildInputField("Vehicle Type", vehicleTypeController),
+            buildSectionTitle("Duty Information"),
+            _buildInputField("Duty Type", dutyTypeController, isEnabled: false),
+            _buildInputField("Vehicle Type", vehicleTypeController, isEnabled: false),
             const SizedBox(height: 16),
-            _buildSectionTitle("Company and Guest"),
-            _buildInputField("Company Name", companyNameController),
-            _buildInputField("Guest Name", guestNameController),
-            _buildInputField("Contact Number", contactNumberController),
+            buildSectionTitle("Company and Guest"),
+            _buildInputField("Company Name", companyNameController, isEnabled: false),
+            _buildInputField("Guest Name", guestNameController, isEnabled: false),
+            _buildInputField("Contact Number", contactNumberController, isEnabled: false),
             const SizedBox(height: 16),
-            _buildSectionTitle("Locations"),
-            _buildInputField("Address", addressController),
-            _buildInputField("Drop Location", dropLocationController),
+            buildSectionTitle("Locations"),
+            _buildInputField("Address", addressController, isEnabled: false),
+            _buildInputField("Drop Location", dropLocationController, isEnabled: false),
             const SizedBox(height: 16),
-            _buildSectionTitle("Toll and Parking"),
-            _buildInputField("Enter Toll Amount", tollAmountController),
+            buildSectionTitle("Toll and Parking"),
+            _buildInputField("Enter Toll Amount", tollAmountController,  isEnabled: true),
             ElevatedButton.icon(
-              onPressed: isEditable ? () => _uploadFile("Toll") : null,
+              onPressed: () => _uploadFile("Toll"),
               icon: const Icon(Icons.upload),
               label: const Text("Upload Toll"),
             ),
             const SizedBox(height: 16),
             _buildInputField("Enter Parking Amount", parkingAmountController),
             ElevatedButton.icon(
-              onPressed: isEditable ? () => _uploadFile("Parking") : null,
+              onPressed: () => _uploadFile("Parking"),
               icon: const Icon(Icons.upload),
               label: const Text("Upload Parking"),
             ),
             const SizedBox(height: 16),
-            _buildSectionTitle("Signature"),
+            buildSectionTitle("Signature"),
             Container(
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: AbsorbPointer(
-                absorbing: !isEditable, // Disable signature input when not editable
-                child: Signature(
-                  controller: _signatureController,
-                  height: 150,
-                  backgroundColor: isEditable ? Colors.white : Colors.grey[200] ?? Colors.grey,
-                ),
+              child: Signature(
+                controller: _signatureController,
+                height: 150,
+                backgroundColor:  Colors.white ,
               ),
             ),
             const SizedBox(height: 8),
@@ -182,11 +204,11 @@ class _EditTripDetailsState extends State<EditTripDetails> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: isEditable ? () => _signatureController.clear() : null,
+                  onPressed:  () => _signatureController.clear() ,
                   child: const Text("Clear Signature"),
                 ),
                 ElevatedButton(
-                  onPressed: isEditable ? _saveSignature : null,
+                  onPressed: _saveSignature,
                   child: const Text("Save Signature"),
                 ),
               ],
@@ -195,7 +217,7 @@ class _EditTripDetailsState extends State<EditTripDetails> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: isEditable ? _submitDetails : null,
+                onPressed:  _submitDetails,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.darkgreen, // Set the background color here
                   foregroundColor: Colors.white, // Set the text color here
@@ -208,6 +230,4 @@ class _EditTripDetailsState extends State<EditTripDetails> {
       ),
     );
   }
-
-
 }

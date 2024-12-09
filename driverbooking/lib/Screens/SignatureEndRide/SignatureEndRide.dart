@@ -1,5 +1,6 @@
 import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
-import 'package:driverbooking/Screens/SignatureEndRide/TollParkingUpload/TollParkingUpload.dart';
+import 'package:driverbooking/Screens/TollParkingUpload/TollParkingUpload.dart';
+import 'package:driverbooking/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:signature/signature.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
@@ -78,7 +79,7 @@ class _SignatureendrideState extends State<Signatureendride> {
             ElevatedButton(
               onPressed: () {
                 // _handleUpload();
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload()));
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload()));
                 // Navigator.of(context).pop(); // Close the dialog
               },
               style: ElevatedButton.styleFrom(
@@ -118,7 +119,7 @@ class _SignatureendrideState extends State<Signatureendride> {
             ),
             SizedBox(height: 10),
             Container(
-              height: 600,
+              height: 500,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey, width: 2),
                 borderRadius: BorderRadius.circular(8),

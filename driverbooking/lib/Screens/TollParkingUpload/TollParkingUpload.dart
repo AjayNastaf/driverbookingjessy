@@ -85,9 +85,9 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               // Enter Toll Amount Section
-              SizedBox(height: 18),
+              const SizedBox(height: 18),
 
-              Text(
+              const Text(
                 "Enter Toll Amount",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
@@ -107,7 +107,7 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisSize: MainAxisSize.min, // Ensures the button shrinks to fit content
                     children: [
                       Icon(Icons.upload_file, color: Colors.white), // Add your desired icon
@@ -123,7 +123,7 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
               SizedBox(height: 32),
 
               // Enter Parking Amount Section
-              Text(
+              const Text(
                 "Enter Parking Amount",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
@@ -163,18 +163,18 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
                 width: double.infinity,
                 height:50.0,
                 child: ElevatedButton(
-
-                  onPressed: _showUploadOptions,
+                  // onPressed: _showUploadOptions,
+                  onPressed: (){
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.darkgreen,
                   ),
-                  child: Text(
+                  child: const Text(
                     'Submit Details',
                     style: TextStyle(color: Colors.white, fontSize: 20.0),
                   ),
                 ),
               ),
-
             ],
           ),
         ),
