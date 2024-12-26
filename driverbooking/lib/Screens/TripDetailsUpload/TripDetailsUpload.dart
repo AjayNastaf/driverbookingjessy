@@ -1,5 +1,136 @@
-import 'package:driverbooking/Screens/TollParkingUpload/TollParkingUpload.dart';
+// import 'dart:io';
+// import 'package:driverbooking/Utils/AllImports.dart';
+// import 'package:driverbooking/Networks/api_service.dart';
+// import 'package:flutter/material.dart';
+// import 'package:image_picker/image_picker.dart';
+//
+// class TripDetailsUpload extends StatefulWidget {
+//   const TripDetailsUpload({Key? key}) : super(key: key);
+//
+//   @override
+//   State<TripDetailsUpload> createState() => _TripDetailsUploadState();
+// }
+//
+// class _TripDetailsUploadState extends State<TripDetailsUpload> {
+//   File? _selectedImage;
+//   final ImagePicker _picker = ImagePicker();
+//
+//   // Function to handle image selection options
+//   Future<void> _chooseOption(BuildContext context) async {
+//     showModalBottomSheet(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return SafeArea(
+//           child: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             children: [
+//               ListTile(
+//                 leading: const Icon(Icons.camera_alt),
+//                 title: const Text("Open Camera"),
+//                 onTap: () async {
+//                   Navigator.of(context).pop();
+//                   final XFile? image =
+//                   await _picker.pickImage(source: ImageSource.camera);
+//                   if (image != null) {
+//                     setState(() {
+//                       _selectedImage = File(image.path);
+//                     });
+//                   }
+//                 },
+//               ),
+//               ListTile(
+//                 leading: const Icon(Icons.photo_library),
+//                 title: const Text("Upload File"),
+//                 onTap: () async {
+//                   Navigator.of(context).pop();
+//                   final XFile? image =
+//                   await _picker.pickImage(source: ImageSource.gallery);
+//                   if (image != null) {
+//                     setState(() {
+//                       _selectedImage = File(image.path);
+//                     });
+//                   }
+//                 },
+//               ),
+//             ],
+//           ),
+//         );
+//       },
+//     );
+//   }
+//
+//   // Function to handle image upload
+//   Future<void> _uploadImage() async {
+//     if (_selectedImage == null) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text("Please select an image first")),
+//       );
+//       return;
+//     }
+//
+//     final result = await ApiService.uploadImage(_selectedImage!);
+//
+//     if (result['success']) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text("Image uploaded successfully!")),
+//       );
+//       setState(() {
+//         _selectedImage = null; // Reset the selected image
+//       });
+//     } else {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         SnackBar(content: Text("Failed to upload image")),
+//       );
+//     }
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Upload Image"),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           children: [
+//             ElevatedButton(
+//               onPressed: () => _chooseOption(context),
+//               child: const Text("Choose Image"),
+//             ),
+//             const SizedBox(height: 16),
+//             _selectedImage != null
+//                 ? Image.file(
+//               _selectedImage!,
+//               width: 200,
+//               height: 200,
+//               fit: BoxFit.cover,
+//             )
+//                 : const Text("No image selected"),
+//             const SizedBox(height: 16),
+//             ElevatedButton(
+//               onPressed: _uploadImage,
+//               child: const Text("Submit"),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
+
+
+import 'dart:io';
+import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:driverbooking/Networks/api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:driverbooking/Screens/SignatureEndRide/SignatureEndRide.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 class TripDetailsUpload extends StatefulWidget {
   const TripDetailsUpload({Key? key}) : super(key: key);
@@ -21,52 +152,97 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   final TextEditingController startKmController = TextEditingController();
   final TextEditingController closeKmController = TextEditingController();
 
-  Future<void> _pickDate(BuildContext context, bool isStartingDate) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (pickedDate != null) {
-      setState(() {
-        if (isStartingDate) {
-          startingDate = pickedDate;
-        } else {
-          closingDate = pickedDate;
-        }
-      });
-    }
-  }
+  File? _selectedImage1;
+  File? _selectedImage2;
+  int? _lastSelectedButton; // Tracks which button was last used
+  final ImagePicker _picker = ImagePicker();
 
-  void _openCameraOrFiles() {
+  // Function to choose an image for a specific button
+  Future<void> _chooseOption(BuildContext context, int buttonId) async {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text('Open Camera'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add camera logic
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.file_upload),
-              title: Text('Upload File'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add file upload logic
-              },
-            ),
-          ],
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Open Camera"),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  final XFile? image =
+                  await _picker.pickImage(source: ImageSource.camera);
+                  if (image != null) {
+                    setState(() {
+                      _lastSelectedButton = buttonId;
+                      if (buttonId == 1) {
+                        _selectedImage1 = File(image.path);
+                      } else if (buttonId == 2) {
+                        _selectedImage2 = File(image.path);
+                      }
+                    });
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text("Upload File"),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  final XFile? image =
+                  await _picker.pickImage(source: ImageSource.gallery);
+                  if (image != null) {
+                    setState(() {
+                      _lastSelectedButton = buttonId;
+                      if (buttonId == 1) {
+                        _selectedImage1 = File(image.path);
+                      } else if (buttonId == 2) {
+                        _selectedImage2 = File(image.path);
+                      }
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
         );
       },
     );
   }
+
+  Future<void> _uploadImage() async {
+    if (_selectedImage1 == null || _selectedImage2 == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select images for both buttons")),
+      );
+      return;
+    }
+
+    // Call the API service to upload images
+    final result = await ApiService.uploadImage(_selectedImage1!, _selectedImage2!);
+
+    if (result['success'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(" Message: ${result['message']}")),
+      );
+
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+
+      // Clear selected images
+      setState(() {
+        _selectedImage1 = null;
+        _selectedImage2 = null;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to upload images: ${result['message']}")),
+      );
+    }
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -163,12 +339,29 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                     ),
                   ),
                   const SizedBox(width: 8),
+
                   ElevatedButton(
-                    onPressed: isStartKmEnabled ? _openCameraOrFiles : null,
-                    child: const Text("Upload"),
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () => _chooseOption(context, 1),
+                    child: const Text("Upload Image"),
                   ),
+                  const SizedBox(height: 16),
+
                 ],
               ),
+              const SizedBox(height: 16),
+              _selectedImage1 != null
+                  ? Image.file(
+                _selectedImage1!,
+                width: 200,
+                height: 200,
+                fit: BoxFit.cover,
+              )
+                  : const Text("No image selected for Button 1"),
               const SizedBox(height: 16),
 
               // Closing Kilometer
@@ -186,11 +379,26 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: isCloseKmEnabled ? _openCameraOrFiles : null,
-                    child: const Text("Upload"),
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () => _chooseOption(context, 2),
+                    child: const Text("Upload Image"),
                   ),
                 ],
               ),
+              _selectedImage2 != null
+                  ? Image.file(
+                _selectedImage2!,
+                width: 200,
+                height: 200,
+                fit: BoxFit.cover,
+              )
+                  : const Text("No image selected for Button 2"),
+              const SizedBox(height: 16),
+
 
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
@@ -204,12 +412,16 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    onPressed: () {
-                      // Add your logic for toll and parking upload
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload()));
-                    },
+                    // onPressed: () {
+                    //   // Add your logic for toll and parking upload
+                    //   // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload()));
+                    //
+                    //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+                    // },
+                    onPressed: _uploadImage,
+
                     child: const Text(
-                      "Upload Toll and Parking",
+                      "Upload Signature",
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),

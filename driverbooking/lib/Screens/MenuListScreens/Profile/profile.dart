@@ -7,6 +7,7 @@ import 'package:driverbooking/Bloc/AppBloc_Events.dart';
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
 import 'package:driverbooking/Bloc/App_Bloc.dart';
 import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
+import 'package:http/http.dart' as http;
 
 class ProfileScreen extends StatelessWidget {
   final String userId, username, password, phonenumber, email;
@@ -77,13 +78,64 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
     }
   }
 
+  Future<void> _uploadImage() async {
+    if (profileImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select an image first")),
+      );
+      return;
+    }
+
+    try {
+      const String apiUrl = "${AppConstants.baseUrl}/upload-image";
+      final request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+
+      // Add the image file with the correct key
+      request.files.add(await http.MultipartFile.fromPath(
+        'image', // Match this with the key expected in your API
+        profileImage!.path,
+      ));
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseBody = await response.stream.bytesToString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Image uploaded successfully!")),
+        );
+        debugPrint("Response: $responseBody");
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to upload image")),
+        );
+        debugPrint("Error: ${response.reasonPhrase}");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+      debugPrint("Exception: $e");
+    }
+
+    context.read<UpdateUserBloc>().add(
+      UpdateUserAttempt(
+        userId: widget.userId,
+        username: nameController.text,
+        password: passwordController.text,
+        phone: mobileController.text,
+        email: emailController.text,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
           "Profile",
-          style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
+          style:
+          TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
         ),
         backgroundColor: AppTheme.Navblue1,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -99,12 +151,11 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
                 MaterialPageRoute(
                     builder: (context) => Homescreen(userId: widget.userId)));
 
-                showInfoSnackBar(context, 'Details updated');
+            showSuccessSnackBar(context, 'Details updated');
           } else if (state is UpdateUserFailure) {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text(state.error)),
             // );
-
             showFailureSnackBar(context, "${state.error}");
           }
         },
@@ -178,15 +229,16 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    context.read<UpdateUserBloc>().add(
-                          UpdateUserAttempt(
-                            userId: widget.userId,
-                            username: nameController.text,
-                            password: passwordController.text,
-                            phone: mobileController.text,
-                            email: emailController.text,
-                          ),
-                        );
+                    //   context.read<UpdateUserBloc>().add(
+                    //         UpdateUserAttempt(
+                    //           userId: widget.userId,
+                    //           username: nameController.text,
+                    //           password: passwordController.text,
+                    //           phone: mobileController.text,
+                    //           email: emailController.text,
+                    //         ),
+                    //       );
+                    _uploadImage();
                   },
                   child: const Text(
                     "Save",
@@ -208,15 +260,15 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
     );
   }
 
-  // Widget _buildTextField(String label, TextEditingController controller,
-  //     {bool obscureText = false}) {
-  //   return TextField(
-  //     controller: controller,
-  //     obscureText: obscureText,
-  //     decoration: InputDecoration(
-  //       labelText: label,
-  //       border: const OutlineInputBorder(),
-  //     ),
-  //   );
-  // }
+// Widget _buildTextField(String label, TextEditingController controller,
+//     {bool obscureText = false}) {
+//   return TextField(
+//     controller: controller,
+//     obscureText: obscureText,
+//     decoration: InputDecoration(
+//       labelText: label,
+//       border: const OutlineInputBorder(),
+//     ),
+//   );
+// }
 }

@@ -1,3 +1,7 @@
+import 'dart:io';
+
+
+
 abstract class LoginEvent {}
 
 class LoginAtempt extends LoginEvent {
@@ -110,4 +114,35 @@ class OtpVerifyAttempt extends CustomerOtpVerifyEvent{
     required this.otp
 });
 }
+
+
+
+abstract class TripDetailsUploadEvent {}
+
+class SelectStartKmImageAttempt extends TripDetailsUploadEvent {
+  final int buttonId;
+  final File image;
+
+  SelectStartKmImageAttempt({required this.buttonId, required this.image});
+}
+
+class UploadStartKmImageEvent extends TripDetailsUploadEvent {
+  final File image;
+
+  UploadStartKmImageEvent({required this.image});
+}
+
+class SelectCloseKmImageAttempt extends TripDetailsUploadEvent {
+  final int buttonId;
+  final File image;
+
+  SelectCloseKmImageAttempt({required this.buttonId, required this.image});
+}
+
+class UploadCloseKmImageEvent extends TripDetailsUploadEvent {
+  final File image;
+
+  UploadCloseKmImageEvent({required this.image});
+}
+
 

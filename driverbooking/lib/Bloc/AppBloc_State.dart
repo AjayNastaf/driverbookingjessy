@@ -162,5 +162,40 @@ class OtpVerifyFailed extends CustomerOtpVerifyState{
 
 }
 
+abstract class TripDetailsUploadState {}
 
+class StartKmUploadInitial extends TripDetailsUploadState {}
 
+class StartKmImageSelected extends TripDetailsUploadState {}
+
+class StartKmUploadInProgress extends TripDetailsUploadState {}
+
+class StartKmUploadComplete extends TripDetailsUploadState {
+  final String message;
+
+  StartKmUploadComplete({required this.message});
+}
+
+class StartKmUploadFailure extends TripDetailsUploadState {
+  final String message;
+
+  StartKmUploadFailure({required this.message});
+}
+
+class CloseKmUploadInitial extends TripDetailsUploadState {}
+
+class CloseKmImageSelected extends TripDetailsUploadState {}
+
+class CloseKmUploadInProgress extends TripDetailsUploadState {}
+
+class CloseKmUploadComplete extends TripDetailsUploadState {
+  final String message;
+
+  CloseKmUploadComplete({required this.message});
+}
+
+class CloseKmUploadFailure extends TripDetailsUploadState {
+  final String message;
+
+  CloseKmUploadFailure({required this.message});
+}

@@ -1,10 +1,12 @@
 import 'package:bloc/bloc.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
 import '../Networks/Api_Service.dart';
 import 'dart:math';
 import 'dart:convert';
+import 'dart:io';  // Add this import to access the 'File' class.
+
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(LoginInitial()) {
@@ -289,4 +291,79 @@ void _onChangePasswordForgotAtempt(ChangePasswordForgotAttempt event,
   }
 }
 
+
+
+
+
+
+
+
+
+//
+// class TripDetailsUploadBloc
+//     extends Bloc<TripDetailsUploadEvent, TripDetailsUploadState> {
+//   TripDetailsUploadBloc() : super(StartKmUploadInitial()) {
+//     on<SelectStartKmImageAttempt>(_onSelectStartKmImageAttempt);
+//     on<UploadStartKmImageEvent>(_onUploadStartKmImageEvent);
+//
+//     on<SelectCloseKmImageAttempt>(_onSelectCloseKmImageAttempt);
+//     on<UploadCloseKmImageEvent>(_onUploadCloseKmImageEvent);
+//   }
+//
+//   Future<void> _onSelectStartKmImageAttempt(
+//       SelectStartKmImageAttempt event,
+//       Emitter<TripDetailsUploadState> emit,
+//       ) async {
+//     if (event.image.existsSync()) {
+//       emit(StartKmImageSelected());
+//     } else {
+//       emit(StartKmUploadFailure(message: "Image file not found!"));
+//     }
+//   }
+//
+//   Future<void> _onUploadStartKmImageEvent(
+//       UploadStartKmImageEvent event,
+//       Emitter<TripDetailsUploadState> emit,
+//       ) async {
+//     emit(StartKmUploadInProgress());
+//     try {
+//       final response = await ApiService.uploadImage(event.image);
+//       if (response['success']) {
+//         emit(StartKmUploadComplete(message: "Image uploaded successfully!"));
+//       } else {
+//         emit(StartKmUploadFailure(message: response['message']));
+//       }
+//     } catch (e) {
+//       emit(StartKmUploadFailure(message: "Failed to upload: ${e.toString()}"));
+//     }
+//   }
+//
+//   Future<void> _onSelectCloseKmImageAttempt(
+//       SelectCloseKmImageAttempt event,
+//       Emitter<TripDetailsUploadState> emit,
+//       ) async {
+//     if (event.image.existsSync()) {
+//       emit(CloseKmImageSelected());
+//     } else {
+//       emit(CloseKmUploadFailure(message: "Image file not found!"));
+//     }
+//   }
+//
+//   Future<void> _onUploadCloseKmImageEvent(
+//       UploadCloseKmImageEvent event,
+//       Emitter<TripDetailsUploadState> emit,
+//       ) async {
+//     emit(CloseKmUploadInProgress());
+//     try {
+//       final response = await ApiService.uploadImage(event.image);
+//       if (response['success']) {
+//         emit(CloseKmUploadComplete(message: "Image uploaded successfully!"));
+//       } else {
+//         emit(CloseKmUploadFailure(message: response['message']));
+//       }
+//     } catch (e) {
+//       emit(CloseKmUploadFailure(message: "Failed to upload: ${e.toString()}"));
+//     }
+//   }
+// }
 

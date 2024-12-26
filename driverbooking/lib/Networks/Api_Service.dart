@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // Ensure this is imported correctly
 import 'package:driverbooking/Screens/Home.dart';
 import 'package:driverbooking/Screens/HomeScreen/MapScreen.dart';
@@ -7,6 +6,9 @@ import '../Screens/HomeScreen/MapScreen.dart';
 import '../Utils/AppConstants.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
+import 'dart:io'; // Add this for File class
+
+
 
 class ApiService {
   final String apiUrl;
@@ -423,7 +425,32 @@ class ApiService {
   }
 
 
+
+  static Future<Map<String, dynamic>> uploadImage(File image1, File image2) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/upload-images');
+    final request = http.MultipartRequest('POST', url);
+
+    // Add images with correct field names
+    request.files.add(await http.MultipartFile.fromPath('startingimage', image1.path));
+    request.files.add(await http.MultipartFile.fromPath('endingimage', image2.path));
+
+    final response = await request.send();
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      // return json.decode(responseBody) as Map<String, dynamic>;
+      return {
+        'success': true,
+        'message': 'Images uploaded successfully!',
+      };
+    } else {
+      return {
+        'success': false,
+        'message': 'Failed to upload images. HTTP ${response.statusCode}',
+      };
+    }
+  }
 }
+
 
 
 

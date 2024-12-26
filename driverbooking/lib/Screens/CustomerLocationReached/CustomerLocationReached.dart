@@ -1,4 +1,5 @@
 import 'package:driverbooking/Screens/SignatureEndRide/SignatureEndRide.dart';
+import 'package:driverbooking/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -271,7 +272,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+                          // Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload()));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,

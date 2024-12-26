@@ -1,5 +1,6 @@
 import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
 import 'package:driverbooking/Screens/TollParkingUpload/TollParkingUpload.dart';
+import 'package:driverbooking/Screens/TripDetailsPreview/TripDetailsPreview.dart';
 import 'package:driverbooking/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:signature/signature.dart';
@@ -79,7 +80,7 @@ class _SignatureendrideState extends State<Signatureendride> {
             ElevatedButton(
               onPressed: () {
                 // _handleUpload();
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview()));
                 // Navigator.of(context).pop(); // Close the dialog
               },
               style: ElevatedButton.styleFrom(
