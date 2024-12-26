@@ -38,6 +38,7 @@ const signaturerouter = require('./Router/signature');
 const closedutyrouter = require('./Router/closeduty');
 const uploadbill = require('./Router/upload');
 const Mailer = require('./Router/mailer');
+const vehcileloc = require('./Router/vehicle');
 
 
 
@@ -50,6 +51,7 @@ app.use('/', signaturerouter);
 app.use('/', closedutyrouter);
 app.use('/', uploadbill);
 app.use('/',Mailer);
+app.use('/',vehcileloc);
 
 // Create a MySQL connection
 // const db = mysql.createConnection({
