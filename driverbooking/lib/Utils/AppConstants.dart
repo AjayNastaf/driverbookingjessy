@@ -13,7 +13,7 @@ class AppConstants {  // only use asset
   static const String navigation = 'assets/image/navigation.png';
 
 
-  static const String baseUrl = "http://192.168.0.107:3000";
+  static const String baseUrl = "http://192.168.0.107:70002";
   // static const String baseUrl = "https://jessycabs.com:7001";
   // static const String baseUrl = "http://157.49.104.176:3000";
   static const Color primaryColor = Colors.blue;
