@@ -208,14 +208,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         //       content: Text('Password Changed Succesfully')),
                         // );
                         // Navigate to the ForgotPasswordOtpScreen after success
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Homescreen(
-                              userId: widget.userId,
-                            ),
-                          ),
-                        );
+                        // Navigator.pushReplacement(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => Homescreen(
+                        //       userId: widget.userId,
+                        //
+                        //     ),
+                        //   ),
+                        // );
                         showSuccessSnackBar(context, "Password Changed Succesfully!");
                       } else if (state is ChangePasswordForgotFailure) {
                         // ScaffoldMessenger.of(context).showSnackBar(

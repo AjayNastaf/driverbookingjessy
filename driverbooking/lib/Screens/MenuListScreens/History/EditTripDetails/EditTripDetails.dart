@@ -81,7 +81,7 @@ class _EditTripDetailsState extends State<EditTripDetails> {
     print("Details submitted");
     // For now, just showing a message as an example
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Details Submitted")));
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "")));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "",username: '',)));
   }
 
   Widget _buildInputField(String label, TextEditingController controller ,{bool isEnabled = true}) {

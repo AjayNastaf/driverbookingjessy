@@ -7,8 +7,15 @@ import 'package:driverbooking/Screens/IntroScreens/IntroScreenTwo.dart';
 import 'package:driverbooking/Screens/LoginScreen/Login_Screen.dart';
 
 class Introscreenmain extends StatefulWidget {
-  final String userId = '';
-  const Introscreenmain({super.key});
+  final String userId;
+  final String username; // Add username as a required parameter
+  const Introscreenmain({
+    super.key,
+    required this.userId,
+    required this.username,
+
+
+  });
 
   @override
   State<Introscreenmain> createState() => _IntroscreenmainState();
@@ -39,7 +46,10 @@ class _IntroscreenmainState extends State<Introscreenmain> {
       // Navigate to the Login page once the last page is reached
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Homescreen(userId: widget.userId)), // Change to your login screen
+        MaterialPageRoute(builder: (context) => Homescreen(
+            userId: widget.userId,
+          username: widget.username,
+        )), // Change to your login screen
       );
     }
   }
@@ -47,7 +57,10 @@ class _IntroscreenmainState extends State<Introscreenmain> {
   void _goToPreviousPage() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => Homescreen(userId: widget.userId)), // Change to your login screen
+      MaterialPageRoute(builder: (context) => Homescreen(
+          userId: widget.userId,
+        username: widget.username,
+      )), // Change to your login screen
     );
   }
 

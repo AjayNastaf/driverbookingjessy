@@ -149,7 +149,10 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => Homescreen(userId: widget.userId)));
+                    builder: (context) => Homescreen(userId: widget.userId,
+                      username: widget.username,  // Add this line to pass username
+
+                    )));
 
             showSuccessSnackBar(context, 'Details updated');
           } else if (state is UpdateUserFailure) {

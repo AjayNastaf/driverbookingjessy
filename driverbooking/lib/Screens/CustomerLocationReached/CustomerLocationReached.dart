@@ -259,7 +259,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               ),
                               SizedBox(height: 32),
                               Text(
-                                ' ${globals.dropLocation}',
+                                ' ${globals.dropLocation}aa',
                                 style: TextStyle(color: Colors.grey.shade800, fontSize: 20.0),
                               ),
                             ],

@@ -30,7 +30,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('${AppConstants.baseUrl}/login'),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({'username': username, 'password': password}),
+      body: json.encode({'username': username, 'userpassword': password}),
     );
 
     // if (response.statusCode == 200) {
@@ -449,6 +449,76 @@ class ApiService {
       };
     }
   }
+
+
+
+
+  static Future<List<Map<String, dynamic>>> fetchTripSheet({
+    required String userId,
+    required String username,
+  }) async {
+    try {
+      // Print the inputs to ensure they are passed correctly
+      print('Fetching trip sheet for userId: $userId, username: $username');
+
+      final response = await http.get(
+        Uri.parse('${AppConstants.baseUrl}/tripsheet/$username'), // Pass username in the URL
+        headers: {
+          'userId': userId,
+        },
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Parse the response and return a list of maps
+        List<Map<String, dynamic>> trips = List<Map<String, dynamic>>.from(json.decode(response.body));
+        print('Fetched tripsheet data: $trips');
+        return trips;
+      } else {
+        throw Exception('Failed to fetch trip sheet: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error in fetchTripSheet: $e');
+      rethrow; // Re-throw the error to handle it in the calling function
+    }
+  }
+
+  // for booking details screen
+  static Future<List<Map<String, dynamic>>> fetchTripSheetBooking({
+    required String userId,
+    required String username,
+  }) async {
+    try {
+      // Print the inputs to ensure they are passed correctly
+      print('Fetching trip sheet for userId: $userId, username: $username');
+
+      final response = await http.get(
+        Uri.parse('${AppConstants.baseUrl}/tripsheet/$username'), // Pass username in the URL
+        headers: {
+          'userId': userId,
+        },
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Parse the response and return a list of maps
+        List<Map<String, dynamic>> trips = List<Map<String, dynamic>>.from(json.decode(response.body));
+        print('Fetched tripsheet data: $trips');
+        return trips;
+      } else {
+        throw Exception('Failed to fetch trip sheet: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error in fetchTripSheet: $e');
+      rethrow; // Re-throw the error to handle it in the calling function
+    }
+  }
+
+
 }
 
 

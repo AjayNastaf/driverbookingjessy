@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <application
         android:label="driverbooking"
         android:name="${applicationName}"
@@ -6,6 +8,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

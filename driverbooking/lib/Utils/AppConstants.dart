@@ -13,9 +13,9 @@ class AppConstants {  // only use asset
   static const String navigation = 'assets/image/navigation.png';
 
 
-  // static const String baseUrl = "http://192.168.0.109:8085";
-  // static const String baseUrl = "http://54.236.10.55:3000";
-  static const String baseUrl = "http://192.168.0.114:3000";
+  static const String baseUrl = "http://192.168.0.107:3000";
+  // static const String baseUrl = "https://jessycabs.com:7001";
+  // static const String baseUrl = "http://157.49.104.176:3000";
   static const Color primaryColor = Colors.blue;
   static const String ApiKey = "AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk";
   static const String mailerEmail = "ravi.vinoth997@gmail.com";

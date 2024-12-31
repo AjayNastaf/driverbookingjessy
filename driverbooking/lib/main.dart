@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
           'home':(context)=> const Home(),
             'login': (context) => const Login_Screen(),
             // 'login': (context) =>  Homescreen(userId: ''),
-            'intro_screen': (context) => const Introscreenmain(),
+            // 'intro_screen': (context) => const Introscreenmain(),
           },
 
 
