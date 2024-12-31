@@ -59,5 +59,17 @@ router.post("/register", async (req, res) => {
   });
 });
 
+router.get('/TemplateForDriverCreation', async (req, res) => {
+  const query = 'SELECT TemplateMessageData FROM TemplateMessage WHERE TemplateInfo = "DriverInfo"';
+  db.query(query, (err, results) => {
+      if (err) {
+          console.log('Database error:', err);
+          return res.status(500).json({ error: 'Failed to fetch data from MySQL' });
+      }
+      console.log('Database results:', results);
+      return res.status(200).json(results);
+  });
+});
+
 module.exports = router;
 

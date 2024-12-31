@@ -89,9 +89,9 @@ router.post('/uploadsdriverapp/:data', upload.single('file'), (req, res) => {
 // updating trip toll and parking
 router.post('/update_updatetrip', (req, res) => {
     const { toll, parking, tripid } = req.body;
-    const query = 'UPDATE tripsheet SET toll = ?, parking = ? WHERE tripid = ?';
+    const query = 'UPDATE tripsheet SET toll = ?, parking = ?,vendorparking = ?,vendortoll = ? WHERE tripid = ?';
 
-    db.query(query, [toll, parking, tripid], (err, results) => {
+    db.query(query, [toll, parking,toll, parking,tripid], (err, results) => {
         if (err) {
             res.status(500).json({ message: 'Internal server error' });
             return;

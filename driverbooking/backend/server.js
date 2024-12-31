@@ -360,7 +360,7 @@ app.post("/checkexistuser", (req, res) => {
 
 // new register change  db----------------------------------------------------------------
 app.post("/getUserDetails", (req, res) => {
-  const { id ,username} = req.body; // Expecting the email to be sent in the body
+  const { username} = req.body; // Expecting the email to be sent in the body
   // Check if the email exists in the database
   // const checkOtpSql = "SELECT * FROM register WHERE id = ?";
   const checkOtpSql = "SELECT * FROM drivercreation WHERE username = ?";

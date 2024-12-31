@@ -111,12 +111,12 @@ router.post('/api/saveSignature', (req, res) => {
             const uniquenumber=generateUniqueNumbers()
             const relativeImagePath = path.relative(baseImagePath, imagePath); // Calculate relative path
             const sql = 'INSERT INTO signatures (tripid, signature_path,unique_number) VALUES (?,?,?)';
-              const sql2=" UPDATE tripsheet set closedate=? , closetime = ? where  tripid = ?"
+              const sql2=" UPDATE tripsheet set closedate=? , closetime = ?,vendorshedInDate = ?, vendorshedintime = ? where  tripid = ?"
             db.query(sql, [tripid, relativeImagePath,uniquenumber], (dbError, results) => {
                 if (dbError) {
                     res.status(500).json({ error: 'Failed to save signature' });
                 } else {
-                    db.query(sql2, [endtrip,endtime,tripid], (dbError1, results1) => {
+                    db.query(sql2, [endtrip,endtime,endtrip,endtime,tripid], (dbError1, results1) => {
                         if (dbError1) {
                             res.status(500).json({ error: 'Failed to save signature' });
                         } else {
