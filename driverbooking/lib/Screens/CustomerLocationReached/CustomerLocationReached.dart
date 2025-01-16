@@ -12,7 +12,8 @@ import 'dart:convert';
 
 
 class Customerlocationreached extends StatefulWidget {
-  const Customerlocationreached({super.key});
+  final String tripId;
+  const Customerlocationreached({super.key, required this.tripId});
 
   @override
   State<Customerlocationreached> createState() => _CustomerlocationreachedState();
@@ -37,7 +38,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     super.initState();
     _initializeLocationTracking();
 
-    _getLatLngFromAddress(globals.dropLocation);
+    // _getLatLngFromAddress(globals.dropLocation);
   }
 
   Future<void> _getLatLngFromAddress(String dropLocation) async {
@@ -92,9 +93,16 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   void _updateCurrentLocation(LocationData locationData) {
     if (locationData.latitude != null && locationData.longitude != null) {
       final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
-      setState(() {
-        _currentLatLng = newLatLng;
-      });
+
+      if (mounted) {
+        setState(() {
+          _currentLatLng = newLatLng;
+        });
+      }
+
+      // setState(() {
+      //   _currentLatLng = newLatLng;
+      // });
 
       _fetchRoute();
       _updateCameraPosition();
@@ -176,6 +184,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
   @override
   Widget build(BuildContext context) {
+    String dropLocation = globals.dropLocation; // Access the global variable
+
     return Scaffold (
       appBar: AppBar(
         title: Text("Trip Started"),
@@ -259,7 +269,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               ),
                               SizedBox(height: 32),
                               Text(
-                                ' ${globals.dropLocation}aa',
+                                // ' ${globals.dropLocation}',
+    '$dropLocation',
                                 style: TextStyle(color: Colors.grey.shade800, fontSize: 20.0),
                               ),
                             ],
@@ -273,7 +284,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                       child: ElevatedButton(
                         onPressed: () {
                           // Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,

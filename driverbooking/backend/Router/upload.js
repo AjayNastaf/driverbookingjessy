@@ -39,6 +39,8 @@ const storage = multer.diskStorage({
   })
 const upload = multer({ storage: storage });
 
+
+
 //file upload in tripsheet
 
 // jesscabs app stored image from jesscabs------------------------------------------------
@@ -59,20 +61,19 @@ router.post('/uploadfolrderapp/:data', upload.single('image'), (req, res) => {
 
 router.post('/uploadsdriverapp/:data', upload.single('file'), (req, res) => {
     const selecteTripid = req.body.tripid;
-    console.log(req.params.data,"daa")
+    console.log(req.params.data,"daaaa");
     const documenttypedata=req.body.documenttype
     // const data=req.body.datadate;
+    console.log(req.file,"fff")
     const fileData = {
         name: req.file.originalname,
         mimetype: req.file.mimetype,
         size: req.file.size,
         path: req.file.path.replace(/\\/g, '/').replace(/^uploads\//, ''),
-        // path: req.file.path.replace(/\\/g, '/').replace(/^path_to_save_uploads\//, ''),
-        // tripid: req.body.tripid,
-        
         tripid: selecteTripid,
         documenttype:documenttypedata
     };
+
     console.log(req.file,"dadadate233233")
     console.log(documenttypedata,"dooocccc")
     console.log(fileData,selecteTripid,"data")
@@ -100,5 +101,8 @@ router.post('/update_updatetrip', (req, res) => {
     });
 });
 //end
+
+
+
 
 module.exports = router;

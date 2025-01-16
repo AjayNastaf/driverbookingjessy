@@ -9,7 +9,8 @@ import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:driverbooking/Screens/BookingDetails/BookingDetails.dart';
 class Pickupscreen extends StatefulWidget {
   final String address;
-  const Pickupscreen({Key?key, required this.address}):super(key: key);
+  final String tripId;
+  const Pickupscreen({Key?key, required this.address, required this.tripId}):super(key: key);
 
   @override
   State<Pickupscreen> createState() => _PickupscreenState();
@@ -161,7 +162,7 @@ class _PickupscreenState extends State<Pickupscreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         // Add your button action here
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => TrackingPage(address: widget.address)));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => TrackingPage(address: widget.address, tripId: widget.tripId,)));
                       },
                       child: Text(
                         'Go to the Location',

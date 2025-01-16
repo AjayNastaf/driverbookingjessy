@@ -9,7 +9,8 @@ import 'dart:convert';
 
 
 class TripDetailsPreview extends StatefulWidget {
-  const TripDetailsPreview({super.key});
+  final String tripId;
+  const TripDetailsPreview({super.key, required this.tripId});
 
   @override
   State<TripDetailsPreview> createState() => _TripDetailsPreviewState();
@@ -135,158 +136,14 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
       ),
       body:
 
-      // SingleChildScrollView(
-      //   child: Padding(
-      //     padding: const EdgeInsets.all(16.0),
-      //     child: Column(
-      //       children: [
-      //         // Trip ID
-      //         TextField(
-      //           controller: tripIdController,
-      //           enabled: false,
-      //           decoration: const InputDecoration(
-      //             labelText: "Trip ID",
-      //             border: OutlineInputBorder(),
-      //           ),
-      //         ),
-      //         const SizedBox(height: 16),
-      //
-      //         // Guest Name
-      //         TextField(
-      //           controller: guestNameController,
-      //           enabled: false,
-      //           decoration: const InputDecoration(
-      //             labelText: "Guest Name",
-      //             border: OutlineInputBorder(),
-      //           ),
-      //         ),
-      //         const SizedBox(height: 16),
-      //
-      //         // Guest Mobile Number
-      //         TextField(
-      //           controller: guestMobileController,
-      //           enabled: false,
-      //           decoration: const InputDecoration(
-      //             labelText: "Guest Mobile Number",
-      //             border: OutlineInputBorder(),
-      //           ),
-      //         ),
-      //         const SizedBox(height: 16),
-      //
-      //         // Vehicle Type
-      //         TextField(
-      //           controller: vehicleTypeController,
-      //           enabled: false,
-      //           decoration: const InputDecoration(
-      //             labelText: "Vehicle Type",
-      //             border: OutlineInputBorder(),
-      //           ),
-      //         ),
-      //         const SizedBox(height: 16),
-      //
-      //         // Starting Date
-      //         TextField(
-      //           readOnly: true,
-      //           enabled: false,
-      //           decoration: InputDecoration(
-      //             hintText: startingDate == null
-      //                 ? "Select Starting Date"
-      //                 : "${startingDate!.toLocal()}".split(' ')[0],
-      //             border: const OutlineInputBorder(),
-      //           ),
-      //         ),
-      //         const SizedBox(height: 16),
-      //
-      //         // Closing Date
-      //         TextField(
-      //           readOnly: true,
-      //           enabled: false,
-      //           decoration: InputDecoration(
-      //             hintText: closingDate == null
-      //                 ? "Select Closing Date"
-      //                 : "${closingDate!.toLocal()}".split(' ')[0],
-      //             border: const OutlineInputBorder(),
-      //           ),
-      //         ),
-      //         const SizedBox(height: 16),
-      //
-      //         // Starting Kilometer
-      //
-      //             TextField(
-      //                 readOnly: true,
-      //                 enabled: false,
-      //                 controller: startKmController,
-      //                 // enabled: isStartKmEnabled,
-      //                 decoration: const InputDecoration(
-      //                   labelText: "Starting Kilometer",
-      //                   border: OutlineInputBorder(),
-      //                 ),
-      //               ),
-      //         Image.asset(
-      //           AppConstants.intro_one, // Replace with your image path
-      //           height: 100, // Set the desired height
-      //           width: 100, // Set the desired width
-      //           fit: BoxFit.cover, // Adjust the image's box fit
-      //         ),
-      //
-      //
-      //         const SizedBox(height: 16),
-      //
-      //         // Closing Kilometer
-      //       TextField(
-      //                 controller: closeKmController,
-      //                 // enabled: isCloseKmEnabled,
-      //                   readOnly: true,
-      //                   enabled: false,
-      //                 decoration: const InputDecoration(
-      //                   labelText: "Closing Kilometer",
-      //                   border: OutlineInputBorder(),
-      //                 ),
-      //               ),
-      //               Image.asset(
-      //                 AppConstants.intro_one, // Replace with your image path
-      //                 height: 100, // Set the desired height
-      //                 width: 100, // Set the desired width
-      //                 fit: BoxFit.cover, // Adjust the image's box fit
-      //               ),
-      //
-      //         Padding(
-      //           padding: const EdgeInsets.only(top: 16.0),
-      //           child: SizedBox(
-      //             width: double.infinity,
-      //             child: ElevatedButton(
-      //               style: ElevatedButton.styleFrom(
-      //                 backgroundColor: Colors.green,
-      //                 shape: RoundedRectangleBorder(
-      //                   borderRadius: BorderRadius.circular(8),
-      //                 ),
-      //                 padding: const EdgeInsets.symmetric(vertical: 16),
-      //               ),
-      //               onPressed: () {
-      //                 // Add your logic for toll and parking upload
-      //                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload()));
-      //                 // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
-      //               },
-      //               child: const Text(
-      //                 "Upload Toll and Prking",
-      //                 style: TextStyle(fontSize: 16, color: Colors.white),
-      //               ),
-      //             ),
-      //           ),
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
-
-
       SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Trip ID (disabled)
+              // Trip ID
               TextField(
+                controller: tripIdController,
                 enabled: false,
                 decoration: const InputDecoration(
                   labelText: "Trip ID",
@@ -295,40 +152,9 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
               ),
               const SizedBox(height: 16),
 
-              // Starting Image
-              startingImageUrl == null
-                  ? const CircularProgressIndicator()  // Show a loading spinner if the image is not loaded yet
-                  :
-              Image.network(
-                startingImageUrl ?? '', // Full URL from the API
-                height: 100,
-                width: 100,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Text("Failed to load image");
-                },
-              ),
-              // Display the URL for debugging
-              Text(startingImageUrl ?? 'URL not available'),
-              const SizedBox(height: 16),
-
-              // Closing Image
-              endingImageUrl == null
-                  ? const CircularProgressIndicator()  // Show a loading spinner if the image is not loaded yet
-                  :
-              Image.network(
-                '$endingImageUrl', // Image path fetched from API
-                height: 100,
-                width: 100,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Text("Failed to load image");
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Other Fields (Guest Name, Vehicle Type, etc.)
+              // Guest Name
               TextField(
+                controller: guestNameController,
                 enabled: false,
                 decoration: const InputDecoration(
                   labelText: "Guest Name",
@@ -337,11 +163,186 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
               ),
               const SizedBox(height: 16),
 
-              // You can add other fields here...
+              // Guest Mobile Number
+              TextField(
+                controller: guestMobileController,
+                enabled: false,
+                decoration: const InputDecoration(
+                  labelText: "Guest Mobile Number",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Vehicle Type
+              TextField(
+                controller: vehicleTypeController,
+                enabled: false,
+                decoration: const InputDecoration(
+                  labelText: "Vehicle Type",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Starting Date
+              TextField(
+                readOnly: true,
+                enabled: false,
+                decoration: InputDecoration(
+                  hintText: startingDate == null
+                      ? "Select Starting Date"
+                      : "${startingDate!.toLocal()}".split(' ')[0],
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Closing Date
+              TextField(
+                readOnly: true,
+                enabled: false,
+                decoration: InputDecoration(
+                  hintText: closingDate == null
+                      ? "Select Closing Date"
+                      : "${closingDate!.toLocal()}".split(' ')[0],
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Starting Kilometer
+
+                  TextField(
+                      readOnly: true,
+                      enabled: false,
+                      controller: startKmController,
+                      // enabled: isStartKmEnabled,
+                      decoration: const InputDecoration(
+                        labelText: "Starting Kilometer",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+              Image.asset(
+                AppConstants.intro_one, // Replace with your image path
+                height: 100, // Set the desired height
+                width: 100, // Set the desired width
+                fit: BoxFit.cover, // Adjust the image's box fit
+              ),
+
+
+              const SizedBox(height: 16),
+
+              // Closing Kilometer
+            TextField(
+                      controller: closeKmController,
+                      // enabled: isCloseKmEnabled,
+                        readOnly: true,
+                        enabled: false,
+                      decoration: const InputDecoration(
+                        labelText: "Closing Kilometer",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    Image.asset(
+                      AppConstants.intro_one, // Replace with your image path
+                      height: 100, // Set the desired height
+                      width: 100, // Set the desired width
+                      fit: BoxFit.cover, // Adjust the image's box fit
+                    ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    onPressed: () {
+                      // Add your logic for toll and parking upload
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload(tripId:widget.tripId ,)));
+                      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+                    },
+                    child: const Text(
+                      "Upload Toll and Parking",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ),
+
+
+      // SingleChildScrollView(
+      //   child: Padding(
+      //     padding: const EdgeInsets.all(16.0),
+      //     child: Column(
+      //       children: [
+      //         // Trip ID (disabled)
+      //         TextField(
+      //           enabled: false,
+      //           decoration: const InputDecoration(
+      //             labelText: "Trip ID",
+      //             border: OutlineInputBorder(),
+      //           ),
+      //         ),
+      //         const SizedBox(height: 16),
+      //
+      //         // Starting Image
+      //         startingImageUrl == null
+      //             ? const CircularProgressIndicator()  // Show a loading spinner if the image is not loaded yet
+      //             :
+      //         Image.network(
+      //           startingImageUrl ?? '', // Full URL from the API
+      //           height: 100,
+      //           width: 100,
+      //           fit: BoxFit.cover,
+      //           errorBuilder: (context, error, stackTrace) {
+      //             return const Text("Failed to load image");
+      //           },
+      //         ),
+      //         // Display the URL for debugging
+      //         Text(startingImageUrl ?? 'URL not available'),
+      //         const SizedBox(height: 16),
+      //
+      //         // Closing Image
+      //         endingImageUrl == null
+      //             ? const CircularProgressIndicator()  // Show a loading spinner if the image is not loaded yet
+      //             :
+      //         Image.network(
+      //           '$endingImageUrl', // Image path fetched from API
+      //           height: 100,
+      //           width: 100,
+      //           fit: BoxFit.cover,
+      //           errorBuilder: (context, error, stackTrace) {
+      //             return const Text("Failed to load image");
+      //           },
+      //         ),
+      //         const SizedBox(height: 16),
+      //
+      //         // Other Fields (Guest Name, Vehicle Type, etc.)
+      //         TextField(
+      //           enabled: false,
+      //           decoration: const InputDecoration(
+      //             labelText: "Guest Name",
+      //             border: OutlineInputBorder(),
+      //           ),
+      //         ),
+      //         const SizedBox(height: 16),
+      //
+      //         // You can add other fields here...
+      //       ],
+      //     ),
+      //   ),
+      // ),
 
     );
   }

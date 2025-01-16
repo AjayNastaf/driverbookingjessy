@@ -562,13 +562,16 @@ class _HomescreenState extends State<Homescreen> {
                         buildSection(
                           context,
                           title: '${trip['duty']}',
-                          dateTime: ' ${trip['tripsheetdate']}',
+                          dateTime: ' ${trip['tripid']}',
                           buttonText: '${trip['apps']}',
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => Bookingdetails(username: widget.username, userId: widget.userId,)),
+                                  builder: (context) => Bookingdetails(username: widget.username, userId: widget.userId,
+                                    tripId: trip['tripid'].toString(), // Convert tripid to a String
+                                    duty: trip['duty'].toString(), // Convert tripid to a String
+                                  )),
                             );
                           },
                         ),

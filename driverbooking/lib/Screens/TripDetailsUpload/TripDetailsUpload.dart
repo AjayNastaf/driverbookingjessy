@@ -124,7 +124,7 @@
 
 import 'dart:io';
 import 'package:driverbooking/Utils/AllImports.dart';
-import 'package:driverbooking/Networks/api_service.dart';
+import 'package:driverbooking/Networks/Api_Service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:driverbooking/Screens/SignatureEndRide/SignatureEndRide.dart';
@@ -133,7 +133,8 @@ import 'dart:convert';
 
 
 class TripDetailsUpload extends StatefulWidget {
-  const TripDetailsUpload({Key? key}) : super(key: key);
+  final String tripId;
+  const TripDetailsUpload({Key? key, required this.tripId}) : super(key: key);
 
   @override
   State<TripDetailsUpload> createState() => _TripDetailsUploadState();
@@ -227,7 +228,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         SnackBar(content: Text(" Message: ${result['message']}")),
       );
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId,)));
 
       // Clear selected images
       setState(() {
@@ -240,6 +241,40 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       );
     }
   }
+
+  Future<void> _handleStartingKmSubmit() async {
+    // Call the API to upload the Toll file
+    bool result = await ApiService.uploadstartingkm(
+      tripid: widget.tripId, // Replace with actual trip ID
+      documenttype: 'StartingKm',
+      startingkilometer: _selectedImage1!,
+    );
+
+  }
+
+  Future<void> _handleClosingKmSubmit() async {
+    // Call the API to upload the Toll file
+    bool result = await ApiService.uploadClosingkm(
+      tripid: widget.tripId, // Replace with actual trip ID
+      documenttype: 'ClosingKm',
+      closingkilometer: _selectedImage2!,
+    );
+
+  }
+
+  Future<void> _handleSubmitStartClose() async {
+    bool result = await ApiService.updateTripDetailsStartandClosekm(
+      tripid: widget.tripId, // Pass the trip ID
+      startingkm: startKmController.text,
+      closigkm: closeKmController.text,
+    );
+
+    _handleStartingKmSubmit();
+    _handleClosingKmSubmit();
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId,)));
+
+  }
+
 
 
 
@@ -404,26 +439,92 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                 padding: const EdgeInsets.only(top: 16.0),
                 child: SizedBox(
                   width: double.infinity,
+                  // child:ElevatedButton(
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.green,
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(8),
+                  //     ),
+                  //     padding: const EdgeInsets.symmetric(vertical: 16),
+                  //   ),
+                  //   onPressed: ()  {
+                  //
+                  //     // Add your logic for toll and parking upload
+                  //     // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload()));
+                  //
+                  //     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId,)));
+                  //   },
+                  //   // onPressed: _uploadImage,
+                  //
+                  //   child: const Text(
+                  //     "Upload Signature",
+                  //     style: TextStyle(fontSize: 16, color: Colors.white),
+                  //   ),
+                  // ),
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    // onPressed: () {
-                    //   // Add your logic for toll and parking upload
-                    //   // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload()));
-                    //
-                    //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
-                    // },
-                    onPressed: _uploadImage,
+                    onPressed: () async {
+                      // Validate the Starting Kilometer and Closing Kilometer fields and images
+                      if (startKmController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please enter the Starting Kilometer")),
+                        );
+                        return;
+                      }
 
-                    child: const Text(
-                      "Upload Signature",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                      if (_selectedImage1 == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please upload an image for Starting Kilometer")),
+                        );
+                        return;
+                      }
+
+                      if (closeKmController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please enter the Closing Kilometer")),
+                        );
+                        return;
+                      }
+
+                      if (_selectedImage2 == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Please upload an image for Closing Kilometer")),
+                        );
+                        return;
+                      }
+
+
+                      final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+                      final String signTime = TimeOfDay.now().format(context); // Current time
+
+                      try {
+                        await ApiService.sendSignatureDetails(
+                          tripId: widget.tripId,
+                          dateSignature: dateSignature,
+                          signTime: signTime,
+                          status: "Accept",
+                        );
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Data uploaded successfully")),
+                        );
+
+
+
+                        bool result = await ApiService.uploadstartingkm(
+                          tripid: widget.tripId, // Replace with actual trip ID
+                          documenttype: 'StartingKm',
+                          startingkilometer: _selectedImage1!,
+                        );
+                        _handleSubmitStartClose();
+
+
+                      } catch (error) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Error uploading data: $error")),
+                        );
+                      }
+                    },
+                    child: Text("Upload Toll and Parking Data"),
                   ),
                 ),
               ),

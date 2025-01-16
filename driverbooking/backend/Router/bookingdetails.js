@@ -5,7 +5,6 @@ const db = require('../db');
 //get duty type based on login driver name when the apps waiting
 router.get('/tripsheet/:username', async (req, res) => {
   const username = req.params.username;
-
   try {
     const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "waiting"';
     db.query(query, [username], (err, results) => {
@@ -21,31 +20,38 @@ router.get('/tripsheet/:username', async (req, res) => {
   }
 });
 //end
-//get duty type details based on login duty type and tripid
-router.get('/tripsheet/:tripid/:duty', async (req, res) => {
-  const { tripid, duty } = req.params;
-  console.log(tripid,duty,"ffff")
+router.get('/tripsheets/:duty/:tripId', async (req, res) => {
+  const { tripId, duty } = req.params;
+  console.log('Received request with tripId:', tripId, 'and duty:', duty);  // Should log the request parameters
 
   try {
     const query = 'SELECT * FROM tripsheet WHERE tripid = ? AND duty = ?';
-    db.query(query, [tripid, duty], (err, results) => {
+    console.log('Executing query:', query, 'with values:', [tripId, duty]);
+
+    db.query(query, [tripId, duty], (err, results) => {
       if (err) {
+        console.log('Database query error:', err);
         res.status(500).json({ message: 'Internal server error' });
         return;
       }
 
-      // Check if trip sheet data was found
+      console.log('Query results:', results); // Should log the query results
       if (results.length === 0) {
+        console.log('No trip sheet found for tripId:', tripId, 'and duty:', duty);
         res.status(404).json({ message: 'Trip sheet not found' });
         return;
       }
 
-      res.status(200).json(results[0]); // Assuming you want to send the first result
+      console.log('Found trip sheet data:', results[0]);  // Should log the found trip sheet data
+      res.status(200).json(results[0]);  // Send the first result
     });
   } catch (err) {
+    console.log('Unexpected error:', err);  // Log unexpected errors
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+
 //end
 // updating trip app status
 router.post('/update_trip_apps', (req, res) => {
@@ -67,5 +73,6 @@ router.post('/update_trip_apps', (req, res) => {
   });
 });
 //end
+
 
 module.exports = router;

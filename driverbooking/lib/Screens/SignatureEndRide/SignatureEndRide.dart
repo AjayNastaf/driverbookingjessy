@@ -5,9 +5,13 @@ import 'package:driverbooking/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:signature/signature.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:driverbooking/Networks/Api_Service.dart';
+import 'dart:convert'; // Add this import at the top of your file
+
 
 class Signatureendride extends StatefulWidget {
-  const Signatureendride({super.key});
+  final String tripId; // Accept tripid here
+  const Signatureendride({super.key,required this.tripId});
 
   @override
   State<Signatureendride> createState() => _SignatureendrideState();
@@ -20,6 +24,37 @@ class _SignatureendrideState extends State<Signatureendride> {
     penStrokeWidth: 3,
   );
 
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Trigger API call when drawing ends
+    _signatureController.onDrawEnd = () async {
+      if (_signatureController.isNotEmpty) {
+        final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+        final String signTime = TimeOfDay.now().format(context);
+
+        try {
+          await ApiService.sendSignatureDetails(
+            tripId: widget.tripId,
+            dateSignature: dateSignature,
+            signTime: signTime,
+            status: "onGoing",
+          );
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Signature data uploaded successfully")),
+          );
+        } catch (error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error uploading signature data: $error")),
+          );
+        }
+      }
+    };
+  }
+
   @override
   void dispose() {
     _signatureController.dispose();
@@ -30,25 +65,84 @@ class _SignatureendrideState extends State<Signatureendride> {
     _signatureController.clear();
   }
 
+  // void _handleSubmit() async {
+  //   if (_signatureController.isNotEmpty) {
+  //     final signature = await _signatureController.toPngBytes();
+  //     if (signature != null) {
+  //       // Do something with the signature (e.g., upload or save locally)
+  //       // ScaffoldMessenger.of(context).showSnackBar(
+  //       //   SnackBar(content: Text("Signature saved successfully!")),
+  //       // );
+  //       // Navigator.push(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "12")));
+  //       showSuccessSnackBar(context, "Signature saved successfully!");
+  //       _handleSubmitModal();
+  //     }
+  //   } else {
+  //     // ScaffoldMessenger.of(context).showSnackBar(
+  //     //   SnackBar(content: Text("Please provide a signature.")),
+  //     // );
+  //     showFailureSnackBar(context, "Please provide a signature.");
+  //   }
+  // }
+
   void _handleSubmit() async {
+    //first api for signature image upload
+    final tripId = widget.tripId; // Retrieve the trip ID from your state or context
     if (_signatureController.isNotEmpty) {
       final signature = await _signatureController.toPngBytes();
       if (signature != null) {
-        // Do something with the signature (e.g., upload or save locally)
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text("Signature saved successfully!")),
-        // );
-        // Navigator.push(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "12")));
-        showSuccessSnackBar(context, "Signature saved successfully!");
-        _handleSubmitModal();
+        String base64Signature = 'data:image/png;base64,' + base64Encode(signature);
+
+        final DateTime now = DateTime.now();
+        final String endtrip = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+        final String endtime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
+        try {
+          await ApiService.saveSignature(
+            tripId: tripId,
+            signatureData: base64Signature,
+            imageName: 'signature-${now.millisecondsSinceEpoch}.png',
+            endtrip: endtrip,
+            endtime: endtime,
+          );
+//first api compled
+
+          //second api for inserting the values in signature times table
+          final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+          final String signTime = TimeOfDay.now().format(context);
+          // Second API call to upload signature details (datesignature, signtime, status = 'Updated')
+          await ApiService.sendSignatureDetailsUpdated(
+            tripId: tripId,
+            dateSignature: dateSignature,
+            signTime: signTime,
+            status: "Updated", // Status set to "Updated"
+          );
+          // /second api compled
+
+          // third api for updated closed in trip sheet
+          await ApiService.updateTripStatusCompleted(
+            tripId: tripId,
+            apps: "Closed", // Set apps status to "Closed"
+          );
+          //third api completed
+
+
+          showSuccessSnackBar(context, "Signature and ride data uploaded successfully!");
+
+          // showSuccessSnackBar(context, "Signature saved successfully!");
+          _handleSubmitModal();
+          _handleClear();
+        } catch (e) {
+          showFailureSnackBar(context, "Failed to save signature. Error: $e");
+        }
       }
     } else {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text("Please provide a signature.")),
-      // );
       showFailureSnackBar(context, "Please provide a signature.");
     }
+
+
   }
+
 
   void _handleSubmitModal() {
     // Show the popup dialog
@@ -80,7 +174,7 @@ class _SignatureendrideState extends State<Signatureendride> {
             ElevatedButton(
               onPressed: () {
                 // _handleUpload();
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
                 // Navigator.of(context).pop(); // Close the dialog
               },
               style: ElevatedButton.styleFrom(

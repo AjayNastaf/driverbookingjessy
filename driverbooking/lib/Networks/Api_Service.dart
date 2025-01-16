@@ -7,6 +7,7 @@ import '../Utils/AppConstants.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'dart:io'; // Add this for File class
+import 'package:intl/intl.dart';  // Add this to format the date
 
 
 
@@ -485,38 +486,502 @@ class ApiService {
     }
   }
 
-  // for booking details screen
-  static Future<List<Map<String, dynamic>>> fetchTripSheetBooking({
+
+
+
+  static Future<List<Map<String, dynamic>>> fetchTripSheetbytripid({
     required String userId,
     required String username,
+    required String tripId,
+    required String duty,
   }) async {
     try {
-      // Print the inputs to ensure they are passed correctly
-      print('Fetching trip sheet for userId: $userId, username: $username');
-
+      final url = '${AppConstants.baseUrl}/tripsheets/$duty/$tripId';
       final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/tripsheet/$username'), // Pass username in the URL
+        Uri.parse(url),
         headers: {
           'userId': userId,
         },
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      // Log the full response body for debugging
+      print("API Response: ${response.body}");
 
       if (response.statusCode == 200) {
-        // Parse the response and return a list of maps
-        List<Map<String, dynamic>> trips = List<Map<String, dynamic>>.from(json.decode(response.body));
-        print('Fetched tripsheet data: $trips');
-        return trips;
+        final responseData = json.decode(response.body);
+
+        // Handle the case where the response is a list of maps or a single map
+        if (responseData is List) {
+          return responseData
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList();  // Explicitly cast each item to Map<String, dynamic>
+        } else if (responseData is Map) {
+          return [Map<String, dynamic>.from(responseData)]; // Wrap the map in a list
+        } else {
+          throw Exception('Unexpected response format');
+        }
       } else {
         throw Exception('Failed to fetch trip sheet: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error in fetchTripSheet: $e');
-      rethrow; // Re-throw the error to handle it in the calling function
+      print('Error fetching trip sheet by tripid: $e');
+      rethrow;
     }
   }
+
+
+
+
+
+  static Future<void> updateTripStatus({required String tripId, required String status}) async {
+    final String url = '${AppConstants.baseUrl}/update_trip_apps';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'tripid': tripId,
+          'apps': status,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print('API Response: ${responseData['message']}');
+      } else {
+        print('Failed to update trip status. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error updating trip status: $error');
+    }
+  }
+
+
+  static Future<http.Response> updateTripStatusStartRide(String tripId, String status) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/update_trip_apps'); // Replace with your actual endpoint
+
+    final body = jsonEncode({
+      'tripid': tripId,
+      'apps': status,
+    }); // Encode the body as a JSON string
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json', // Ensure the content type is JSON
+        },
+        body: body, // Pass the encoded body
+      );
+
+      return response;
+    } catch (e) {
+      throw Exception('Failed to send request: $e');
+    }
+  }
+
+
+  static Future<http.Response> updateTripStatusCompleted( {required String tripId, required String apps}) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/update_trip_apps'); // Replace with your actual endpoint
+
+    final body = jsonEncode({
+      'tripid': tripId,
+      'apps': 'Closed',
+    }); // Encode the body as a JSON string
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json', // Ensure the content type is JSON
+        },
+        body: body, // Pass the encoded body
+      );
+
+      return response;
+    } catch (e) {
+      throw Exception('Failed to send request: $e');
+    }
+  }
+
+
+
+  static Future<void> saveSignature({
+    required String tripId,
+    required String signatureData,
+    required String imageName,
+    required String endtrip,
+    required String endtime,
+  }) async {
+    final Uri url = Uri.parse('${AppConstants.baseUrl}/api/saveSignature');  // Update the endpoint URL
+
+    try {
+      // Prepare the data to send in the request
+      final Map<String, dynamic> requestBody = {
+        'tripid': tripId,
+        'signatureData': signatureData,
+        'imageName': imageName,
+        'endtrip': endtrip,
+        'endtime': endtime,
+      };
+
+      // Convert the body to JSON
+      final String body = json.encode(requestBody);
+
+      // Send POST request to save signature
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      );
+
+      // Handle the response
+      print('Response status code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        print("Successsss: ${data['message']}");
+      } else {
+        final Map<String, dynamic> errorData = json.decode(response.body);
+        print("Error: ${errorData['error']}");
+        print("Response body: ${response.body}");  // Add this line to log the full response body
+      }
+    } catch (e) {
+      print("Error occurred: $e");
+    }
+  }
+
+
+
+  static Future<void> sendSignatureDetails({
+    required String tripId,
+    required String dateSignature,
+    required String signTime,
+    String status = 'Accept',
+  }) async {
+    final String apiUrl = '${AppConstants.baseUrl}/signaturedatatimesdriverapp/$tripId';
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'status': status,
+          'datesignature': dateSignature,
+          'signtime': signTime,
+          'tripId':tripId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Data uploaded successfully");
+      } else {
+        throw Exception("Failed to upload data: ${response.body}");
+      }
+    } catch (error) {
+      throw Exception("Error uploading data: $error");
+    }
+  }
+
+
+  static Future<void> sendSignatureDetailsOnGoing({
+    required String tripId,
+    required String dateSignature,
+    required String signTime,
+    String status = 'onGoing',
+  }) async {
+    final String apiUrl = '${AppConstants.baseUrl}/signaturedatatimesdriverapp/$tripId';
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'status': status,
+          'datesignature': dateSignature,
+          'signtime': signTime,
+          'tripId':tripId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Data uploaded successfullyyyyyyyyyy");
+      } else {
+        throw Exception("Failed to upload data: ${response.body}");
+      }
+    } catch (error) {
+      throw Exception("Error uploading data: $error");
+    }
+  }
+
+
+  static Future<void> sendSignatureDetailsUpdated({
+    required String tripId,
+    required String dateSignature,
+    required String signTime,
+    required String status,
+  }) async {
+    final String apiUrl = '${AppConstants.baseUrl}/signaturedatatimesdriverapp/$tripId';
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'status': status,
+          'datesignature': dateSignature,
+          'signtime': signTime,
+          'tripId':tripId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("Data uploaded successfullyyyyyyyyyy");
+      } else {
+        throw Exception("Failed to upload data: ${response.body}");
+      }
+    } catch (error) {
+      throw Exception("Error uploading data: $error");
+    }
+  }
+
+
+
+
+
+
+  //for parking file upload
+  static Future<bool> uploadTollFile({
+    required String tripid,
+    required String documenttype,
+    required File tollFile,
+  }) async {
+    try {
+      // Generate the unique filename based on the current date
+      // String formattedDate = DateFormat('yyyyMMdd_HHmmssSSSZ').format(DateTime.now());
+      String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+      // String fileName = 'file_$formattedDate.jpg';
+
+      var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields['tripid'] = tripid;
+      request.fields['documenttype'] = documenttype;
+
+      // Upload the file with the unique name
+      request.files.add(await http.MultipartFile.fromPath('file', tollFile.path,
+          // filename: fileName
+      ));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("Error during upload: $e");
+      return false;
+    }
+  }
+
+  static Future<bool> uploadParkingFile({
+    required String tripid,
+    required String documenttype,
+    required File parkingFile,
+  }) async {
+    try {
+      // Generate the unique filename based on the current date
+      // String formattedDate = DateFormat('yyyyMMdd_HHmmssSSSZ').format(DateTime.now());
+      String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
+      // String fileName = 'file_$formattedDate.jpg';
+
+      var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields['tripid'] = tripid;
+      request.fields['documenttype'] = documenttype;
+
+      // Upload the file with the unique name
+      request.files.add(await http.MultipartFile.fromPath('file', parkingFile.path,
+        // filename: fileName
+      ));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("Error during upload: $e");
+      return false;
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+  static Future<bool> updateTripDetailsTollParking({
+    required String tripid,
+    required String toll,
+    required String parking,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/update_updatetrip');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'tripid': tripid,
+          'toll': toll,
+          'parking': parking,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Trip details updated successfully!');
+        return true;
+      } else {
+        print('Failed to update trip details: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error updating trip details: $e');
+      return false;
+    }
+  }
+
+
+
+  //for starting kilometer file upload
+  static Future<bool> uploadstartingkm({
+    required String tripid,
+    required String documenttype,
+    required File startingkilometer,
+  }) async {
+    try {
+      // Generate the unique filename based on the current date
+      String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+
+      var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields['tripid'] = tripid;
+      request.fields['documenttype'] = documenttype;
+
+      // Upload the file with the unique name
+      request.files.add(await http.MultipartFile.fromPath('file', startingkilometer.path,
+        // filename: fileName
+      ));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("Error during upload: $e");
+      return false;
+    }
+  }
+
+
+
+  //for closing kilometer file upload
+  static Future<bool> uploadClosingkm({
+    required String tripid,
+    required String documenttype,
+    required File closingkilometer,
+  }) async {
+    try {
+      // Generate the unique filename based on the current date
+      String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+
+      var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+      var request = http.MultipartRequest('POST', uri);
+
+      request.fields['tripid'] = tripid;
+      request.fields['documenttype'] = documenttype;
+
+      // Upload the file with the unique name
+      request.files.add(await http.MultipartFile.fromPath('file', closingkilometer.path,
+        // filename: fileName
+      ));
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print("Failed to upload file: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("Error during upload: $e");
+      return false;
+    }
+  }
+
+
+//starting and closing km update text
+  static Future<bool> updateTripDetailsStartandClosekm({
+    required String tripid,
+    required String startingkm,
+    required String closigkm,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/update_updatetrip');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'tripid': tripid,
+          'StartingKm': startingkm,
+          'ClosingKm': closigkm,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Trip details updated successfully!');
+        return true;
+      } else {
+        print('Failed to update trip details: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error updating trip details: $e');
+      return false;
+    }
+  }
+
+
 
 
 }

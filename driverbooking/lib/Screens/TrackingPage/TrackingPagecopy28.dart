@@ -1127,12 +1127,12 @@ class _TrackingPageState extends State<TrackingPage> {
             if (state is OtpVerifyCompleted) {
               showSuccessSnackBar(context, "OTP Verified Successfully!");
             } else if (state is OtpVerifyFailed) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Customerlocationreached(),
-                ),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => Customerlocationreached(),
+              //   ),
+              // );
               showFailureSnackBar(context, '${state.error}');
               _clearOtpInputs();
             }
@@ -1210,13 +1210,13 @@ class _TrackingPageState extends State<TrackingPage> {
                                 onPressed: () {
                                   if (isOtpVerified) {
                                     _clearOtpInputs();
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            Customerlocationreached(),
-                                      ),
-                                    );
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) =>
+                                    //         Customerlocationreached(),
+                                    //   ),
+                                    // );
                                   } else {
                                     final String otp = _otpControllers
                                         .map((controller) => controller.text)

@@ -44,18 +44,18 @@ router.post('/update_starttrip_apps', (req, res) => {
 //end
 
 // updating trip toll and parking
-router.post('/update_updatekm', (req, res) => {
-  const { starttime, startdate, startkm, tripid } = req.body;
-  const query = 'UPDATE tripsheet SET starttime = ?, startdate = ?, startkm = ? WHERE tripid = ?';
-
-  db.query(query, [starttime, startdate, startkm, tripid], (err, results) => {
-    if (err) {
-      res.status(500).json({ message: 'Internal server error' });
-      return;
-    }
-    res.status(200).json({ message: 'Status updated successfully' });
-  });
-});
+//router.post('/update_updatekm', (req, res) => {
+//  const { starttime, startdate, startkm, tripid } = req.body;
+//  const query = 'UPDATE tripsheet SET starttime = ?, startdate = ?, startkm = ? WHERE tripid = ?';
+//
+//  db.query(query, [starttime, startdate, startkm, tripid], (err, results) => {
+//    if (err) {
+//      res.status(500).json({ message: 'Internal server error' });
+//      return;
+//    }
+//    res.status(200).json({ message: 'Status updated successfully' });
+//  });
+//});
 //end
 // checkingmethod
 router.post('/update_updatekm', (req, res) => {
