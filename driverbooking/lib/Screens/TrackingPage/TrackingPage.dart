@@ -634,6 +634,8 @@ class _TrackingPageState extends State<TrackingPage> {
   bool isStartRideEnabled = false;
   String? latitude;
   String? longitude;
+  double? _previousLatitude;
+  double? _previousLongitude;
 
   // Variables to track last location and time
   LatLng? _lastSavedLatLng;
@@ -723,7 +725,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
   bool _shouldSaveLocation(LatLng newLatLng) {
     // Check if the location has changed significantly or if enough time has passed
-    const double locationThreshold = 0.0001; // Latitude/Longitude threshold for change
+    const double locationThreshold = 0.001; // Latitude/Longitude threshold for change
     const int timeThreshold = 30; // Time threshold in seconds
 
     if (_lastSavedLatLng != null) {
@@ -759,6 +761,21 @@ class _TrackingPageState extends State<TrackingPage> {
     return deg * (math.pi / 180.0);
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   Future<void> _saveLocationToDatabase(double latitude, double longitude) async {
     const String apiUrl = '${AppConstants.baseUrl}/addvehiclelocation'; // Replace with your API endpoint
     String createdAt = DateTime.now().toIso8601String().split('T').first; // "2024-12-27" format
@@ -767,6 +784,12 @@ class _TrackingPageState extends State<TrackingPage> {
     print('Latitude: $latitude');
     print('Longitude: $longitude');
     print('Created At (Date Only): $createdAt');
+
+    // Check if the values are different from the previous ones
+    if (latitude == _previousLatitude && longitude == _previousLongitude ) {
+      print('Location is the same as previous. Skipping API call.');
+      return; // Skip API call if values are the same
+    }
 
     try {
       print('Sending POST request to API...');
@@ -781,10 +804,14 @@ class _TrackingPageState extends State<TrackingPage> {
       print('API Response Status Code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        print('Location saved successfully!');
+        print('Location saved successfullyyyyyyyyyyyy!');
         setState(() {
           _lastSavedLatLng = LatLng(latitude, longitude);
           _lastSavedTime = DateTime.now(); // Update last saved time
+          // Update previous values after successful API call
+          _previousLatitude = latitude;
+          _previousLongitude = longitude;
+          // _previousCreatedAt = createdAt;
         });
       } else {
         print('Failed to save location. Response: ${response.statusCode}');
@@ -793,6 +820,24 @@ class _TrackingPageState extends State<TrackingPage> {
       print('Error saving location: $e');
     }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   Future<void> _fetchRoute() async {
     if (_currentLatLng == null) return;
