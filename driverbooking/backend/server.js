@@ -790,12 +790,12 @@ app.get('/uploads', (req, res) => {
 });
 
 
-app.listen(3000, () => {
-  console.log("Server started on port 3000");
-});
-
-//app.listen(7002, () => {
-//  console.log("Server started on port 7002");
+//app.listen(3000, () => {
+//  console.log("Server started on port 3000");
 //});
+
+app.listen(7002, () => {
+  console.log("Server started on port 7002");
+});
 
 
