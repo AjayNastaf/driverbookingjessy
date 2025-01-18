@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:driverbooking/Screens/SignatureEndRide/SignatureEndRide.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 
@@ -29,10 +29,68 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
   final TextEditingController vehicleTypeController = TextEditingController();
   final TextEditingController startKmController = TextEditingController();
   final TextEditingController closeKmController = TextEditingController();
+  final TextEditingController startDateController = TextEditingController();
+  final TextEditingController closeDateController = TextEditingController();
 
   String? startingImageUrl;
   String? endingImageUrl;
   bool isLoading = true;
+
+  Map<String, dynamic>? tripDetails;
+
+  Future<void> _fetchTripDetails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? tripDetailsJson = prefs.getString('tripDetails');
+
+    if (tripDetailsJson != null) {
+      Map<String, dynamic> tripDetails = json.decode(tripDetailsJson);
+
+      // Print out the entire fetched data to check if all values are present
+      print("Fetched trip details: $tripDetails");
+
+      // Check each value individually
+      print("guestname: ${tripDetails['guestname']}");
+      print("tripid: ${tripDetails['tripid']}");
+      print("guestmobileno: ${tripDetails['guestmobileno']}");
+      print("vehType: ${tripDetails['vehType']}");
+      print("startdate: ${tripDetails['startdate']}");
+      print("closeDate: ${tripDetails['closeDate']}");
+
+      setState(() {
+        // Update the controllers with the values
+        guestMobileController.text = tripDetails['guestmobileno'] ?? 'Not available';
+        guestNameController.text = tripDetails['guestname'] ?? 'Not available';
+        tripIdController.text = tripDetails['tripid'].toString()  ?? 'Not available';
+        vehicleTypeController.text = tripDetails['vehType'] ?? 'Not available';
+        startDateController.text = tripDetails['startdate'].toString() ?? 'Not available';
+        closeDateController.text = tripDetails['closeDate'].toString() ?? 'Not available';
+        startKmController.text =tripDetails['startkm']()?? 'Not Available';
+        closeKmController.text =tripDetails['closekm']?? 'Not Available';
+        // imageUrl = tripDetails['imageUrl'] ?? '';
+
+        // Print after setting the text to controllers to verify
+        print("Updated guestNameController text: ${guestNameController.text}");
+        print("Updated tripIdController text: ${tripIdController.text}");
+        print("Updated guestMobileController text: ${guestMobileController.text}");
+        print("Updated vehicleTypeController text: ${vehicleTypeController.text}");
+
+      });
+    } else {
+      print('No trip details found in shared preferences.');
+    }
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    // _loadTripDetails();
+    _fetchTripDetails();
+      fetchImages(); // Make sure fetchImages is being called
+
+  }
+
 
 
   Future<void> _pickDate(BuildContext context, bool isStartingDate) async {
@@ -121,11 +179,11 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    fetchImages(); // Make sure fetchImages is being called
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   fetchImages(); // Make sure fetchImages is being called
+  // }
 
 
   @override
@@ -189,12 +247,18 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
               TextField(
                 readOnly: true,
                 enabled: false,
-                decoration: InputDecoration(
-                  hintText: startingDate == null
-                      ? "Select Starting Date"
-                      : "${startingDate!.toLocal()}".split(' ')[0],
-                  border: const OutlineInputBorder(),
+                controller: startDateController,
+                decoration: const InputDecoration(
+                  labelText: "Starting Date",
+                  border: OutlineInputBorder(),
                 ),
+
+                // decoration: InputDecoration(
+                //   hintText: startingDate == null
+                //       ? "Select Starting Date"
+                //       : "${startingDate!.toLocal()}".split(' ')[0],
+                //   border: const OutlineInputBorder(),
+                // ),
               ),
               const SizedBox(height: 16),
 
@@ -202,12 +266,18 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
               TextField(
                 readOnly: true,
                 enabled: false,
-                decoration: InputDecoration(
-                  hintText: closingDate == null
-                      ? "Select Closing Date"
-                      : "${closingDate!.toLocal()}".split(' ')[0],
-                  border: const OutlineInputBorder(),
+                controller: closeDateController,
+                decoration: const InputDecoration(
+                  labelText: "closing Date",
+                  border: OutlineInputBorder(),
                 ),
+
+                // decoration: InputDecoration(
+                //   hintText: closingDate == null
+                //       ? "Select Closing Date"
+                //       : "${closingDate!.toLocal()}".split(' ')[0],
+                //   border: const OutlineInputBorder(),
+                // ),
               ),
               const SizedBox(height: 16),
 

@@ -3,6 +3,8 @@ import 'package:driverbooking/Utils/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:driverbooking/GlobalVariable/global_variable.dart' as globals;
 import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class Bookingdetails extends StatefulWidget {
   final String userId;
@@ -68,6 +70,19 @@ class _BookingdetailsState extends State<Bookingdetails> {
     }
   }
 
+  // local storage
+  Future<void> _saveTripDetailsToLocalStorage(Map<String, dynamic> tripDetails) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Convert the tripDetails map to a JSON string
+    String tripDetailsJson = json.encode(tripDetails);
+
+    // Save the JSON string in shared preferences
+    await prefs.setString('tripDetails', tripDetailsJson);
+
+    print('Trip details saved to local storage.');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,6 +99,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
         itemCount: tripSheetData.length,
         itemBuilder: (context, index) {
           final tripDetails = tripSheetData[index];
+          _saveTripDetailsToLocalStorage(tripDetails);
           return SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
