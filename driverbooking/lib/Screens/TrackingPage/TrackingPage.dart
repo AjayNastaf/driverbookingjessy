@@ -840,7 +840,8 @@ String? Statusvalue;
 
     try {
       final response = await http.post(
-        Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
+        // Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
+        Uri.parse("${AppConstants.baseUrl}/addvehiclelocation"),
         headers: {"Content-Type": "application/json"},
         body: json.encode(requestData),
       );
