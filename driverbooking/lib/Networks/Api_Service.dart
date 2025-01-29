@@ -984,6 +984,255 @@ class ApiService {
 
 
 
+  static Future<void> updateKmTripDetailsUpload({
+    required String tripId,
+    required String startKm,
+    required String closeKm,
+    required int hcl,
+    required String duty,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/kmupdatetripsheet');
+    try {
+      print('Sending data to API: $url');
+      print('Payload: {tripId: $tripId, startkm: $startKm, closekm: $closeKm, Hcl: $hcl, duty: $duty}');
+
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'}, // Set JSON header
+        body: jsonEncode({
+          'tripId': tripId,
+          'startkm': startKm,
+          'closekm': closeKm,
+          'Hcl': hcl.toString(),
+          'duty': duty,
+        }),
+      );
+
+      print('Response status code: ${startKm}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('Successfully updated KM details');
+      } else {
+        throw Exception('Failed to update KM details: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+      throw Exception('Error occurred: $e');
+    }
+  }
+
+
+
+  // Fetch trip details by tripId
+  static Future<Map<String, dynamic>?> fetchTripDetails(String tripId) async {
+    final String url = '${AppConstants.baseUrl}/tripsheets_fulldetails/$tripId';
+
+    // Log the URL being called for debugging
+    print('URL being called: $url');
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      // Log the status code and response body for debugging
+      print('Response status code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print("Success: Objects fetched");
+        final data = json.decode(response.body);
+        return data; // Return the trip details if successful
+      } else if (response.statusCode == 404) {
+        print('Trip not found');
+        return null; // Handle not found
+      } else {
+        print('Error: Failed to fetch trip details. Status Code: ${response.statusCode}');
+        return null; // Handle other status codes
+      }
+    } catch (e) {
+      print('Error occurred while fetching trip details: $e');
+      return null; // Handle network or parsing errors
+    }
+  }
+
+
+
+//for fetching driver details used  in home page
+  static Future<Map<String, dynamic>?> getDriverProfile(String username) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/getDriverProfile');
+
+    print('Making API call to getDriverProfile with username: $username');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username}),
+      );
+
+      // Print the status code to check if it's 200 or another error code
+      print('Response status code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        // Print the response body to check if it contains the expected data
+        print('Response body: ${response.body}');
+
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 404) {
+        print('Driver not found (404)');
+        throw Exception('Driver not found');
+      } else {
+        print('Failed to fetch driver profile (status code: ${response.statusCode})');
+        throw Exception('Failed to fetch driver profile');
+      }
+    } catch (e) {
+      // Catch and print any errors
+      print('Error fetching driver profile: $e');
+      rethrow;
+    }
+  }
+//for fetching driver details used  in home page end
+
+
+
+  //close values showing for rides screen
+  static Future<List<Map<String, dynamic>>> fetchTripSheetClosedRides({
+    required String userId,
+    required String username,
+  }) async {
+    try {
+      // Print the inputs to ensure they are passed correctly
+      print('Fetching trip sheet for userId: $userId, username: $username');
+
+      final response = await http.get(
+        Uri.parse('${AppConstants.baseUrl}/tripsheetRides/$username'), // Pass username in the URL
+        headers: {
+          'userId': userId,
+        },
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Parse the response and return a list of maps
+        List<Map<String, dynamic>> trips = List<Map<String, dynamic>>.from(json.decode(response.body));
+        print('Fetched tripsheet data: $trips');
+        return trips;
+      } else {
+        throw Exception('Failed to fetch trip sheet: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error in fetchTripSheet: $e');
+      rethrow; // Re-throw the error to handle it in the calling function
+    }
+  }
+
+//close values showing for rides screen end
+
+
+
+
+//values getting according to the filter
+  static Future<List<Map<String, dynamic>>> fetchTripSheetFilteredRides({
+    required String username,
+    required DateTime? startDate,
+    required DateTime? endDate,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/tripsheetfilterdate');
+
+    final body = jsonEncode({
+      "username": username,
+      "startDate": startDate?.toIso8601String(),
+      "endDate": endDate?.toIso8601String(),
+    });
+
+    print('Request URL: $url');
+    print('Request Body: $body');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        print('Parsed Response: $responseData');
+        return List<Map<String, dynamic>>.from(responseData);
+      } else {
+        throw Exception('Failed to fetch data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+      throw Exception('Error: $e');
+    }
+  }
+
+
+
+//values getting according to the filter end
+
+
+
+// adding lat long to database start
+
+  static Future<bool> sendVehicleLocation({
+    required String vehicleNo,
+    required double latitude,
+    required double longitude,
+  }) async {
+    final String url = "${AppConstants.baseUrl}/addvehiclelocation";
+
+    final Map<String, dynamic> requestData = {
+      "vehicleno": vehicleNo,
+      "latitudeloc": latitude,
+      "longitutdeloc": longitude,
+      "Trip_id": "12345", // Dummy Trip ID
+      "Runing_Date": DateTime.now().toIso8601String().split("T")[0], // Current Date
+      "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1], // Current Time
+      "Trip_Status": "Active",
+      "Tripstarttime": "08:00 AM",
+      "TripEndTime": "10:00 AM",
+      "created_at": DateTime.now().toIso8601String(),
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(requestData),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print("Error sending location data: $e");
+      return false;
+    }
+  }
+  // adding lat long to database end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 

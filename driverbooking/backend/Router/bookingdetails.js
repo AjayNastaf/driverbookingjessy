@@ -20,6 +20,27 @@ router.get('/tripsheet/:username', async (req, res) => {
   }
 });
 //end
+
+//get duty type based on login driver name when the apps closed
+router.get('/tripsheetRides/:username', async (req, res) => {
+  const username = req.params.username;
+  try {
+    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "Closed"';
+    db.query(query, [username], (err, results) => {
+      if (err) {
+        res.status(500).json({ message: 'Internal server error' });
+        return;
+      }
+
+      res.status(200).json(results);
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+//end
+
+
 router.get('/tripsheets/:duty/:tripId', async (req, res) => {
   const { tripId, duty } = req.params;
   console.log('Received request with tripId:', tripId, 'and duty:', duty);  // Should log the request parameters
@@ -51,6 +72,38 @@ router.get('/tripsheets/:duty/:tripId', async (req, res) => {
   }
 });
 
+
+
+router.get('/tripsheets_fulldetails/:tripId', async (req, res) => {
+  const { tripId } = req.params;
+  console.log('Received request with tripId:', tripId);  // Should log the request parameters
+
+  try {
+    const query = 'SELECT * FROM tripsheet WHERE tripid = ?';
+    console.log('Executing query:', query, 'with values:', [tripId]);
+
+    db.query(query, [tripId], (err, results) => {
+      if (err) {
+        console.log('Database query error:', err);
+        res.status(500).json({ message: 'Internal server error' });
+        return;
+      }
+
+      console.log('Query results:', results); // Should log the query results
+      if (results.length === 0) {
+        console.log('No trip sheet found for tripId:', tripId,);
+        res.status(404).json({ message: 'Trip sheet not found' });
+        return;
+      }
+
+      console.log('Found trip sheet dataaaa:', results[0]);  // Should log the found trip sheet data
+      res.status(200).json(results[0]);  // Send the first result
+    });
+  } catch (err) {
+    console.log('Unexpected error:', err);  // Log unexpected errors
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 //end
 // updating trip app status

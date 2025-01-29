@@ -67,6 +67,8 @@ class _ProfileScreenContentState extends State<ProfileScreenContent> {
     mobileController = TextEditingController(text: widget.phonenumber);
     passwordController = TextEditingController(text: widget.password);
     emailController = TextEditingController(text: widget.email);
+    print('Userphone: ${widget.phonenumber}, Usernameddd: ${widget.username},Userpass: ${widget.password}, Usernameddd: ${widget.email}');
+
   }
 
   Future<void> pickImage(ImageSource source) async {

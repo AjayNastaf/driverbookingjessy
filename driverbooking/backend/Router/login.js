@@ -25,6 +25,7 @@ router.post('/login', (req, res) => {
     console.log(username ,userpassword,"yser")
 
     db.query('SELECT * FROM drivercreation WHERE username = ? AND userpassword = ?', [username, userpassword], (err, result) => {
+
         if (err) {
             return res.status(500).json({ error: 'Failed to retrieve user details from MySQL' });
         }
@@ -82,8 +83,9 @@ router.post('/logoutDriver',(req,res)=>{
 // });
 
 
-router.get('/getDriverProfile', (req, res) => {
-    const username = req.query.username;
+router.post('/getDriverProfile', (req, res) => {
+        const { username } = req.body;
+console.log(username,'username checkkk');
     const query = 'SELECT * FROM drivercreation WHERE drivername = ?';
     db.query(query, [username], (err, results) => {
         if (err) {

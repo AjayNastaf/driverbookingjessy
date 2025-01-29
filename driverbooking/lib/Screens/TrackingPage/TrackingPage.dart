@@ -641,7 +641,8 @@ class _TrackingPageState extends State<TrackingPage> {
   LatLng? _lastSavedLatLng;
   DateTime? _lastSavedTime;
   late String? tripId;
-
+String? vehiclevalue;
+String? Statusvalue;
 
   @override
   void initState() {
@@ -653,8 +654,42 @@ class _TrackingPageState extends State<TrackingPage> {
     _getLatLngFromAddress(widget.address);
     _saveLocationToDatabase(12.9716, 77.5946);
     tripId = widget.tripId; // Assuming `tripId` is passed to the `TrackingPage`
-
+    _loadTripDetails();
   }
+
+  Future<void> _loadTripDetails() async {
+    try {
+      // Fetch trip details from the API
+      final tripDetails = await ApiService.fetchTripDetails(tripId!);
+      print('Raw Trip details fetched: $tripDetails'); // Debugging
+
+      if (tripDetails != null) {
+        // Remove any accidental spaces or tabs in key names
+        var vehicleNo = tripDetails['vehRegNo']?.toString();
+        var tripStatusValue = tripDetails['apps'];
+
+        print('Vehicle No: $vehicleNo');
+        print('Trip Status: $tripStatusValue');
+
+        if((tripStatusValue != null) && (vehicleNo   != null)) {
+          setState(() {
+            vehiclevalue = vehicleNo;
+            Statusvalue = tripStatusValue;
+          });
+          print('Updated vehiclevalue: $vehiclevalue');
+        } else {
+          print('Error: vehicleNo is null');
+        }
+      } else {
+        print('No trip details found.');
+      }
+    } catch (e) {
+      print('Error loading trip details: $e');
+    }
+  }
+
+
+
 
   Future<void> _getLatLngFromAddress(String address) async {
     const String apiKey = AppConstants.ApiKey; // Replace with your API Key
@@ -700,33 +735,165 @@ class _TrackingPageState extends State<TrackingPage> {
     final initialLocation = await location.getLocation();
     _updateCurrentLocation(initialLocation);
 
+    // Continuous location updates
     _locationStream = location.onLocationChanged;
     _locationStream!.listen((newLocation) {
       _updateCurrentLocation(newLocation);
     });
   }
 
-  void _updateCurrentLocation(LocationData locationData) {
-    if (locationData.latitude != null && locationData.longitude != null) {
-      final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
 
-      // Only update if the location is significantly different or enough time has passed
-      if (_shouldSaveLocation(newLatLng)) {
-        setState(() {
-          _currentLatLng = newLatLng;
-        });
 
-        _fetchRoute();
-        _updateCameraPosition();
-        _saveLocationToDatabase(locationData.latitude!, locationData.longitude!);
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> polylineCoordinates = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
+
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lng += dlng;
+
+      final point = LatLng(lat / 1e5, lng / 1e5);
+      polylineCoordinates.add(point);
+    }
+
+    return polylineCoordinates;
+  }
+
+
+  Future<void> _fetchRoute() async {
+    if (_currentLatLng == null) return;
+
+    const String apiKey = AppConstants.ApiKey;
+    final String url =
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${_currentLatLng!.latitude},${_currentLatLng!.longitude}&destination=${_destination.latitude},${_destination.longitude}&key=$apiKey';
+
+    try {
+      final response = await Dio().get(url);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final routes = data['routes'] as List;
+        if (routes.isNotEmpty) {
+          final polyline = routes[0]['overview_polyline']['points'] as String;
+          setState(() {
+            _routeCoordinates = _decodePolyline(polyline);
+          });
+        } else {
+          print('No routes found in API response.');
+        }
+      } else {
+        print('API response error: ${response.statusCode}');
       }
+    } catch (e) {
+      print('Error fetching route: $e');
     }
   }
 
+
+  void _updateCameraPosition() {
+    if (_currentLatLng != null) {
+      _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: _currentLatLng!,
+            zoom: 15,
+          ),
+        ),
+      );
+    }
+  }
+
+  // Function to send location data to API
+  Future<void> _saveLocationToDatabase(double latitude, double longitude) async {
+    print("Saving location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
+
+    final Map<String, dynamic> requestData = {
+      "vehicleno": vehiclevalue,
+      "latitudeloc": latitude,
+      "longitutdeloc": longitude,
+      "Trip_id": tripId, // Dummy Trip ID
+      "Runing_Date": DateTime.now().toIso8601String().split("T")[0], // Current Date
+      "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1], // Current Time
+      "Trip_Status": Statusvalue,
+      "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
+      "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
+      "created_at": DateTime.now().toIso8601String(),
+    };
+
+    print("Request Data: ${json.encode(requestData)}"); // Debugging print
+
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(requestData),
+      );
+
+      print("Response Status Codeee: ${response.statusCode}"); // Debugging print
+      print("Response Body: ${response.body}"); // Debugging print
+
+      if (response.statusCode == 200) {
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Lat Long Saved Successfullyyyyyyyyyyyyyyyy")),
+        // );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to Save Lat Long")),
+        );
+      }
+    } catch (e) {
+      print("Error sending location data: $e"); // Debugging print
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error occurred")),
+      );
+    }
+  }
+
+
+
+  void _updateCurrentLocation(LocationData locationData) {
+    if (locationData.latitude != null && locationData.longitude != null) {
+      print("Received Location: ${locationData.latitude}, ${locationData.longitude}");
+
+      final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
+
+      setState(() {
+        _currentLatLng = newLatLng;
+      });
+
+      _fetchRoute();
+      _updateCameraPosition();
+      // _saveLocationToDatabase(locationData.latitude!, locationData.longitude!);
+      _saveLocationToDatabase(locationData.latitude!, locationData.longitude!);
+
+    } else {
+      print("Location data is null");
+    }
+  }
+
+
+
   bool _shouldSaveLocation(LatLng newLatLng) {
-    // Check if the location has changed significantly or if enough time has passed
-    const double locationThreshold = 0.001; // Latitude/Longitude threshold for change
-    const int timeThreshold = 30; // Time threshold in seconds
+    print("Inside _shouldSaveLocation...");
+
+    const double locationThreshold = 0.001;
+    const int timeThreshold = 30;
 
     if (_lastSavedLatLng != null) {
       double distance = _calculateDistance(_lastSavedLatLng!, newLatLng);
@@ -734,12 +901,14 @@ class _TrackingPageState extends State<TrackingPage> {
       bool hasTimePassed = _lastSavedTime == null ||
           DateTime.now().difference(_lastSavedTime!).inSeconds > timeThreshold;
 
-      // Only save if location has significantly changed or enough time has passed
+      print("Distanceeeee: $distance, Significant Change: $hasSignificantChange, Time Passed: $hasTimePassed");
+
       if (hasSignificantChange || hasTimePassed) {
         return true;
       }
     }
 
+    print("Returning false from _shouldSaveLocation");
     return false;
   }
 
@@ -776,55 +945,95 @@ class _TrackingPageState extends State<TrackingPage> {
 
 
 
-  Future<void> _saveLocationToDatabase(double latitude, double longitude) async {
-    const String apiUrl = '${AppConstants.baseUrl}/addvehiclelocation'; // Replace with your API endpoint
-    String createdAt = DateTime.now().toIso8601String().split('T').first; // "2024-12-27" format
-
-    // Print statements to debug
-    print('Latitude: $latitude');
-    print('Longitude: $longitude');
-    print('Created At (Date Only): $createdAt');
-
-    // Check if the values are different from the previous ones
-    if (latitude == _previousLatitude && longitude == _previousLongitude ) {
-      print('Location is the same as previous. Skipping API call.');
-      return; // Skip API call if values are the same
-    }
-
-    try {
-      print('Sending POST request to API...');
-      final response = await Dio().post(apiUrl, data: {
-        'latitudeloc': latitude,
-        'longitutdeloc': longitude,
-        'created_at': createdAt,
-        'vehicleno': '7689', // Add the created_at field (date only)
-      });
-
-      print('API2 : ${response}');
-      print('API Response Status Code: ${response.statusCode}');
-
-      if (response.statusCode == 200) {
-        print('Location saved successfullyyyyyyyyyyyy!');
-        setState(() {
-          _lastSavedLatLng = LatLng(latitude, longitude);
-          _lastSavedTime = DateTime.now(); // Update last saved time
-          // Update previous values after successful API call
-          _previousLatitude = latitude;
-          _previousLongitude = longitude;
-          // _previousCreatedAt = createdAt;
-        });
-      } else {
-        print('Failed to save location. Response: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error saving location: $e');
-    }
-  }
-
-
+  // Future<void> _saveLocationToDatabase(double latitude, double longitude) async {
+  //   const String apiUrl = '${AppConstants.baseUrl}/addvehiclelocation'; // Replace with your API endpoint
+  //   String createdAt = DateTime.now().toIso8601String().split('T').first; // "2024-12-27" format
+  //
+  //   // Print statements to debug
+  //   print('Latitude: $latitude');
+  //   print('Longitude: $longitude');
+  //   print('Created At (Date Only): $createdAt');
+  //
+  //   // Check if the values are different from the previous ones
+  //   if (latitude == _previousLatitude && longitude == _previousLongitude ) {
+  //     print('Location is the same as previous. Skipping API call.');
+  //     return; // Skip API call if values are the same
+  //   }
+  //
+  //   try {
+  //     print('Sending POST request to API...');
+  //     final response = await Dio().post(apiUrl, data: {
+  //       'latitudeloc': latitude,
+  //       'longitutdeloc': longitude,
+  //       'created_at': createdAt,
+  //       'vehicleno': '7689', // Add the created_at field (date only)
+  //     });
+  //
+  //     print('API2 : ${response}');
+  //     print('API Response Status Code: ${response.statusCode}');
+  //
+  //     if (response.statusCode == 200) {
+  //       print('Location saved successfullyyyyyyyyyyyy!');
+  //       setState(() {
+  //         _lastSavedLatLng = LatLng(latitude, longitude);
+  //         _lastSavedTime = DateTime.now(); // Update last saved time
+  //         // Update previous values after successful API call
+  //         _previousLatitude = latitude;
+  //         _previousLongitude = longitude;
+  //         // _previousCreatedAt = createdAt;
+  //       });
+  //     } else {
+  //       print('Failed to save location. Response: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print('Error saving location: $e');
+  //   }
+  // }
 
 
 
+  // Function to send location data to API
+  // Future<void> _saveLocationToDatabase() async {
+  //   final Map<String, dynamic> requestData = {
+  //     "vehicleno": '7689',
+  //     "latitudeloc": latitude,
+  //     "longitutdeloc": longitude,
+  //     "Trip_id": "12345",
+  //     // Dummy Trip ID
+  //     "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
+  //     // Current Date
+  //     "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
+  //     // Current Time
+  //     "Trip_Status": "Active",
+  //     "Tripstarttime": "08:00 AM",
+  //     "TripEndTime": "10:00 AM",
+  //     "created_at": DateTime.now().toIso8601String(),
+  //   };
+  //
+  //   try {
+  //     final response = await http.post(
+  //       Uri.parse("${AppConstants.baseUrl}/addvehiclelocation"),
+  //       // Replace with your backend URL
+  //       headers: {"Content-Type": "application/json"},
+  //       body: json.encode(requestData),
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text("Lat Long Saved Successfully")),
+  //       );
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text("Failed to Save Lat Long")),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     print("Error sending location data: $e");
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text("Error occurred")),
+  //     );
+  //   }
+  // }
 
 
 
@@ -837,80 +1046,6 @@ class _TrackingPageState extends State<TrackingPage> {
 
 
 
-
-
-  Future<void> _fetchRoute() async {
-    if (_currentLatLng == null) return;
-
-    const String apiKey = AppConstants.ApiKey;
-    final String url =
-        'https://maps.googleapis.com/maps/api/directions/json?origin=${_currentLatLng!.latitude},${_currentLatLng!.longitude}&destination=${_destination.latitude},${_destination.longitude}&key=$apiKey';
-
-    try {
-      final response = await Dio().get(url);
-      if (response.statusCode == 200) {
-        final data = response.data;
-        final routes = data['routes'] as List;
-        if (routes.isNotEmpty) {
-          final polyline = routes[0]['overview_polyline']['points'] as String;
-          setState(() {
-            _routeCoordinates = _decodePolyline(polyline);
-          });
-        } else {
-          print('No routes found in API response.');
-        }
-      } else {
-        print('API response error: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching route: $e');
-    }
-  }
-
-  List<LatLng> _decodePolyline(String encoded) {
-    List<LatLng> polylineCoordinates = [];
-    int index = 0, len = encoded.length;
-    int lat = 0, lng = 0;
-
-    while (index < len) {
-      int b, shift = 0, result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-      lat += dlat;
-
-      shift = 0;
-      result = 0;
-      do {
-        b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
-        shift += 5;
-      } while (b >= 0x20);
-      int dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
-      lng += dlng;
-
-      final point = LatLng(lat / 1e5, lng / 1e5);
-      polylineCoordinates.add(point);
-    }
-
-    return polylineCoordinates;
-  }
-
-  void _updateCameraPosition() {
-    if (_currentLatLng != null) {
-      _mapController?.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: _currentLatLng!,
-            zoom: 15,
-          ),
-        ),
-      );
-    }
-  }
 
   void _clearOtpInputs() {
     for (var controller in _otpControllers) {
@@ -1032,28 +1167,29 @@ class _TrackingPageState extends State<TrackingPage> {
                     child: IgnorePointer(
                       ignoring: false,
                       child: Container(
-                        height: 300,
+                        height: 150,
                         padding: EdgeInsets.all(16),
                         color: Colors.white,
+
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(height: 30.0),
-                            Text(
-                              'Enter Customer OTP',
-                              style: TextStyle(
-                                  fontSize: 23, fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                _buildOtpInput(0),
-                                _buildOtpInput(1),
-                                _buildOtpInput(2),
-                                _buildOtpInput(3),
-                              ],
-                            ),
+                            // SizedBox(height: 30.0),
+                            // Text(
+                            //   'Enter Customer OTP',
+                            //   style: TextStyle(
+                            //       fontSize: 23, fontWeight: FontWeight.bold),
+                            // ),
+                            // SizedBox(height: 10),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            //   children: [
+                            //     _buildOtpInput(0),
+                            //     _buildOtpInput(1),
+                            //     _buildOtpInput(2),
+                            //     _buildOtpInput(3),
+                            //   ],
+                            // ),
                             SizedBox(height: 40),
                             SizedBox(
                               width: double.infinity,
@@ -1091,39 +1227,39 @@ class _TrackingPageState extends State<TrackingPage> {
                               //         fontSize: 20.0, color: Colors.white),
                               //   ),
                               // ),
-              ElevatedButton(
-              onPressed: () async {
-                await _handleStartRide(context);
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await _handleStartRide(context);
 
-              //   if (isOtpVerified) {
-              // // API is called only when "Start Ride" is clicked
-              // await _handleStartRide(context);
-              // } else {
-              // // Verify OTP logic
-              // final String otp = _otpControllers
-              //     .map((controller) => controller.text)
-              //     .join();
-              // context
-              //     .read<CustomerOtpVerifyBloc>()
-              //     .add(OtpVerifyAttempt(otp: otp));
-              // }
-              },
-              style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.Navblue1,
-              padding: EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              ),
-              ),
-              // child: Text(
-              // isOtpVerified ? 'Start Ride' : 'Verify OTP',
-              // style: TextStyle(fontSize: 20.0, color: Colors.white),
-              // ),
-                child: Text(
-                   'Start Ride',
-                  style: TextStyle(fontSize: 20.0, color: Colors.white),
-                ),
-              ),
+                                  //   if (isOtpVerified) {
+                                  // // API is called only when "Start Ride" is clicked
+                                  // await _handleStartRide(context);
+                                  // } else {
+                                  // // Verify OTP logic
+                                  // final String otp = _otpControllers
+                                  //     .map((controller) => controller.text)
+                                  //     .join();
+                                  // context
+                                  //     .read<CustomerOtpVerifyBloc>()
+                                  //     .add(OtpVerifyAttempt(otp: otp));
+                                  // }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.Navblue1,
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                // child: Text(
+                                // isOtpVerified ? 'Start Ride' : 'Verify OTP',
+                                // style: TextStyle(fontSize: 20.0, color: Colors.white),
+                                // ),
+                                child: Text(
+                                  'Start Ride',
+                                  style: TextStyle(fontSize: 20.0, color: Colors.white),
+                                ),
+                              ),
 
                             ),
                           ],

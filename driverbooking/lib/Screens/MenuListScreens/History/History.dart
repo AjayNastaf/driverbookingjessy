@@ -2,14 +2,20 @@ import 'package:driverbooking/Screens/MenuListScreens/History/EditTripDetails/Ed
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:driverbooking/Networks/Api_Service.dart';
 import 'package:excel/excel.dart';
-import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:driverbooking/Utils/AllImports.dart';
+
 
 class History extends StatefulWidget {
-  const History({Key? key}) : super(key: key);
+  final String userId;
+  final String username;
+  final List<Map<String, dynamic>> tripSheetData;
+
+
+  const History({Key? key, required this.username, required this.userId , required this.tripSheetData})
+      : super(key: key);
 
   @override
   State<History> createState() => _HistoryState();
@@ -18,39 +24,34 @@ class History extends StatefulWidget {
 class _HistoryState extends State<History> {
   DateTime? fromDate;
   DateTime? toDate;
-
-  final List<Map<String, dynamic>> allData = [
-    {'date': DateTime(2024, 11, 1), 'CustomerName': 'Ajay', 'FromTo': 'Tambaram - Central'},
-    {'date': DateTime(2024, 11, 1), 'CustomerName': 'Ajay', 'FromTo': 'Tambaram - Central'},
-    {'date': DateTime(2024, 11, 1), 'CustomerName': 'Ajay', 'FromTo': 'Tambaram - Central'},
-    {'date': DateTime(2024, 11, 1), 'CustomerName': 'Ajay', 'FromTo': 'Tambaram - Central'},
+  List<Map<String, dynamic>> tripSheetData = [];
+  bool isLoading = true;
 
 
-
-
-
-  ];
-
-  List<Map<String, dynamic>> filteredData = [];
 
   @override
-  void initState() {
-    super.initState();
-    filteredData = List.from(allData);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeData();
   }
 
-  void filterData() {
-    setState(() {
-      if (fromDate != null && toDate != null) {
-        filteredData = allData.where((item) {
-          final date = item['date'] as DateTime;
-          return date.isAfter(fromDate!.subtract(const Duration(days: 1))) &&
-              date.isBefore(toDate!.add(const Duration(days: 1)));
-        }).toList();
-      } else {
-        filteredData = List.from(allData);
-      }
-    });
+  Future<void> _initializeData() async {
+    try {
+      final data = await ApiService.fetchTripSheetClosedRides(
+        userId: widget.userId,
+        username: widget.username,
+      );
+
+      setState(() {
+        tripSheetData = data;
+      });
+    } catch (e) {
+      print('Error initializing data: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> selectDateRange() async {
@@ -68,84 +69,91 @@ class _HistoryState extends State<History> {
         fromDate = picked.start;
         toDate = picked.end;
       });
-      filterData();
     }
   }
 
-  Future<void> downloadTableAsExcel() async {
-    var excel = Excel.createExcel();
-    Sheet sheetObject = excel['History'];
-
-    // Add headers
-    sheetObject.appendRow(["Date", "CustomerName", "FromTo"]);
-
-    // Add rows
-    for (var row in filteredData) {
-      sheetObject.appendRow([
-        DateFormat('dd MMM yyyy').format(row['date']),
-        row['CustomerName'],
-        row['FromTo'],
-      ]);
+  Future<void> fetchFilteredData() async {
+    if (fromDate == null || toDate == null) {
+      print('Date range is invalid');
+      return; // Don't proceed if the dates are not selected
     }
 
-    // Save file
-    final fileBytes = excel.save();
-    if (fileBytes != null) {
-      try {
-        final directory = Directory(
-            '/storage/emulated/0/Documents'); // Android Downloads folder
-        if (!await directory.exists()) {
-          await directory.create(recursive: true);
-        }
+    setState(() {
+      isLoading = true;
+    });
 
-        String baseName = "History";
-        String extension = ".xlsx";
-        String filePath = "${directory.path}/$baseName$extension";
+    try {
+      final data = await ApiService.fetchTripSheetFilteredRides(
+        username: widget.username,
+        startDate: fromDate,
+        endDate: toDate,
+      );
 
-        int counter = 1;
-        while (await File(filePath).exists()) {
-          filePath = "${directory.path}/$baseName$counter$extension";
-          counter++;
-        }
-
-        final file = File(filePath);
-        await file.writeAsBytes(fileBytes, flush: true);
-
-        // Notify the user
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text('File downloaded to $filePath')),
-        // );
-        showInfoSnackBar(context, 'File downloaded to $filePath');
-      } catch (e) {
-        // Handle errors
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text('Error saving file: $e')),
-        // );
-        showFailureSnackBar(context, 'Error saving file: $e');
-      }
+      setState(() {
+        tripSheetData = data;
+      });
+      print('Filtered data: $data');
+    } catch (e) {
+      print('Error fetching filtered data: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-            "History",
-            style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize)
+          "History",
+          style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
         ),
         backgroundColor: AppTheme.Navblue1,
-        iconTheme: const IconThemeData(
-          color:
-              Colors.white, // Change back button (leading icon) color to white
-        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.download,
-              color: Colors.white,
-            ),
-            onPressed: downloadTableAsExcel,
+            icon: const Icon(Icons.download, color: Colors.white),
+            onPressed: () async {
+              try {
+                var excel = Excel.createExcel(); // Create an Excel file
+                Sheet sheetObject = excel['Sheet1']; // Add data to the first sheet
+
+                // Add header row
+                sheetObject.appendRow(["Start Time", "Full Name", "Address"]);
+
+                // Add tripSheetData to the sheet
+                for (var data in tripSheetData) {
+                  sheetObject.appendRow([
+                    data['startdate'],
+                    data['guestname'],
+                    data['useage'],
+                  ]);
+                }
+
+                // Get the directory to save the file
+                var directory = await getApplicationDocumentsDirectory();
+                String filePath = "${directory.path}/TripDetails.xlsx";
+
+                // Save the file
+                File(filePath)
+                  ..createSync(recursive: true)
+                  ..writeAsBytesSync(excel.save()!);
+
+                // Show a success message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Excel file saved at $filePath')),
+                );
+              } catch (e) {
+                print('Error creating Excel file: $e');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed to save Excel file')),
+                );
+              }
+            },
             tooltip: "Download as Excel",
           ),
         ],
@@ -154,39 +162,29 @@ class _HistoryState extends State<History> {
         children: [
           Container(
             padding: const EdgeInsets.all(16.0),
-            // color: Color(0xFF373751).withOpacity(0.1),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Filter by Date Range",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.Navblue1,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          fromDate != null
-                              ? "From: ${DateFormat('dd MMM yyyy').format(fromDate!)}"
-                              : "From: Not Selected",
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          toDate != null
-                              ? "To: ${DateFormat('dd MMM yyyy').format(toDate!)}"
-                              : "To: Not Selected",
-                          style: const TextStyle(fontSize: 16),
-                        ),
-                      ],
+                    Text(
+                      fromDate != null
+                          ? "From: ${DateFormat('dd MMM yyyy').format(fromDate!)}"
+                          : "From: Not Selected",
+                      style: const TextStyle(fontSize: 16),
                     ),
+                    const SizedBox(height: 5),
+                    Text(
+                      toDate != null
+                          ? "To: ${DateFormat('dd MMM yyyy').format(toDate!)}"
+                          : "To: Not Selected",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
                     ElevatedButton.icon(
                       onPressed: selectDateRange,
                       icon: const Icon(Icons.date_range),
@@ -199,15 +197,71 @@ class _HistoryState extends State<History> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (fromDate == null || toDate == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Please select a valid date range')),
+                          );
+                          return;
+                        }
+                        fetchFilteredData();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text("Apply Filter"),
+                    ),
+
                   ],
                 ),
               ],
             ),
           ),
-
-          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Container(
+              color: AppTheme.Navblue1,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+              child: Row(
+                children: const [
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      "Start Time",
+                      style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      "Full Name",
+                      style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Address",
+                      style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Icon(Icons.visibility, color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // const SizedBox(height: 5),
+          const SizedBox(height: 0.0),
           Expanded(
-            child: Card(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Card(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -215,133 +269,62 @@ class _HistoryState extends State<History> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: filteredData.isEmpty
+                child: tripSheetData.isEmpty
                     ? const Center(
                   child: Text(
                     "No records found for the selected date range.",
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 )
-                    : Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Fixed Header Row
-                    Container(
-                      color: AppTheme.lightBlue,
-                      child: Row(
-                        children: const [
-                          Expanded(
-                            flex: 2, // Adjust flex for column width
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Date",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                    : ListView(
+                  children: tripSheetData.map((item) {
+                    var trip = item['tripid'].toString();
+                    return Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(trip),
                           ),
-                          Expanded(
-                            flex: 3, // Adjust flex for column width
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "Customer Name",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3, // Adjust flex for column width
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                "From To",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1, // Adjust flex for column width
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Icon(
-                                Icons.remove_red_eye, // Use eye-like icon
-                                color: Colors.white, // Set color to white
-                                size: 24.0, // Optional: Adjust size if needed
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Scrollable Data Rows
-                    SizedBox(
-                      height: 200.0,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: filteredData.map((item) {
-                            return Row(
-                              children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      DateFormat('dd MMM yyyy').format(item['date']),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(item['CustomerName']),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 3,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(item['FromTo']),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: TextButton(
-                                      onPressed: () {
-                                      Navigator.push(context, MaterialPageRoute(builder: (context)=>EditTripDetails()));
-                                      },
-                                      child: Text(
-                                        "View",
-                                        style: TextStyle(fontSize: 16.0),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-
-
-
-
-
-                              ],
-                            );
-                          }).toList(),
                         ),
-                      ),
-                    ),
-                  ],
+                        Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(item['guestname']),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(item['useage']),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditTripDetails( tripId: trip.toString()),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "View",
+                                style: TextStyle(fontSize: 16.0),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
               ),
             ),

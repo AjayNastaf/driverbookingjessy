@@ -58,10 +58,16 @@ router.post('/update_starttrip_apps', (req, res) => {
 //});
 //end
 // checkingmethod
-router.post('/update_updatekm', (req, res) => {
+router.put('/kmupdatetripsheet', (req, res) => {
   // const {startkm, tripid } = req.body;
-  const { startkm, closekm ,Hcl,duty} = req.body; 
+  const { tripId,startkm, closekm ,Hcl,duty} = req.body;
   // const query = 'UPDATE tripsheet SET starttime = ?, startdate = ?, startkm = ? WHERE tripid = ?';
+console.log(tripId,startkm, closekm ,Hcl,duty , "checking received");
+console.log('ajay',typeof(tripId));
+console.log('ajay1',typeof(startkm));
+console.log('ajay2',typeof(closekm));
+console.log('ajay3',typeof(Hcl));
+console.log('ajay4',typeof(duty));
 
   let sql = "";
   let values = [];
@@ -69,23 +75,23 @@ router.post('/update_updatekm', (req, res) => {
   if (Hcl === 1 && duty === "Outstation") {
     // First condition
     sql = "UPDATE tripsheet SET startkm = ?, closekm = ? WHERE tripid = ?";
-    values = [startkm, closekm,tripid];
+    values = [startkm, closekm,tripId];
   } else if (Hcl === 1 && duty !== "Outstation") {
     // Second condition
     sql = "UPDATE tripsheet SET startkm = ?,closekm = ?, vendorshedoutkm = ?,vendorshedinkm = ? WHERE tripid = ?";
-    values = [startkm, closekm,startkm, closekm,tripid];
+    values = [startkm, closekm,startkm, closekm,tripId];
   } else {
     // Default case or other conditions
     sql = "UPDATE tripsheet SET startkm = ?, closekm = ? WHERE tripid = ?";
-    values = [startkm, closekm,tripid];
+    values = [startkm, closekm,tripId];
   }
 
   db.query(sql,values,(err, result) => {
       if (err) {
-        console.error('Error updating tripsheet:', err);
+        console.log('Error updating tripsheet:', err);
         return res.status(500).send('Failed to update');
       }
-      console.log(result, "data of the tripsheet")
+      console.log(result, "data of the tripsheet data of the tripsheet")
       return res.status(200).send('Successfully updated');
     }
   );

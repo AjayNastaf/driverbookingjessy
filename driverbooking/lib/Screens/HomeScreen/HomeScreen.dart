@@ -323,18 +323,24 @@ class _HomescreenState extends State<Homescreen> {
   String? phonenumber;
   String? email;
 
+
   @override
   void initState() {
     super.initState();
     _getUserDetails();
+    _getUserDetailsDriver();
+
+    print('Userhone: ${widget.userId}, Usernameddd: ${widget.username}');
+
   }
+
+
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _initializeData();
   }
-
   Future<void> _initializeData() async {
     try {
       final data = await ApiService.fetchTripSheet(
@@ -377,6 +383,32 @@ class _HomescreenState extends State<Homescreen> {
       // });
     }
   }
+
+  void _getUserDetailsDriver() async {
+    try {
+      print('Fetching user details for username: ${widget.username}');
+      final getUserDetailsResult = await ApiService.getDriverProfile(widget.username);
+
+      if (getUserDetailsResult != null) {
+        print('User details fetched successfullyyyyy: $getUserDetailsResult');
+        var Driverusername = getUserDetailsResult['username'];
+        var DriverEmail = getUserDetailsResult['Email'];
+        var Driverphone = getUserDetailsResult['Mobileno'];
+        var Driverpass = getUserDetailsResult['userpassword'];
+        setState(() {
+          username = Driverusername ;
+          password = Driverpass;
+          phonenumber = Driverphone;
+          email = DriverEmail;
+        });
+      } else {
+        print('Failed to retrieve user detailssss.');
+      }
+    } catch (e) {
+      print('Error fetching user details: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -469,7 +501,7 @@ class _HomescreenState extends State<Homescreen> {
               title: Text('My Rides'),
               onTap: () {
                 // Navigator.push(context, ()=>)
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>Ridescreen()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>Ridescreen(userId: widget.userId,username: widget.username,)));
               },
             ),
             ListTile(
@@ -515,7 +547,8 @@ class _HomescreenState extends State<Homescreen> {
               leading: Icon(Icons.supervised_user_circle_rounded),
               title: Text('History'),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>History()));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>History(userId: widget.userId,username: widget.username,tripSheetData: tripSheetData, // Pass tripSheetData to History
+                )));
               },
             ),
             ListTile(

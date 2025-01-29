@@ -31,4 +31,48 @@ router.get('/tripsheetfilter/:username', (req, res) => {
     }
 });
 
+
+//filterdata start
+router.post('/tripsheetfilterdate', (req, res) => {
+    const { username, startDate, endDate } = req.body;
+
+    console.log('Incoming Request:', { username, startDate, endDate });
+
+    const formattedFromDate = moment(startDate).format('YYYY-MM-DD');
+    const formattedToDate = moment(endDate).format('YYYY-MM-DD');
+
+    console.log('Formatted Dates:', { formattedFromDate, formattedToDate });
+
+    try {
+        const query = `
+            SELECT *
+            FROM tripsheet
+            WHERE driverName = ?
+              AND startdate >= DATE_ADD(?, INTERVAL 0 DAY)
+              AND startdate <= DATE_ADD(?, INTERVAL 1 DAY)
+        `;
+
+        db.query(query, [username, formattedFromDate, formattedToDate], (err, results) => {
+            if (err) {
+                console.error('Database Error:', err);
+                res.status(500).json({ message: 'Internal server error' });
+                return;
+            }
+
+            if (results.length === 0) {
+                res.status(404).json({ message: 'Trip sheet not found' });
+                return;
+            }
+
+            console.log('Query Results:', results);
+            res.status(200).json(results); // Send filtered data
+        });
+    } catch (err) {
+        console.error('Unexpected Error:', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+//filterdata end
+
+
 module.exports = router;

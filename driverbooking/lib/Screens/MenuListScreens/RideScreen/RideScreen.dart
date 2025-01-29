@@ -1,14 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:driverbooking/Networks/Api_Service.dart';
 
 class Ridescreen extends StatefulWidget {
-  const Ridescreen({super.key});
+  final String userId ;
+  final String username;
 
+  // const Ridescreen({super.key, required this.userId});
+  const Ridescreen({Key? key, required this.userId, required this.username})
+      : super(key: key);
   @override
   State<Ridescreen> createState() => _RidescreenState();
 }
 
 class _RidescreenState extends State<Ridescreen> {
+  List<Map<String, dynamic>> tripSheetData = [];
+  bool isLoading = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeData();
+  }
+  Future<void> _initializeData() async {
+    try {
+      final data = await ApiService.fetchTripSheetClosedRides(
+        userId: widget.userId,
+        username: widget.username,
+      );
+      setState(() {
+        tripSheetData = data;
+      });
+    } catch (e) {
+      print('Error initializing data: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,30 +114,61 @@ class _RidescreenState extends State<Ridescreen> {
         //   ],
         // ),
 
-        body: const SingleChildScrollView(
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.start,
+        // body: const SingleChildScrollView(
+        //   child: Column(
+        //     // mainAxisAlignment: MainAxisAlignment.start,
+        //     children: [
+        //       CustomCard(
+        //         name: 'Ajay',
+        //         image: AppConstants.sample,
+        //         vehicle: 'BMW',
+        //         price: '\$300.50',
+        //         dateTime: 'Tue 19 Nov, 2024 11:05 am',
+        //         startAddress: '9 Nastaf, Saidhapet, Chennai 32',
+        //         endAddress: '10 Thiruvalluvar puram, west Tambaram, Chennai 45',
+        //       ),
+        //       CustomCard(
+        //         name: 'Rohit',
+        //         image: AppConstants.sample,
+        //         vehicle: 'Mercedes',
+        //         price: '\$500.75',
+        //         dateTime: 'Wed 20 Nov, 2024 9:00 am',
+        //         startAddress: '12 MG Road, Bangalore',
+        //         endAddress: '24 Residency Road, Bangalore',
+        //       ),
+        //     ],
+        //   ),
+        // )
+
+      body: isLoading
+          ? const Center(
+        child: CircularProgressIndicator(),
+      )
+          : tripSheetData.isEmpty
+          ? const Center(
+        child: Text('No trip sheet data found.'),
+      )
+          : ListView.builder(
+        itemCount: tripSheetData.length,
+        itemBuilder: (context, index) {
+          final trip = tripSheetData[index];
+          return Column(
             children: [
-              CustomCard(
-                name: 'Ajay',
-                image: AppConstants.sample,
-                vehicle: 'BMW',
-                price: '\$300.50',
-                dateTime: 'Tue 19 Nov, 2024 11:05 am',
-                startAddress: '9 Nastaf, Saidhapet, Chennai 32',
-                endAddress: '10 Thiruvalluvar puram, west Tambaram, Chennai 45',
-              ),
-              CustomCard(
-                name: 'Rohit',
-                image: AppConstants.sample,
-                vehicle: 'Mercedes',
-                price: '\$500.75',
-                dateTime: 'Wed 20 Nov, 2024 9:00 am',
-                startAddress: '12 MG Road, Bangalore',
-                endAddress: '24 Residency Road, Bangalore',
+              buildSection(
+                context,
+                title: '${trip['duty']}',
+                dateTime: ' ${trip['tripid']}',
+                buttonText: '${trip['apps']}',
+                onTap: () {
+
+                },
               ),
             ],
-          ),
-        ));
+          );
+        },
+      ),
+
+    );
+
   }
 }

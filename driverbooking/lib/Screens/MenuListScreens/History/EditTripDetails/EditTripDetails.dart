@@ -2,9 +2,14 @@ import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:signature/signature.dart';
+import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class EditTripDetails extends StatefulWidget {
-  const EditTripDetails({super.key});
+
+  final String tripId;
+  const EditTripDetails({super.key, required this.tripId});
 
   @override
   State<EditTripDetails> createState() => _EditTripDetailsState();
@@ -19,7 +24,6 @@ class _EditTripDetailsState extends State<EditTripDetails> {
   final TextEditingController reportTimeController = TextEditingController();
   final TextEditingController dutyTypeController = TextEditingController();
   final TextEditingController vehicleTypeController = TextEditingController();
-  final TextEditingController companyNameController = TextEditingController();
   final TextEditingController guestNameController = TextEditingController();
   final TextEditingController contactNumberController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
@@ -32,6 +36,114 @@ class _EditTripDetailsState extends State<EditTripDetails> {
     penStrokeWidth: 2.0,
     exportBackgroundColor: Colors.white,
   );
+  @override
+  void initState() {
+    super.initState();
+    _loadTripDetails();
+    print('Received tripId: ${widget.tripId}'); // Print the tripId for debugging
+
+
+  }
+
+
+  // Future<void> _fetchTripDetails() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //
+  //   String? tripDetailsJson = prefs.getString('tripDetails');
+  //
+  //   if (tripDetailsJson != null) {
+  //     Map<String, dynamic> tripDetails = json.decode(tripDetailsJson);
+  //
+  //     // Print out the entire fetched data to check if all values are present
+  //           var tripIdvalue = tripDetails['tripid'].toString();
+  //           var tripdatevalue = tripDetails['tripsheetdate'].toString();
+  //           var reporttimevalue = tripDetails['reporttime'];
+  //           var dutyvalue = tripDetails['duty'].toString();
+  //           var vectypeValue = tripDetails['vehType'].toString();
+  //           var guestnamevalue = tripDetails['guestname'].toString();
+  //           var guestmobilenovalue = tripDetails['guestmobileno'].toString();
+  //           var 	pickupvalue = tripDetails['address1'].toString();
+  //           var droplocationvalue = tripDetails['useage'].toString();
+  //           var parkingvalue = tripDetails['parking'].toString();
+  //           var tollvalue = tripDetails['toll'].toString();
+  //
+  //
+  //     // print("dutyyyy: ${tripDetails['hcl']}");
+  //     setState(() {
+  //       // Update the controllers with the values
+  //       tripSheetNumberController.text = tripIdvalue ?? '';
+  //               tripDateController.text = tripdatevalue ?? '';
+  //               reportTimeController.text = reporttimevalue?? '';
+  //               vehicleTypeController.text = vectypeValue ?? '';
+  //               dutyTypeController.text = dutyvalue ?? '';
+  //               guestNameController.text = guestnamevalue ?? '';
+  //               contactNumberController.text = guestmobilenovalue ?? '';
+  //               addressController.text = pickupvalue ?? '';
+  //               dropLocationController.text = droplocationvalue ?? '';
+  //               tollAmountController.text = parkingvalue ?? '';
+  //               parkingAmountController.text = tollvalue ?? '';
+  //
+  //
+  //     });
+  //   } else {
+  //     print('No trip details found in shared preferences.');
+  //   }
+  // }
+
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // _loadTripDetails();
+  //   // _fetchTripDetails();
+  // }
+
+
+  Future<void> _loadTripDetails() async {
+    try {
+      // Fetch trip details from the API
+      final tripDetails = await ApiService.fetchTripDetails(widget.tripId);
+      print('Trip details fetchedd: $tripDetails');
+      if (tripDetails != null) {
+
+        var tripIdvalue = tripDetails['tripid'].toString();
+        var tripdatevalue = tripDetails['tripsheetdate'].toString();
+        var reporttimevalue = tripDetails['reporttime'].toString();;
+        var dutyvalue = tripDetails['duty'].toString();
+        var vectypeValue = tripDetails['vehType'].toString();
+        var guestnamevalue = tripDetails['guestname'].toString();
+        var guestmobilenovalue = tripDetails['guestmobileno'].toString();
+        var 	pickupvalue = tripDetails['address1'].toString();
+        var droplocationvalue = tripDetails['useage'].toString();
+        var parkingvalue = tripDetails['parking'].toString();
+        var tollvalue = tripDetails['toll'].toString();
+
+
+        print("dutyyyy: ${tripIdvalue}");
+        setState(() {
+          // Update the controllers with the values
+          tripSheetNumberController.text = tripIdvalue ?? '';
+          tripDateController.text = tripdatevalue ?? '';
+          reportTimeController.text = reporttimevalue?? '';
+          vehicleTypeController.text = vectypeValue ?? '';
+          dutyTypeController.text = dutyvalue ?? '';
+          guestNameController.text = guestnamevalue ?? '';
+          contactNumberController.text = guestmobilenovalue ?? '';
+          addressController.text = pickupvalue ?? '';
+          dropLocationController.text = droplocationvalue ?? '';
+          tollAmountController.text = parkingvalue ?? '';
+          parkingAmountController.text = tollvalue ?? '';
+
+
+        });
+
+      } else {
+        print('No trip details found.');
+      }
+    } catch (e) {
+      print('Error loading trip details: $e');
+    }
+  }
 
   Future<void> _saveSignature() async {
     if (_signatureController.isNotEmpty) {
@@ -162,13 +274,12 @@ class _EditTripDetailsState extends State<EditTripDetails> {
             _buildInputField("Duty Type", dutyTypeController, isEnabled: false),
             _buildInputField("Vehicle Type", vehicleTypeController, isEnabled: false),
             const SizedBox(height: 16),
-            buildSectionTitle("Company and Guest"),
-            _buildInputField("Company Name", companyNameController, isEnabled: false),
+            buildSectionTitle("Guest Information"),
             _buildInputField("Guest Name", guestNameController, isEnabled: false),
             _buildInputField("Contact Number", contactNumberController, isEnabled: false),
             const SizedBox(height: 16),
             buildSectionTitle("Locations"),
-            _buildInputField("Address", addressController, isEnabled: false),
+            _buildInputField("Pickup Location ", addressController, isEnabled: false),
             _buildInputField("Drop Location", dropLocationController, isEnabled: false),
             const SizedBox(height: 16),
             buildSectionTitle("Toll and Parking"),

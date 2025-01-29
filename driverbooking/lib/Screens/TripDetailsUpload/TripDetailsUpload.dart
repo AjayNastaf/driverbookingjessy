@@ -162,7 +162,8 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   int? _lastSelectedButton; // Tracks which button was last used
   final ImagePicker _picker = ImagePicker();
   Map<String, dynamic>? tripDetails;
-
+  String? duty;
+  int? hcl;
 
   Future<void> _fetchTripDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -182,7 +183,12 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       print("vehType: ${tripDetails['vehType']}");
       print("startdate: ${tripDetails['startdate']}");
       print("closeDate: ${tripDetails['closeDate']}");
+      print("dutyyyy: ${tripDetails['duty']}");
+      print("Hybriddata: ${tripDetails['Hybriddata']}");
 
+      hcl = tripDetails['Hybriddata']; // Assuming `hcl` is part of the trip details
+      duty = tripDetails['duty']; // Assuming `duty` is part of the trip details
+      // print("dutyyyy: ${tripDetails['hcl']}");
       setState(() {
         // Update the controllers with the values
         guestMobileController.text = tripDetails['guestmobileno'] ?? 'Not available';
@@ -606,6 +612,32 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                       } catch (error) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text("Error uploading data: $error")),
+                        );
+                      }
+
+                      // Extract values from the controller and other sources
+                      final startKm = startKmController.text;
+                      final closeKm = closeKmController.text;
+                      // final hcldata = 0; // Replace with the actual value
+                      final dutyValue = duty ?? ""; // Use the fetched duty value (default to "Local" if null)
+                      final hclValue = hcl ?? 0; // Use the fetched hcl value (default to 0 if null)
+
+                      try {
+                        // Call the API service
+                        await ApiService.updateKmTripDetailsUpload(
+                          tripId: widget.tripId,
+                          startKm: startKm,
+                          closeKm: closeKm,
+                          hcl: hclValue,
+                          duty: dutyValue,
+                        );
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("Kilometer details updated successfully")),
+                        );
+                      } catch (error) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Error updating data: $error")),
                         );
                       }
                     },

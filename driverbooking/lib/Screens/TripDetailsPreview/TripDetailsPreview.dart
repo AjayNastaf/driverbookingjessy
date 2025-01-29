@@ -1,3 +1,4 @@
+import 'package:driverbooking/Networks/Api_Service.dart';
 import 'package:driverbooking/Screens/TollParkingUpload/TollParkingUpload.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
@@ -36,60 +37,55 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
   String? endingImageUrl;
   bool isLoading = true;
 
-  Map<String, dynamic>? tripDetails;
 
-  Future<void> _fetchTripDetails() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    String? tripDetailsJson = prefs.getString('tripDetails');
-
-    if (tripDetailsJson != null) {
-      Map<String, dynamic> tripDetails = json.decode(tripDetailsJson);
-
-      // Print out the entire fetched data to check if all values are present
-      print("Fetched trip details: $tripDetails");
-
-      // Check each value individually
-      print("guestname: ${tripDetails['guestname']}");
-      print("tripid: ${tripDetails['tripid']}");
-      print("guestmobileno: ${tripDetails['guestmobileno']}");
-      print("vehType: ${tripDetails['vehType']}");
-      print("startdate: ${tripDetails['startdate']}");
-      print("closeDate: ${tripDetails['closeDate']}");
-
-      setState(() {
-        // Update the controllers with the values
-        guestMobileController.text = tripDetails['guestmobileno'] ?? 'Not available';
-        guestNameController.text = tripDetails['guestname'] ?? 'Not available';
-        tripIdController.text = tripDetails['tripid'].toString()  ?? 'Not available';
-        vehicleTypeController.text = tripDetails['vehType'] ?? 'Not available';
-        startDateController.text = tripDetails['startdate'].toString() ?? 'Not available';
-        closeDateController.text = tripDetails['closeDate'].toString() ?? 'Not available';
-        startKmController.text =tripDetails['startkm']()?? 'Not Available';
-        closeKmController.text =tripDetails['closekm']?? 'Not Available';
-        // imageUrl = tripDetails['imageUrl'] ?? '';
-
-        // Print after setting the text to controllers to verify
-        print("Updated guestNameController text: ${guestNameController.text}");
-        print("Updated tripIdController text: ${tripIdController.text}");
-        print("Updated guestMobileController text: ${guestMobileController.text}");
-        print("Updated vehicleTypeController text: ${vehicleTypeController.text}");
-
-      });
-    } else {
-      print('No trip details found in shared preferences.');
-    }
-  }
 
 
   @override
   void initState() {
     super.initState();
-    // _loadTripDetails();
-    _fetchTripDetails();
+    _loadTripDetails();
+
       fetchImages(); // Make sure fetchImages is being called
 
   }
+
+  Future<void> _loadTripDetails() async {
+    try {
+      // Fetch trip details from the API
+      final tripDetails = await ApiService.fetchTripDetails(widget.tripId);
+      print('Trip details fetchedd: $tripDetails');
+      if (tripDetails != null) {
+
+        var tripIdvalue = tripDetails['tripid'].toString();
+        var guestNameValue = tripDetails['guestname'];
+        var guestmobilevalue = tripDetails['guestmobileno'].toString();
+        var vectypeValue = tripDetails['vehType'].toString();
+        var startkmvalue = tripDetails['startkm'].toString();
+        var closekmvalue = tripDetails['closekm'].toString();
+        var startdatevalue = tripDetails['startdate'].toString();
+        var closedatevalue = tripDetails['closedate'].toString();
+        print('Trip details guest: $guestNameValue');
+
+        setState(() {
+          // Populate the form fields with the fetched data
+          tripIdController.text = tripIdvalue ?? '';
+          guestNameController.text = guestNameValue ?? '';
+          guestMobileController.text = guestmobilevalue?? '';
+          vehicleTypeController.text = vectypeValue ?? '';
+          startKmController.text = startkmvalue ?? '';
+          closeKmController.text = closekmvalue ?? '';
+          startDateController.text = startdatevalue ?? '';
+          closeDateController.text = closedatevalue ?? '';
+        });
+
+      } else {
+        print('No trip details found.');
+      }
+    } catch (e) {
+      print('Error loading trip details: $e');
+    }
+  }
+
 
 
 
@@ -283,16 +279,15 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
 
               // Starting Kilometer
 
-                  TextField(
-                      readOnly: true,
-                      enabled: false,
-                      controller: startKmController,
-                      // enabled: isStartKmEnabled,
-                      decoration: const InputDecoration(
-                        labelText: "Starting Kilometer",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
+              TextField(
+                readOnly: true, // Makes the field read-only
+                enabled: false, // Disables editing
+                controller: startKmController,
+                decoration: const InputDecoration(
+                  labelText: "Starting Kilometer",
+                  border: OutlineInputBorder(),
+                ),
+              ),
               Image.asset(
                 AppConstants.intro_one, // Replace with your image path
                 height: 100, // Set the desired height

@@ -50,6 +50,8 @@ dependencies:
   geolocator: ^9.0.2
   dio: ^5.0.0  # Or the latest version
   shared_preferences: ^2.0.15
+  permission_handler: ^11.1.0
+
 
 
 

@@ -90,7 +90,8 @@ class _Login_ScreenState extends State<Login_Screen> {
                   MaterialPageRoute(builder: (context) => Homescreen(userId: state.userId ,username: _usernameController.text,)),
               );
               showSuccessSnackBar(context, "Login Successful! User ID: ${state.userId}");
-
+              print('Navigating to HomeScreen with userId: ${state.userId}');
+              print('Navigating to HomeScreen with username: ${_usernameController.text}');
               // Navigator.pushReplacement(
               //   context,
               //   MaterialPageRoute(builder: (context) => Introscreenmain(userId: state.userId)),
