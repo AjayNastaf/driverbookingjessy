@@ -10,7 +10,7 @@ import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:driverbooking/Networks/Api_Service.dart';
-
+import 'dart:async';
 
 class Customerlocationreached extends StatefulWidget {
   final String tripId;
@@ -102,6 +102,33 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
   }
 
+  StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
+
+  Future<void> _initializeLocationTracking() async {
+    Location location = Location();
+
+    bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) return;
+    }
+
+    PermissionStatus permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) return;
+    }
+
+    final initialLocation = await location.getLocation();
+    _updateCurrentLocation(initialLocation);
+
+    _locationStream = location.onLocationChanged;
+    _locationStream!.listen((newLocation) {
+      _updateCurrentLocation(newLocation);
+    });
+  }
+
+
 
   void _updateCameraPosition() {
     if (_currentLatLng != null) {
@@ -189,30 +216,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
 
 
-  Future<void> _initializeLocationTracking() async {
-    Location location = Location();
-
-    bool serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) return;
-    }
-
-    PermissionStatus permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) return;
-    }
-
-    final initialLocation = await location.getLocation();
-    _updateCurrentLocation(initialLocation);
-
-    _locationStream = location.onLocationChanged;
-    _locationStream!.listen((newLocation) {
-      _updateCurrentLocation(newLocation);
-    });
-  }
-
   // void _updateCurrentLocation(LocationData locationData) {
   //   if (locationData.latitude != null && locationData.longitude != null) {
   //     final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
@@ -291,6 +294,18 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
     return polylineCoordinates;
   }
+
+
+  @override
+  void dispose() {
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
+    _locationSubscription?.cancel(); // Stop tracking when widget is removed
+
+    super.dispose();
+  }
+
 
 
   @override

@@ -611,6 +611,7 @@ import 'package:driverbooking/Bloc/AppBloc_Events.dart';
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driverbooking/Networks/Api_Service.dart';
+import 'dart:async';
 
 class TrackingPage extends StatefulWidget {
   final String address;
@@ -716,6 +717,7 @@ String? Statusvalue;
     }
   }
 
+  StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
 
   Future<void> _initializeLocationTracking() async {
     Location location = Location();
@@ -934,121 +936,6 @@ String? Statusvalue;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // Future<void> _saveLocationToDatabase(double latitude, double longitude) async {
-  //   const String apiUrl = '${AppConstants.baseUrl}/addvehiclelocation'; // Replace with your API endpoint
-  //   String createdAt = DateTime.now().toIso8601String().split('T').first; // "2024-12-27" format
-  //
-  //   // Print statements to debug
-  //   print('Latitude: $latitude');
-  //   print('Longitude: $longitude');
-  //   print('Created At (Date Only): $createdAt');
-  //
-  //   // Check if the values are different from the previous ones
-  //   if (latitude == _previousLatitude && longitude == _previousLongitude ) {
-  //     print('Location is the same as previous. Skipping API call.');
-  //     return; // Skip API call if values are the same
-  //   }
-  //
-  //   try {
-  //     print('Sending POST request to API...');
-  //     final response = await Dio().post(apiUrl, data: {
-  //       'latitudeloc': latitude,
-  //       'longitutdeloc': longitude,
-  //       'created_at': createdAt,
-  //       'vehicleno': '7689', // Add the created_at field (date only)
-  //     });
-  //
-  //     print('API2 : ${response}');
-  //     print('API Response Status Code: ${response.statusCode}');
-  //
-  //     if (response.statusCode == 200) {
-  //       print('Location saved successfullyyyyyyyyyyyy!');
-  //       setState(() {
-  //         _lastSavedLatLng = LatLng(latitude, longitude);
-  //         _lastSavedTime = DateTime.now(); // Update last saved time
-  //         // Update previous values after successful API call
-  //         _previousLatitude = latitude;
-  //         _previousLongitude = longitude;
-  //         // _previousCreatedAt = createdAt;
-  //       });
-  //     } else {
-  //       print('Failed to save location. Response: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('Error saving location: $e');
-  //   }
-  // }
-
-
-
-  // Function to send location data to API
-  // Future<void> _saveLocationToDatabase() async {
-  //   final Map<String, dynamic> requestData = {
-  //     "vehicleno": '7689',
-  //     "latitudeloc": latitude,
-  //     "longitutdeloc": longitude,
-  //     "Trip_id": "12345",
-  //     // Dummy Trip ID
-  //     "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
-  //     // Current Date
-  //     "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
-  //     // Current Time
-  //     "Trip_Status": "Active",
-  //     "Tripstarttime": "08:00 AM",
-  //     "TripEndTime": "10:00 AM",
-  //     "created_at": DateTime.now().toIso8601String(),
-  //   };
-  //
-  //   try {
-  //     final response = await http.post(
-  //       Uri.parse("${AppConstants.baseUrl}/addvehiclelocation"),
-  //       // Replace with your backend URL
-  //       headers: {"Content-Type": "application/json"},
-  //       body: json.encode(requestData),
-  //     );
-  //
-  //     if (response.statusCode == 200) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text("Lat Long Saved Successfully")),
-  //       );
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text("Failed to Save Lat Long")),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     print("Error sending location data: $e");
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text("Error occurred")),
-  //     );
-  //   }
-  // }
-
-
-
-
-
-
-
-
-
-
-
-
-
   void _clearOtpInputs() {
     for (var controller in _otpControllers) {
       controller.clear();
@@ -1060,6 +947,8 @@ String? Statusvalue;
     for (var controller in _otpControllers) {
       controller.dispose();
     }
+    _locationSubscription?.cancel(); // Stop tracking when widget is removed
+
     super.dispose();
   }
 
@@ -1077,6 +966,8 @@ String? Statusvalue;
 
       if (response.statusCode == 200) {
         print('Status updated successfully');
+        // Stop location tracking before navigating
+        _locationSubscription?.cancel();
         Navigator.push(
           context,
           MaterialPageRoute(
