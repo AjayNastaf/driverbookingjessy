@@ -840,7 +840,7 @@ String? Statusvalue;
 
     try {
       final response = await http.post(
-        Uri.parse("${AppConstants.baseUrl}/addvehiclelocation"),
+        Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
         headers: {"Content-Type": "application/json"},
         body: json.encode(requestData),
       );
@@ -852,10 +852,12 @@ String? Statusvalue;
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(content: Text("Lat Long Saved Successfullyyyyyyyyyyyyyyyy")),
         // );
+        print("Lat Long Saved Successfully");
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to Save Lat Long")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Failed to Save Lat Long")),
+        // );
+        print("Failed to Save Lat Long");
       }
     } catch (e) {
       print("Error sending location data: $e"); // Debugging print
