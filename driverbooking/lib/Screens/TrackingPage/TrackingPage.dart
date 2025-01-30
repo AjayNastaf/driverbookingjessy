@@ -1229,6 +1229,7 @@ String? Statusvalue;
                               //         fontSize: 20.0, color: Colors.white),
                               //   ),
                               // ),
+
                               ElevatedButton(
                                 onPressed: () async {
                                   await _handleStartRide(context);

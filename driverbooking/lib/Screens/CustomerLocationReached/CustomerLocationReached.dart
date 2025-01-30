@@ -9,6 +9,7 @@ import 'package:driverbooking/GlobalVariable/global_variable.dart' as globals;
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:driverbooking/Networks/Api_Service.dart';
 
 
 class Customerlocationreached extends StatefulWidget {
@@ -32,14 +33,49 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   bool isStartRideEnabled = false;
   String? latitude;
   String? longitude;
-
+  bool isRideStopped = false; // Initially, show "Stop Ride" button
+  String? vehiclevalue;
+  String? Statusvalue;
   @override
   void initState() {
     super.initState();
     _initializeLocationTracking();
-
+    _loadTripDetails();
     // _getLatLngFromAddress(globals.dropLocation);
   }
+
+  Future<void> _loadTripDetails() async {
+    try {
+      // Fetch trip details from the API
+      final tripDetails = await ApiService.fetchTripDetails(widget.tripId!);
+      print('Raw Trip details fetched: $tripDetails'); // Debugging
+
+      if (tripDetails != null) {
+        // Remove any accidental spaces or tabs in key names
+        var vehicleNo = tripDetails['vehRegNo']?.toString();
+        var tripStatusValue = tripDetails['apps'];
+
+        print('Vehicle No: $vehicleNo');
+        print('Trip Status: $tripStatusValue');
+
+        if((tripStatusValue != null) && (vehicleNo   != null)) {
+          setState(() {
+            vehiclevalue = vehicleNo;
+            Statusvalue = tripStatusValue;
+          });
+          print('Updated vehiclevalue: $vehiclevalue');
+        } else {
+          print('Error: vehicleNo is null');
+        }
+      } else {
+        print('No trip details found.');
+      }
+    } catch (e) {
+      print('Error loading trip details: $e');
+    }
+  }
+
+
 
   Future<void> _getLatLngFromAddress(String dropLocation) async {
     const String apiKey = AppConstants.ApiKey; // Replace with your API Key
@@ -66,6 +102,93 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
   }
 
+
+  void _updateCameraPosition() {
+    if (_currentLatLng != null) {
+      _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: _currentLatLng!,
+            zoom: 15,
+          ),
+        ),
+      );
+    }
+  }
+
+  // Function to send location data to API
+  Future<void> _saveLocationToDatabase(double latitude, double longitude) async {
+    print("Saving location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
+
+    final Map<String, dynamic> requestData = {
+      "vehicleno": vehiclevalue,
+      "latitudeloc": latitude,
+      "longitutdeloc": longitude,
+      "Trip_id": widget.tripId, // Dummy Trip ID
+      "Runing_Date": DateTime.now().toIso8601String().split("T")[0], // Current Date
+      "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1], // Current Time
+      "Trip_Status": Statusvalue,
+      "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
+      "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
+      "created_at": DateTime.now().toIso8601String(),
+    };
+
+    print("Request Data: ${json.encode(requestData)}"); // Debugging print
+
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(requestData),
+      );
+
+      print("Response Status Codeee: ${response.statusCode}"); // Debugging print
+      print("Response Body: ${response.body}"); // Debugging print
+
+      if (response.statusCode == 200) {
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Lat Long Saved Successfullyyyyyyyyyyyyyyyy")),
+        // );
+        print("Lat Long Saved Successfully");
+      } else {
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Failed to Save Lat Long")),
+        // );
+        print("Failed to Save Lat Long");
+      }
+    } catch (e) {
+      print("Error sending location data: $e"); // Debugging print
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error occurred")),
+      );
+    }
+  }
+
+
+
+  void _updateCurrentLocation(LocationData locationData) {
+    if (locationData.latitude != null && locationData.longitude != null) {
+      print("Received Location: ${locationData.latitude}, ${locationData.longitude}");
+
+      final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
+
+      setState(() {
+        _currentLatLng = newLatLng;
+      });
+
+      _fetchRoute();
+      _updateCameraPosition();
+      // _saveLocationToDatabase(locationData.latitude!, locationData.longitude!);
+      _saveLocationToDatabase(locationData.latitude!, locationData.longitude!);
+
+    } else {
+      print("Location data is null");
+    }
+  }
+
+
+
+
   Future<void> _initializeLocationTracking() async {
     Location location = Location();
 
@@ -90,24 +213,24 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     });
   }
 
-  void _updateCurrentLocation(LocationData locationData) {
-    if (locationData.latitude != null && locationData.longitude != null) {
-      final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
-
-      if (mounted) {
-        setState(() {
-          _currentLatLng = newLatLng;
-        });
-      }
-
-      // setState(() {
-      //   _currentLatLng = newLatLng;
-      // });
-
-      _fetchRoute();
-      _updateCameraPosition();
-    }
-  }
+  // void _updateCurrentLocation(LocationData locationData) {
+  //   if (locationData.latitude != null && locationData.longitude != null) {
+  //     final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
+  //
+  //     if (mounted) {
+  //       setState(() {
+  //         _currentLatLng = newLatLng;
+  //       });
+  //     }
+  //
+  //     // setState(() {
+  //     //   _currentLatLng = newLatLng;
+  //     // });
+  //
+  //     _fetchRoute();
+  //     _updateCameraPosition();
+  //   }
+  // }
 
   Future<void> _fetchRoute() async {
     if (_currentLatLng == null) return;
@@ -169,18 +292,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     return polylineCoordinates;
   }
 
-  void _updateCameraPosition() {
-    if (_currentLatLng != null) {
-      _mapController?.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: _currentLatLng!,
-            zoom: 15,
-          ),
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +381,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               SizedBox(height: 32),
                               Text(
                                 // ' ${globals.dropLocation}',
-    '$dropLocation',
+                                  '$dropLocation',
                                 style: TextStyle(color: Colors.grey.shade800, fontSize: 20.0),
                               ),
                             ],
@@ -278,6 +389,57 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 20.0,),
+                    if (!isRideStopped)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              isRideStopped = true; // Hide Stop, Show Start
+                            });
+
+
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Stop Ride',
+                            style: TextStyle(fontSize: 20.0, color: Colors.white),
+                          ),
+                        ),
+                      ),
+
+                    // Start Ride Button (Shown after Stop Ride is clicked)
+                    if (isRideStopped)
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              isRideStopped = false; // Hide Start, Show Stop
+                            });
+
+
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Start Ride',
+                            style: TextStyle(fontSize: 20.0, color: Colors.white),
+                          ),
+                        ),
+                      ),
                     SizedBox(height: 20.0,),
                     SizedBox(
                       width: double.infinity,
@@ -299,6 +461,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                         ),
                       ),
                     ),
+
                   ],
                 ),
               ),
