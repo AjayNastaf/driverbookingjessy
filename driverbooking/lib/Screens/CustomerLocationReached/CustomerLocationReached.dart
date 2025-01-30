@@ -40,11 +40,11 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   void initState() {
     super.initState();
     _initializeLocationTracking();
-    _loadTripDetails();
+    _loadTripDetailsCustomer();
     // _getLatLngFromAddress(globals.dropLocation);
   }
 
-  Future<void> _loadTripDetails() async {
+  Future<void> _loadTripDetailsCustomer() async {
     try {
       // Fetch trip details from the API
       final tripDetails = await ApiService.fetchTripDetails(widget.tripId!);
@@ -117,7 +117,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   }
 
   // Function to send location data to API
-  Future<void> _saveLocationToDatabase(double latitude, double longitude) async {
+  Future<void> _saveLocationToDatabaseCustomer(double latitude, double longitude) async {
     print("Saving location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
 
     final Map<String, dynamic> requestData = {
@@ -178,8 +178,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
       _fetchRoute();
       _updateCameraPosition();
-      // _saveLocationToDatabase(locationData.latitude!, locationData.longitude!);
-      _saveLocationToDatabase(locationData.latitude!, locationData.longitude!);
+      // _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
+      _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
 
     } else {
       print("Location data is null");
