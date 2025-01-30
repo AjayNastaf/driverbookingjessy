@@ -102,7 +102,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
   }
 
-  StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
+  // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
 
   Future<void> _initializeLocationTracking() async {
     Location location = Location();
@@ -301,7 +301,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     for (var controller in _otpControllers) {
       controller.dispose();
     }
-    _locationSubscription?.cancel(); // Stop tracking when widget is removed
+    // _locationSubscription?.cancel(); // Stop tracking when widget is removed
 
     super.dispose();
   }
