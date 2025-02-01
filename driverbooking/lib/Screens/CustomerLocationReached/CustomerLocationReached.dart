@@ -108,7 +108,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
   }
 
-  // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
+  StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
 
   Future<void> _initializeCustomerLocationTracking() async {
     Location location = Location();
@@ -128,8 +128,12 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     final initialLocation = await location.getLocation();
     _updateCustomerCurrentLocation(initialLocation);
 
-    _locationStream = location.onLocationChanged;
-    _locationStream!.listen((newLocation) {
+    // _locationStream = location.onLocationChanged;
+    // _locationStream!.listen((newLocation) {
+    //   _updateCustomerCurrentLocation(newLocation);
+    // });
+    _locationSubscription = location.onLocationChanged.listen((newLocation) {
+      print("New location received: $newLocation");
       _updateCustomerCurrentLocation(newLocation);
     });
   }
@@ -281,12 +285,15 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   }
 
 
+
+
   @override
   void dispose() {
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
-    // _locationSubscription?.cancel(); // Stop tracking when widget is removed
+    // for (var controller in _otpControllers) {
+    //   controller.dispose();
+    // }
+    _locationSubscription!.cancel();
+    _locationSubscription = null;// Remove reference
 
     super.dispose();
   }
@@ -499,12 +506,15 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               _currentLatLng!.latitude,
                               _currentLatLng!.longitude,
                             );
+                              _locationSubscription?.cancel();
+
                             } else {
                               print("Error: _currentLatLng is null");
                             }
                           } else {
                             print("Location already saved, skipping API call.");
                           }
+                          _locationSubscription?.cancel();
 
                           // Navigate to the next screen
                           Navigator.push(
