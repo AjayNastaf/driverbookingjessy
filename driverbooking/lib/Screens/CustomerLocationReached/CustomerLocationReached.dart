@@ -36,12 +36,18 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   bool isRideStopped = false; // Initially, show "Stop Ride" button
   String? vehiclevalue;
   String? Statusvalue;
+  bool isLocationSaved = false; // Add this flag at the class level
+
+  // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
+
   @override
   void initState() {
     super.initState();
-    _initializeLocationTracking();
+    _initializeCustomerLocationTracking();
     _loadTripDetailsCustomer();
     // _getLatLngFromAddress(globals.dropLocation);
+    // _locationSubscription?.cancel(); // ✅ Safe way to cancel without crashing
+    // _locationSubscription = null;
   }
 
   Future<void> _loadTripDetailsCustomer() async {
@@ -104,7 +110,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
   // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
 
-  Future<void> _initializeLocationTracking() async {
+  Future<void> _initializeCustomerLocationTracking() async {
     Location location = Location();
 
     bool serviceEnabled = await location.serviceEnabled();
@@ -120,17 +126,17 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
 
     final initialLocation = await location.getLocation();
-    _updateCurrentLocation(initialLocation);
+    _updateCustomerCurrentLocation(initialLocation);
 
     _locationStream = location.onLocationChanged;
     _locationStream!.listen((newLocation) {
-      _updateCurrentLocation(newLocation);
+      _updateCustomerCurrentLocation(newLocation);
     });
   }
 
 
 
-  void _updateCameraPosition() {
+  void _updateCustomerCameraPosition() {
     if (_currentLatLng != null) {
       _mapController?.animateCamera(
         CameraUpdate.newCameraPosition(
@@ -193,7 +199,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
 
 
-  void _updateCurrentLocation(LocationData locationData) {
+  void _updateCustomerCurrentLocation(LocationData locationData) {
     if (locationData.latitude != null && locationData.longitude != null) {
       print("Received Location: ${locationData.latitude}, ${locationData.longitude}");
 
@@ -203,8 +209,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         _currentLatLng = newLatLng;
       });
 
-      _fetchRoute();
-      _updateCameraPosition();
+      _fetchRouteCustomer();
+      _updateCustomerCameraPosition();
       // _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
       _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
 
@@ -214,28 +220,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   }
 
 
-
-
-  // void _updateCurrentLocation(LocationData locationData) {
-  //   if (locationData.latitude != null && locationData.longitude != null) {
-  //     final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
-  //
-  //     if (mounted) {
-  //       setState(() {
-  //         _currentLatLng = newLatLng;
-  //       });
-  //     }
-  //
-  //     // setState(() {
-  //     //   _currentLatLng = newLatLng;
-  //     // });
-  //
-  //     _fetchRoute();
-  //     _updateCameraPosition();
-  //   }
-  // }
-
-  Future<void> _fetchRoute() async {
+  Future<void> _fetchRouteCustomer() async {
     if (_currentLatLng == null) return;
 
     const String apiKey = AppConstants.ApiKey;
@@ -250,7 +235,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         if (routes.isNotEmpty) {
           final polyline = routes[0]['overview_polyline']['points'] as String;
           setState(() {
-            _routeCoordinates = _decodePolyline(polyline);
+            _routeCoordinates = _decodePolylineCustomer(polyline);
           });
         } else {
           print('No routes found in API response.');
@@ -263,7 +248,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
   }
 
-  List<LatLng> _decodePolyline(String encoded) {
+  List<LatLng> _decodePolylineCustomer(String encoded) {
     List<LatLng> polylineCoordinates = [];
     int index = 0, len = encoded.length;
     int lat = 0, lng = 0;
@@ -412,9 +397,18 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                           onPressed: () {
                             setState(() {
                               isRideStopped = true; // Hide Stop, Show Start
+                              Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
                             });
 
-
+                            // Call the function to save location with updated status
+                            if (_currentLatLng != null) {
+                              _saveLocationToDatabaseCustomer(
+                                _currentLatLng!.latitude,
+                                _currentLatLng!.longitude,
+                              );
+                            } else {
+                              print("Error: _currentLatLng is null");
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepPurple,
@@ -437,10 +431,19 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                         child: ElevatedButton(
                           onPressed: () {
                             setState(() {
-                              isRideStopped = false; // Hide Start, Show Stop
+                              isRideStopped = false; // Hide Stop, Show Start
+                              Statusvalue = "On_Going"; // Set Trip_Status to "waypoint"
                             });
 
-
+                            // Call the function to save location with updated status
+                            if (_currentLatLng != null) {
+                              _saveLocationToDatabaseCustomer(
+                                _currentLatLng!.latitude,
+                                _currentLatLng!.longitude,
+                              );
+                            } else {
+                              print("Error: _currentLatLng is null");
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
@@ -459,11 +462,59 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
+                        // onPressed: () {
+                        //   // Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+                        //   Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
+                        // },
+                        // onPressed: () {
+                        //   setState(() {
+                        //     Statusvalue = 'Reached'; // Set Trip_Status to "waypoint"
+                        //   });
+                        //
+                        //   // Call the function to save location with updated status
+                        //   if (_currentLatLng != null) {
+                        //     _saveLocationToDatabaseCustomer(
+                        //       _currentLatLng!.latitude,
+                        //       _currentLatLng!.longitude,
+                        //     );
+                        //   } else {
+                        //     print("Error: _currentLatLng is null");
+                        //   }
+                        //   Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
+                        //
+                        // },
+
+                        // bool isLocationSaved = false; // Add this flag at the class level
+
                         onPressed: () {
-                          // Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
-                        },
-                        style: ElevatedButton.styleFrom(
+                          if (!isLocationSaved) { // Check if already saved
+                            setState(() {
+                            Statusvalue = 'Reached'; // Set Trip_Status to "Reached"
+                            isLocationSaved = true;  // Prevent duplicate API calls
+                          });
+
+                          // Call the function to save location with updated status
+                            if (_currentLatLng != null) {
+                              _saveLocationToDatabaseCustomer(
+                              _currentLatLng!.latitude,
+                              _currentLatLng!.longitude,
+                            );
+                            } else {
+                              print("Error: _currentLatLng is null");
+                            }
+                          } else {
+                            print("Location already saved, skipping API call.");
+                          }
+
+                          // Navigate to the next screen
+                          Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => TripDetailsUpload(tripId: widget.tripId,))
+                          );
+                          },
+
+
+                          style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           padding: EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(

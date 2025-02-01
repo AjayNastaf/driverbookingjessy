@@ -738,8 +738,12 @@ String? Statusvalue;
     _updateCurrentLocation(initialLocation);
 
     // Continuous location updates
-    _locationStream = location.onLocationChanged;
-    _locationStream!.listen((newLocation) {
+    // _locationStream = location.onLocationChanged;
+    // _locationStream!.listen((newLocation) {
+    //   _updateCurrentLocation(newLocation);
+    // });
+    _locationSubscription = location.onLocationChanged.listen((newLocation) {
+      print("New location received: $newLocation");
       _updateCurrentLocation(newLocation);
     });
   }
@@ -947,7 +951,8 @@ String? Statusvalue;
     for (var controller in _otpControllers) {
       controller.dispose();
     }
-    // _locationSubscription?.cancel(); // Stop tracking when widget is removed
+    _locationSubscription!.cancel();
+    _locationSubscription = null;// Remove reference
 
     super.dispose();
   }
@@ -966,14 +971,15 @@ String? Statusvalue;
 
       if (response.statusCode == 200) {
         print('Status updated successfully');
-        // Stop location tracking before navigating
-        _locationSubscription?.cancel();
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => Customerlocationreached(tripId:tripId!),
           ),
         );
+        // Stop location tracking before navigating
+        _locationSubscription?.cancel();
       } else {
         print('Failed to update status: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
