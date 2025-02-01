@@ -506,7 +506,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               _currentLatLng!.latitude,
                               _currentLatLng!.longitude,
                             );
-                              _locationSubscription?.cancel();
+                              // _locationSubscription?.cancel();
 
                             } else {
                               print("Error: _currentLatLng is null");
