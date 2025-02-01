@@ -36,8 +36,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   bool isRideStopped = false; // Initially, show "Stop Ride" button
   String? vehiclevalue;
   String? Statusvalue;
-  bool isLocationSaved = false; // Add this flag at the class level
-
+  // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
+  bool _hasSavedEndRideStatus = false;
 
   @override
   void initState() {
@@ -45,7 +45,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     _initializeCustomerLocationTracking();
     _loadTripDetailsCustomer();
     // _getLatLngFromAddress(globals.dropLocation);
-
+    // _locationSubscription?.cancel(); // ✅ Safe way to cancel without crashing
+    // _locationSubscription = null;
   }
 
   Future<void> _loadTripDetailsCustomer() async {
@@ -106,7 +107,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
   }
 
-  StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
+  // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
 
   Future<void> _initializeCustomerLocationTracking() async {
     Location location = Location();
@@ -130,10 +131,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     _locationStream!.listen((newLocation) {
       _updateCustomerCurrentLocation(newLocation);
     });
-    // _locationSubscription = location.onLocationChanged.listen((newLocation) {
-    //   print("New location received: $newLocation");
-    //   _updateCustomerCurrentLocation(newLocation);
-    // });
   }
 
 
@@ -154,6 +151,10 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   // Function to send location data to API
   Future<void> _saveLocationToDatabaseCustomer(double latitude, double longitude) async {
     print("Saving location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
+    if (_hasSavedEndRideStatus) {
+      print("Trip_Status is already saved, skipping database update.");
+      return;
+    }
 
     final Map<String, dynamic> requestData = {
       "vehicleno": vehiclevalue,
@@ -184,6 +185,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         // ScaffoldMessenger.of(context).showSnackBar(
         //   SnackBar(content: Text("Lat Long Saved Successfullyyyyyyyyyyyyyyyy")),
         // );
+        _hasSavedEndRideStatus = true; // Mark as saved
         print("Lat Long Saved Successfully");
       } else {
         // ScaffoldMessenger.of(context).showSnackBar(
@@ -283,15 +285,12 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   }
 
 
-
-
   @override
   void dispose() {
-    // for (var controller in _otpControllers) {
-    //   controller.dispose();
-    // }
-    _locationSubscription!.cancel();
-    _locationSubscription = null;// Remove reference
+    for (var controller in _otpControllers) {
+      controller.dispose();
+    }
+    // _locationSubscription?.cancel(); // Stop tracking when widget is removed
 
     super.dispose();
   }
@@ -437,7 +436,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                           onPressed: () {
                             setState(() {
                               isRideStopped = false; // Hide Stop, Show Start
-                              Statusvalue = "On_Going"; // Set Trip_Status to "waypoint"
+                              Statusvalue = 'On_Going'; // Set Trip_Status to "waypoint"
                             });
 
                             // Call the function to save location with updated status
@@ -449,6 +448,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                             } else {
                               print("Error: _currentLatLng is null");
                             }
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
@@ -489,40 +489,37 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                         //
                         // },
 
-                        // bool isLocationSaved = false; // Add this flag at the class level
-
                         onPressed: () {
-                          if (!isLocationSaved) { // Check if already saved
+                          if (!_hasSavedEndRideStatus) {
                             setState(() {
-                            Statusvalue = 'Reached'; // Set Trip_Status to "Reached"
-                            isLocationSaved = true;  // Prevent duplicate API calls
-                          });
+                              Statusvalue = 'Reached'; // Set Trip_Status to "Reached"
+                              _hasSavedEndRideStatus = true; // Prevent further insertions
+                            });
 
-                          // Call the function to save location with updated status
+                            // Call the function to save location with updated status only once
                             if (_currentLatLng != null) {
                               _saveLocationToDatabaseCustomer(
-                              _currentLatLng!.latitude,
-                              _currentLatLng!.longitude,
-                            );
-
+                                _currentLatLng!.latitude,
+                                _currentLatLng!.longitude,
+                              );
                             } else {
                               print("Error: _currentLatLng is null");
                             }
+
+                            // Navigate to the next screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TripDetailsUpload(tripId: widget.tripId),
+                              ),
+                            );
                           } else {
-                            print("Location already saved, skipping API call.");
+                            print("Trip_Status is already saved, preventing duplicate entry.");
                           }
-
-                          // Navigate to the next screen
-                          Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => TripDetailsUpload(tripId: widget.tripId,))
-                          );
-                          _locationSubscription?.cancel();
-
                         },
 
 
-                          style: ElevatedButton.styleFrom(
+                        style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           padding: EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(

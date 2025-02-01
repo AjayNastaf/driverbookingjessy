@@ -289,13 +289,14 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         SnackBar(content: Text(" Message: ${result['message']}")),
       );
 
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId,)));
 
       // Clear selected images
       setState(() {
         _selectedImage1 = null;
         _selectedImage2 = null;
       });
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId,)));
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to upload images: ${result['message']}")),
