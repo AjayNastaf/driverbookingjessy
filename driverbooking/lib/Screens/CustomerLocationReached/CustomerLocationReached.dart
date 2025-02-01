@@ -38,7 +38,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   String? Statusvalue;
   bool isLocationSaved = false; // Add this flag at the class level
 
-  // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
 
   @override
   void initState() {
@@ -46,8 +45,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     _initializeCustomerLocationTracking();
     _loadTripDetailsCustomer();
     // _getLatLngFromAddress(globals.dropLocation);
-    // _locationSubscription?.cancel(); // ✅ Safe way to cancel without crashing
-    // _locationSubscription = null;
+
   }
 
   Future<void> _loadTripDetailsCustomer() async {
@@ -128,14 +126,14 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     final initialLocation = await location.getLocation();
     _updateCustomerCurrentLocation(initialLocation);
 
-    // _locationStream = location.onLocationChanged;
-    // _locationStream!.listen((newLocation) {
-    //   _updateCustomerCurrentLocation(newLocation);
-    // });
-    _locationSubscription = location.onLocationChanged.listen((newLocation) {
-      print("New location received: $newLocation");
+    _locationStream = location.onLocationChanged;
+    _locationStream!.listen((newLocation) {
       _updateCustomerCurrentLocation(newLocation);
     });
+    // _locationSubscription = location.onLocationChanged.listen((newLocation) {
+    //   print("New location received: $newLocation");
+    //   _updateCustomerCurrentLocation(newLocation);
+    // });
   }
 
 
@@ -506,7 +504,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               _currentLatLng!.latitude,
                               _currentLatLng!.longitude,
                             );
-                              // _locationSubscription?.cancel();
 
                             } else {
                               print("Error: _currentLatLng is null");
@@ -514,14 +511,15 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                           } else {
                             print("Location already saved, skipping API call.");
                           }
-                          _locationSubscription?.cancel();
 
                           // Navigate to the next screen
                           Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => TripDetailsUpload(tripId: widget.tripId,))
                           );
-                          },
+                          _locationSubscription?.cancel();
+
+                        },
 
 
                           style: ElevatedButton.styleFrom(
