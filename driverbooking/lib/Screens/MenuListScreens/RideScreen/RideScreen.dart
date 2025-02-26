@@ -1,6 +1,10 @@
+import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:driverbooking/Bloc/App_Bloc.dart';
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
 import 'package:flutter/material.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Ridescreen extends StatefulWidget {
   final String userId ;
@@ -18,9 +22,20 @@ class _RidescreenState extends State<Ridescreen> {
   bool isLoading = true;
 
   @override
+  void initState() {
+    super.initState();
+
+    BlocProvider.of<TripSheetClosedValuesBloc>(context).add(
+      TripsheetStatusClosed(username: widget.username, userid: widget.userId),
+    );
+
+
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initializeData();
+    // _initializeData();
   }
   Future<void> _initializeData() async {
     try {
@@ -140,33 +155,37 @@ class _RidescreenState extends State<Ridescreen> {
         //   ),
         // )
 
-      body: isLoading
-          ? const Center(
-        child: CircularProgressIndicator(),
-      )
-          : tripSheetData.isEmpty
-          ? const Center(
-        child: Text('No trip sheet data found.'),
-      )
-          : ListView.builder(
-        itemCount: tripSheetData.length,
-        itemBuilder: (context, index) {
-          final trip = tripSheetData[index];
-          return Column(
-            children: [
-              buildSection(
-                context,
-                title: '${trip['duty']}',
-                dateTime: ' ${trip['tripid']}',
-                buttonText: '${trip['apps']}',
-                onTap: () {
+      body:BlocBuilder<TripSheetClosedValuesBloc,TripSheetClosedValuesState>(builder: (context, state){
+        if(state is TripSheetStatusClosedLoading){
+          return CircularProgressIndicator();
+        } else if(state is TripsheetStatusClosedLoaded){
+          return state.tripSheetClosedData.isEmpty ?
+              const Center(
+            child: Text('No trip sheet data found.', style: TextStyle(color:Colors.green ),),
+          ):ListView.builder(
+            itemCount: state.tripSheetClosedData.length,
+            itemBuilder: (context, index) {
+              final trip = state.tripSheetClosedData[index];
+              return Column(
+                children: [
+                  buildSection(
+                    context,
+                    title: '${trip['duty']}',
+                    dateTime: ' ${trip['tripid']}',
+                    buttonText: '${trip['apps']}',
+                    onTap: () {
 
-                },
-              ),
-            ],
+                    },
+                  ),
+                ],
+              );
+            },
           );
-        },
-      ),
+
+      } else {
+          return const Center(child: Text('Something went wrong.'));
+        }
+      })
 
     );
 

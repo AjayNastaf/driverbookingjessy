@@ -6,6 +6,8 @@ plugins {
 }
 
 android {
+    compileSdkVersion 33
+
     namespace = "com.example.driverbooking"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion

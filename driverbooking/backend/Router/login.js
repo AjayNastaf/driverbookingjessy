@@ -100,35 +100,46 @@ console.log(username,'username checkkk');
     });
 });
 // updating profile page
-// router.post('/update_updateprofile', (req, res) => {
-//     const { ufirstname, mobileno, userpassword, userconfirmpassword, email, username } = req.body;
-//     const query = 'UPDATE usercreation SET ufirstname = ?, mobileno = ?, userpassword = ?, userconfirmpassword = ?, email = ? WHERE username = ?';
 
-//     db.query(query, [ufirstname, mobileno, userpassword, userconfirmpassword, email, username], (err, results) => {
-//         if (err) {
-//             res.status(500).json({ message: 'Internal server error' });
-//             return;
-//         }
-//         res.status(200).json({ message: 'Status updated successfully' });
-//     });
-// });
+
+
+//router.post('/update_updateprofile', (req, res) => {
+//    const { username, mobileno, userpassword, email, drivername } = req.body;
+//
+//
+//    const query = 'UPDATE drivercreation SET username = ?, Mobileno = ?, userpassword = ?, Email = ? WHERE drivername = ?';
+//
+//    db.query(query, [username, mobileno, userpassword, email, drivername], (err, results) => {
+//        if (err) {
+//            res.status(500).json({ message: 'Internal server error' });
+//            return;
+//        }
+//
+//        res.status(200).json({ message: 'Status updated successfully' });
+//    });
+//});
 
 
 router.post('/update_updateprofile', (req, res) => {
-    const { username, mobileno, userpassword, email, drivername } = req.body;
-   
-    
-    const query = 'UPDATE drivercreation SET username = ?, Mobileno = ?, userpassword = ?, Email = ? WHERE drivername = ?';
+    const { username, mobileno, userpassword, email } = req.body;
 
-    db.query(query, [username, mobileno, userpassword, email, drivername], (err, results) => {
+
+    const query = 'UPDATE drivercreation SET  Mobileno = ?, userpassword = ?, Email = ? WHERE username = ?';
+
+    db.query(query, [ mobileno, userpassword, email, username], (err, results) => {
         if (err) {
             res.status(500).json({ message: 'Internal server error' });
             return;
         }
-    
+
         res.status(200).json({ message: 'Status updated successfully' });
     });
 });
+
+
+
+
+
 //end
 //uploading profile image
 // router.post('/uploadProfilePhoto', upload.single('avatar'), (req, res) => {

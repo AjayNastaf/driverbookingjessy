@@ -6,7 +6,10 @@ import 'package:driverbooking/Screens/SignatureEndRide/SignatureEndRide.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:driverbooking/Bloc/App_Bloc.dart';
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 class TripDetailsPreview extends StatefulWidget {
@@ -43,13 +46,12 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
   @override
   void initState() {
     super.initState();
-    _loadTripDetails();
-
+    // _loadTripSheetDetailsByTripId();
+    context.read<TripSheetDetailsTripIdBloc>().add(FetchTripDetailsByTripIdEventClass(tripId: widget.tripId));
       fetchImages(); // Make sure fetchImages is being called
-
   }
 
-  Future<void> _loadTripDetails() async {
+  Future<void> _loadTripSheetDetailsByTripId() async {
     try {
       // Fetch trip details from the API
       final tripDetails = await ApiService.fetchTripDetails(widget.tripId);
@@ -64,7 +66,7 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
         var closekmvalue = tripDetails['closekm'].toString();
         var startdatevalue = tripDetails['startdate'].toString();
         var closedatevalue = tripDetails['closedate'].toString();
-        print('Trip details guest: $guestNameValue');
+        print('Trip details guest: $tripDetails');
 
         setState(() {
           // Populate the form fields with the fetched data
@@ -85,9 +87,6 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
       print('Error loading trip details: $e');
     }
   }
-
-
-
 
   Future<void> _pickDate(BuildContext context, bool isStartingDate) async {
     final DateTime? pickedDate = await showDatePicker(
@@ -184,13 +183,30 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocListener<TripSheetDetailsTripIdBloc, TripSheetDetailsTripIdState>(listener: (context, state){
+      if(state is TripDetailsByTripIdLoaded){
+        setState(() {
+
+          tripIdController.text = state.tripDetails['tripid'].toString() ?? '';
+          guestNameController.text = state.tripDetails['guestname'] ?? '';
+          guestMobileController.text = state.tripDetails['guestmobileno'].toString()?? '';
+          vehicleTypeController.text = state.tripDetails['vehType'].toString() ?? '';
+          startKmController.text = state.tripDetails['startkm'].toString() ?? '';
+          closeKmController.text = state.tripDetails['closekm'].toString() ?? '';
+          startDateController.text = state.tripDetails['startdate'].toString() ?? '';
+          closeDateController.text = state.tripDetails['closedate'].toString() ?? '';
+        });
+        print('Trip details guest: ${state.tripDetails}');
+      }else if(state is TripDetailsByTripIdError){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.message)),
+        );
+      }
+    },child:Scaffold(
       appBar: AppBar(
         title: const Text("Trip Preview"),
       ),
-      body:
-
-      SingleChildScrollView(
+      body:SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -288,12 +304,12 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
                   border: OutlineInputBorder(),
                 ),
               ),
-              Image.asset(
-                AppConstants.intro_one, // Replace with your image path
-                height: 100, // Set the desired height
-                width: 100, // Set the desired width
-                fit: BoxFit.cover, // Adjust the image's box fit
-              ),
+              // Image.asset(
+              //   AppConstants.intro_one, // Replace with your image path
+              //   height: 100, // Set the desired height
+              //   width: 100, // Set the desired width
+              //   fit: BoxFit.cover, // Adjust the image's box fit
+              // ),
 
 
               const SizedBox(height: 16),
@@ -309,38 +325,38 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
                         border: OutlineInputBorder(),
                       ),
                     ),
-                    Image.asset(
-                      AppConstants.intro_one, // Replace with your image path
-                      height: 100, // Set the desired height
-                      width: 100, // Set the desired width
-                      fit: BoxFit.cover, // Adjust the image's box fit
-                    ),
+                    // Image.asset(
+                    //   AppConstants.intro_one, // Replace with your image path
+                    //   height: 100, // Set the desired height
+                    //   width: 100, // Set the desired width
+                    //   fit: BoxFit.cover, // Adjust the image's box fit
+                    // ),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    onPressed: () {
-                      // Add your logic for toll and parking upload
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload(tripId:widget.tripId ,)));
-                      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
-                    },
-                    child: const Text(
-                      "Upload Toll and Parking",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0,),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            onPressed: () {
+              // Add your logic for toll and parking upload
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload(tripId:widget.tripId ,)));
+              // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
+            },
+            child: const Text(
+              "Upload Toll and Parking",
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
           ),
         ),
       ),
@@ -409,6 +425,7 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
       //   ),
       // ),
 
+    ),
     );
   }
 }

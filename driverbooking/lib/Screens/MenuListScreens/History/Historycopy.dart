@@ -26,29 +26,29 @@ class _HistoryState extends State<History> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initializeData();
+    // _initializeData();
   }
-  Future<void> _initializeData() async {
-    try {
-      print('Fetching trip sheet data...'); // Before the API call
-      final data = await ApiService.fetchTripSheetClosedRides(
-        userId: widget.userId,
-        username: widget.username,
-      );
-      print('User details fetched History: $data'); // After successful data fetch
-
-      setState(() {
-        tripSheetData = data;
-      });
-    } catch (e) {
-      print('Error initializing data: $e'); // On error
-    } finally {
-      print('Setting loading state to false...'); // Before setting loading state
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  // Future<void> _initializeData() async {
+  //   try {
+  //     print('Fetching trip sheet data...'); // Before the API call
+  //     final data = await ApiService.fetchTripSheetClosedRides(
+  //       userId: widget.userId,
+  //       username: widget.username,
+  //     );
+  //     print('User details fetched History: $data'); // After successful data fetch
+  //
+  //     setState(() {
+  //       tripSheetData = data;
+  //     });
+  //   } catch (e) {
+  //     print('Error initializing data: $e'); // On error
+  //   } finally {
+  //     print('Setting loading state to false...'); // Before setting loading state
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
 
 
 

@@ -995,9 +995,9 @@ String? Statusvalue;
   }
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => CustomerOtpVerifyBloc(),
-      child: Scaffold(
+    return
+
+      Scaffold(
         appBar: AppBar(
           title: const Text(
             "Tracking Page",
@@ -1007,24 +1007,7 @@ String? Statusvalue;
           backgroundColor: AppTheme.Navblue1,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-        body: BlocListener<CustomerOtpVerifyBloc, CustomerOtpVerifyState>(
-          listener: (context, state) {
-            if (state is OtpVerifyCompleted) {
-              showSuccessSnackBar(context, "OTP Verified Successfully!");
-            } else if (state is OtpVerifyFailed) {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => Customerlocationreached(),
-              //   ),
-              // );
-              showFailureSnackBar(context, '${state.error}');
-              _clearOtpInputs();
-            }
-          },
-          child: BlocBuilder<CustomerOtpVerifyBloc, CustomerOtpVerifyState>(
-            builder: (context, state) {
-              return Stack(
+        body:  Stack(
                 children: [
                   if (_currentLatLng != null)
                     GoogleMap(
@@ -1168,12 +1151,9 @@ String? Statusvalue;
                     ),
                   ),
                 ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
+              ),
+      );
+
   }
 
   Widget _buildOtpInput(int index) {

@@ -40,7 +40,7 @@ dependencies:
   mailer: ^6.1.0
 #  dio: ^5.2.0 # For API calls to fetch route details (optional)
   intl: ^0.18.0
-  excel: ^2.0.3
+#  excel: ^2.0.3
   path_provider: ^2.0.14
   signature: ^5.2.1
   geocoding: ^2.0.1
@@ -51,6 +51,9 @@ dependencies:
   dio: ^5.0.0  # Or the latest version
   shared_preferences: ^2.0.15
   permission_handler: ^11.1.0
+  excel: ^2.0.21
+#    path_provider: ^2.1.2
+  open_file: ^3.3.2
 
 
 

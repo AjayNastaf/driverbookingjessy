@@ -1,3 +1,7 @@
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:equatable/equatable.dart';
+
+
 abstract class LoginState{}
 
 class LoginInitial extends LoginState{}
@@ -15,36 +19,36 @@ class LoginFailure extends LoginState {
 }
 
 
-
-abstract class RegisterState{}
-
-
-class RegisterInitial extends RegisterState{}
-class RegisterLoading extends RegisterState{}
-
-class RegisterSuccess extends RegisterState{
-  // final String message;
-  // RegisterSuccess(this.message);
-}
-
-
-class RegisterFailure extends RegisterState{
-  final String error;
-  RegisterFailure(this.error);
-}
-
-
-class RequestOtpSuccess extends RegisterState{
-  final String otp;
-  RequestOtpSuccess(this.otp);
-}
-
-
-class RequestOtpFailure extends RegisterState{
-  final String error;
-  RequestOtpFailure(this.error);
-}
-
+//
+// abstract class RegisterState{}
+//
+//
+// class RegisterInitial extends RegisterState{}
+// class RegisterLoading extends RegisterState{}
+//
+// class RegisterSuccess extends RegisterState{
+//   // final String message;
+//   // RegisterSuccess(this.message);
+// }
+//
+//
+// class RegisterFailure extends RegisterState{
+//   final String error;
+//   RegisterFailure(this.error);
+// }
+//
+//
+// class RequestOtpSuccess extends RegisterState{
+//   final String otp;
+//   RequestOtpSuccess(this.otp);
+// }
+//
+//
+// class RequestOtpFailure extends RegisterState{
+//   final String error;
+//   RequestOtpFailure(this.error);
+// }
+//
 
 
 abstract class UpdateUserState{}
@@ -198,4 +202,450 @@ class CloseKmUploadFailure extends TripDetailsUploadState {
   final String message;
 
   CloseKmUploadFailure({required this.message});
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Above States codes are old below are new for apis
+
+
+//Reegistering State code starts
+
+abstract class RegisterState extends Equatable{
+  @override
+  // TODO: implement props
+  List<Object?> get props => [];
+}
+
+// initial State
+class RegisteringInitial extends RegisterState{}
+
+
+// Loading State
+class RegisteringLoading extends RegisterState{}
+
+
+// Success State
+class RegisteringSucces extends RegisterState{
+  final String message;
+
+  RegisteringSucces(this .message);
+  @override
+  List<Object?> get props => [message];
+}
+// failure State
+class RegisteringFailure extends RegisterState{
+  final String errormessage;
+
+  RegisteringFailure(this.errormessage);
+  @override
+  List<Object?> get props => [errormessage];
+}
+//Reegistering State code ends
+
+
+
+
+
+//for TripSheet values geting api state started
+
+ abstract class TripSheetValuesState{}
+
+class FetchingTripSheetValuesInitial extends TripSheetValuesState{}
+
+class FetchingTripSheetValuesLoading extends TripSheetValuesState{}
+
+class FetchingTripSheetValuesLoaded extends TripSheetValuesState{
+  final dynamic tripSheetData;
+
+  FetchingTripSheetValuesLoaded(this.tripSheetData);
+}
+
+class FetchingTripSheetValuesFailure extends TripSheetValuesState{
+  final String errormessage;
+
+  FetchingTripSheetValuesFailure(this.errormessage);
+}
+//for TripSheet values geting api state completed
+
+
+//for Rides screen tripSheet closed values geting api state startes
+
+abstract class TripSheetClosedValuesState{}
+class TripSheetStatusClosedLoading extends TripSheetClosedValuesState{}
+class TripsheetStatusClosedLoaded extends TripSheetClosedValuesState{
+  final dynamic tripSheetClosedData;
+
+  TripsheetStatusClosedLoaded(this.tripSheetClosedData);
+}
+
+class TripSheetClosedFailure extends TripSheetClosedValuesState{
+  final String error;
+  TripSheetClosedFailure(this.error);
+}
+
+//for Rides screen tripSheet closed values geting api state completed
+
+
+
+
+
+
+
+
+//for profile driver details state start
+abstract class DrawerDriverDetailsState {}
+
+class DrawerDriverDataLoading extends DrawerDriverDetailsState {}
+
+class DrawerDriverDataLoaded extends DrawerDriverDetailsState {
+  final String username;
+  final String email;
+  final String phoneNumber;
+  final String password;
+  final String? profileImage;
+
+  DrawerDriverDataLoaded({
+    required this.username,
+    required this.email,
+    required this.phoneNumber,
+    required this.password,
+     this.profileImage,
+  });
+}
+
+class DrawerDriverDataFailure extends DrawerDriverDetailsState {
+  final String error;
+  DrawerDriverDataFailure(this.error);
+}
+
+//for profile driver details state completed
+
+
+
+
+//for fetching values from tripsheet by userid state start
+
+abstract class GettingTripSheetDetilsByUseridState{}
+
+class Getting_TripSheetDetails_ByUserid_Loading  extends GettingTripSheetDetilsByUseridState{}
+class Getting_TripSheetDetails_ByUserid_Loaded extends GettingTripSheetDetilsByUseridState{
+  final List<Map<String, dynamic>> tripSheets;
+Getting_TripSheetDetails_ByUserid_Loaded(this.tripSheets);
+}
+class Getting_TripSheetDetails_ByUserid_Failure extends GettingTripSheetDetilsByUseridState{
+  final String error;
+  Getting_TripSheetDetails_ByUserid_Failure(this.error);
+}
+//for fetching values from tripsheet by userid state completed
+
+
+
+
+
+//update TripSheet status Accepts,onGoing,Closed,Waiting state starts
+abstract class UpdateTripStatusInTripsheetState {}
+class UpdateTripStatusInTripsheetInitial extends UpdateTripStatusInTripsheetState{}
+class UpdateTripStatusInTripsheetLoading extends UpdateTripStatusInTripsheetState{}
+class UpdateTripStatusInTripsheetSuccess extends UpdateTripStatusInTripsheetState{
+}
+class UpdateTripStatusInTripsheetFailure extends UpdateTripStatusInTripsheetState{
+  final String error;
+
+  UpdateTripStatusInTripsheetFailure(this.error);
+
+}
+
+//update TripSheet status Accepts,onGoing,Closed,Waiting state completed
+
+
+
+//for enteringStarting Kilometer text to the tripsheet state starts
+abstract class StartKmState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+// Initial state
+class StartKmInitial extends StartKmState {}
+
+// Loading state for submitting text
+class StartKmTextLoading extends StartKmState {}
+
+// Success state for text submission
+class StartKmTextSubmitted extends StartKmState {}
+
+// Loading state for image upload
+class StartKmImageUploading extends StartKmState {}
+
+// Success state for image upload
+class StartKmImageUploaded extends StartKmState {}
+
+// Error state
+class StartKmError extends StartKmState {
+  final String message;
+  StartKmError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+//for enteringStarting Kilometer text to the tripsheet state completed
+
+
+
+//this the total state implementing 3 apis in the Trip details Upload page starts
+
+abstract class TripUploadState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+class TripUploadInitial extends TripUploadState {}
+
+class TripUploadLoading extends TripUploadState {}
+
+class TripUploadSuccess extends TripUploadState {
+  final String message;
+  TripUploadSuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class TripUploadFailure extends TripUploadState {
+  final String error;
+  TripUploadFailure(this.error);
+
+  @override
+  List<Object?> get props => [error];
+}
+
+//this the total states implementing 3 apis in the Trip details Upload page completed
+
+
+
+//this is total states for end ride screen where sign image save, sign status , trip status event Starts
+abstract class TripSignatureState {}
+
+class TripSignatureInitial extends TripSignatureState {}
+
+class TripSignatureLoading extends TripSignatureState {}
+
+class SaveSignatureSuccess extends TripSignatureState {}
+
+class SendSignatureDetailsSuccess extends TripSignatureState {}
+
+class UpdateTripStatusSuccess extends TripSignatureState {}
+
+class TripSignatureFailure extends TripSignatureState {
+  final String error;
+  TripSignatureFailure(this.error);
+}
+
+//this is total states for end ride screen where sign image save, sign status , trip status event completed
+
+
+//For fetching tripsheet details based on tripId State Starts
+
+class TripSheetDetailsTripIdState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+class TripDetailsByTripIdInitial extends TripSheetDetailsTripIdState {}
+
+class TripDetailsByTripIdLoading extends TripSheetDetailsTripIdState {}
+
+class TripDetailsByTripIdLoaded extends TripSheetDetailsTripIdState {
+  final Map<String, dynamic> tripDetails;
+
+  TripDetailsByTripIdLoaded({required this.tripDetails});
+
+  @override
+  List<Object?> get props => [tripDetails];
+}
+
+class TripDetailsByTripIdError extends TripSheetDetailsTripIdState {
+  final String message;
+
+  TripDetailsByTripIdError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+//For fetching tripsheet details based on tripId State completed
+
+
+//toll and parking text upload and tool and parking image upload State Starts
+abstract class TollParkingDetailsState extends Equatable {
+  const TollParkingDetailsState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+// Initial state
+class TollParkingDetailsInitial extends TollParkingDetailsState {}
+
+// Loading state
+class TollParkingDetailsLoading extends TollParkingDetailsState {}
+
+// Success states
+class TollParkingUpdated extends TollParkingDetailsState {}
+
+class ParkingFileUploaded extends TollParkingDetailsState {}
+
+class TollFileUploaded extends TollParkingDetailsState {}
+
+// Error state
+class TollParkingDetailsError extends TollParkingDetailsState {
+  final String message;
+
+  const TollParkingDetailsError({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+
+//toll and parking text upload and tool and parking image upload State completed
+
+
+
+// saving status as On_Going state starts
+abstract class TripState extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
+class TripInitial extends TripState {}
+
+class TripLoading extends TripState {}
+
+class TripSuccess extends TripState {}
+
+class TripFailure extends TripState {
+  final String error;
+  TripFailure({required this.error});
+
+  @override
+  List<Object> get props => [error];
+}
+// saving status as On_Going state competed
+
+
+
+//history page Tripsheet values closed state Starts
+abstract class TripSheetState {}
+
+class TripSheetInitial extends TripSheetState {}
+
+class TripSheetLoading extends TripSheetState {}
+
+class TripSheetLoaded extends TripSheetState {
+  final List<dynamic> tripSheetData;
+  TripSheetLoaded({required this.tripSheetData});
+}
+
+class TripSheetError extends TripSheetState {
+  final String message;
+  TripSheetError({required this.message});
+}
+
+
+//history page Tripsheet values closed state completed
+
+
+
+//history page Tripsheet values closed filtered dates states starts
+
+abstract class FetchFilteredRidesState extends Equatable {
+  const FetchFilteredRidesState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class FetchFilteredRidesInitial extends FetchFilteredRidesState {}
+
+class FetchFilteredRidesLoading extends FetchFilteredRidesState {}
+
+class FetchFilteredRidesLoaded extends FetchFilteredRidesState {
+  final List<Map<String, dynamic>> tripSheetData;
+
+  const FetchFilteredRidesLoaded(this.tripSheetData);
+
+  @override
+  List<Object?> get props => [tripSheetData];
+}
+
+class FetchFilteredRidesError extends FetchFilteredRidesState {
+  final String message;
+
+  const FetchFilteredRidesError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+//history page Tripsheet values closed filtered dates states completed
+
+
+
+
+
+// abstract class ProfileState {}
+//
+// class ProfileInitial extends ProfileState {}
+//
+// class ProfileLoading extends ProfileState {}
+//
+// class ProfileUpdated extends ProfileState {}
+//
+// class ProfileError extends ProfileState {
+//   final String message;
+//   ProfileError(this.message);
+// }
+
+
+abstract class ProfileState {}
+
+class ProfileInitial extends ProfileState {}
+
+class ProfileLoading extends ProfileState {}
+
+class ProfileUpdated extends ProfileState {}
+
+class ProfileError extends ProfileState {
+  final String message;
+
+  ProfileError(this.message);
+}
+
+class ProfilePhotoUploaded extends ProfileState {}
+
+class ProfilePhotoUploadError extends ProfileState {
+  final String message;
+
+  ProfilePhotoUploadError(this.message);
 }

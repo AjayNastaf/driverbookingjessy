@@ -8,6 +8,7 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'dart:io'; // Add this for File class
 import 'package:intl/intl.dart';  // Add this to format the date
+import 'package:path/path.dart' as path;
 
 
 
@@ -427,29 +428,29 @@ class ApiService {
 
 
 
-  static Future<Map<String, dynamic>> uploadImage(File image1, File image2) async {
-    final url = Uri.parse('${AppConstants.baseUrl}/upload-images');
-    final request = http.MultipartRequest('POST', url);
-
-    // Add images with correct field names
-    request.files.add(await http.MultipartFile.fromPath('startingimage', image1.path));
-    request.files.add(await http.MultipartFile.fromPath('endingimage', image2.path));
-
-    final response = await request.send();
-    if (response.statusCode == 200) {
-      final responseBody = await response.stream.bytesToString();
-      // return json.decode(responseBody) as Map<String, dynamic>;
-      return {
-        'success': true,
-        'message': 'Images uploaded successfully!',
-      };
-    } else {
-      return {
-        'success': false,
-        'message': 'Failed to upload images. HTTP ${response.statusCode}',
-      };
-    }
-  }
+  // static Future<Map<String, dynamic>> uploadImage(File image1, File image2) async {
+  //   final url = Uri.parse('${AppConstants.baseUrl}/upload-images');
+  //   final request = http.MultipartRequest('POST', url);
+  //
+  //   // Add images with correct field names
+  //   request.files.add(await http.MultipartFile.fromPath('startingimage', image1.path));
+  //   request.files.add(await http.MultipartFile.fromPath('endingimage', image2.path));
+  //
+  //   final response = await request.send();
+  //   if (response.statusCode == 200) {
+  //     final responseBody = await response.stream.bytesToString();
+  //     // return json.decode(responseBody) as Map<String, dynamic>;
+  //     return {
+  //       'success': true,
+  //       'message': 'Images uploaded successfully!',
+  //     };
+  //   } else {
+  //     return {
+  //       'success': false,
+  //       'message': 'Failed to upload images. HTTP ${response.statusCode}',
+  //     };
+  //   }
+  // }
 
 
 
@@ -714,7 +715,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        print("Data uploaded successfullyyyyyyyyyy");
+        print("Data uploaded successfully");
       } else {
         throw Exception("Failed to upload data: ${response.body}");
       }
@@ -883,6 +884,7 @@ class ApiService {
     required File startingkilometer,
   }) async {
     try {
+      print('insie api url');
       // Generate the unique filename based on the current date
       String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
 
@@ -900,9 +902,11 @@ class ApiService {
       var response = await request.send();
 
       if (response.statusCode == 200) {
+        print("success to upload filee: ${response.statusCode}");
+
         return true;
       } else {
-        print("Failed to upload file: ${response.statusCode}");
+        print("Failed to upload filee: ${response.statusCode}");
         return false;
       }
     } catch (e) {
@@ -1023,6 +1027,121 @@ class ApiService {
   }
 
 
+// uploading starting kilometr to the starting kilometer screen starts
+  static Future<void> updateStartinKMToSratingkmScreen({
+    required String tripId,
+    required String startKm,
+    required int hcl,
+    required String duty,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/startkmupdatetripsheet');
+    try {
+      print('Sending data to API: $url');
+      print('Payload: {tripId: $tripId, startkm: $startKm,  Hcl: $hcl, duty: $duty}');
+
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'}, // Set JSON header
+        body: jsonEncode({
+          'tripId': tripId,
+          'startkm': startKm,
+          'Hcl': hcl,
+          'duty': duty,
+          // tripId,startkm ,Hcl,duty
+        }),
+      );
+
+      print('Response status code: ${tripId}');
+      print('Response status code: ${startKm}');
+      print('Response status code: ${hcl}');
+      print('Response status code: ${duty}');
+      print('Response body: ${response.statusCode}');
+
+      // if (response.statusCode == 200) {
+      //
+      //   final data = jsonDecode(response.body);
+      //
+      //   if (data['success']) {
+      //
+      //     return;
+      //
+      //   } else {
+      //
+      //     throw Exception(data['message'] ?? "Failed to update starting kilometer");
+      //   }
+      //   print('Successfully updated KM details');
+      //   return;
+      //
+      // } else {
+      //   throw Exception("Server error: ${response.statusCode}");
+      //
+      // }
+
+      if (response.statusCode == 200) {
+        if (response.body.isNotEmpty) {
+          final data = jsonDecode(response.body);
+          if (data['success'] == true) {
+            print('Successfully updated KM details');
+            return;
+          } else {
+            throw Exception(data['message'] ?? "Failed to update starting kilometer");
+          }
+        } else {
+          print("Empty response body");
+          return;
+        }
+      }
+
+    } catch (e) {
+      print('Error occurred: $e');
+      throw Exception('Error occurredzzzzz: $e');
+    }
+  }
+
+// uploading starting kilometr to the starting kilometer screen completed
+
+
+
+// uploading starting kilometr to the Trip details upload starts
+  static Future<void> updateCloseKMToTripDetailsUploadScreen({
+    required String tripId,
+    required String closeKm,
+    required int hcl,
+    required String duty,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/closekmupdatetripsheet');
+    try {
+      print('Sending data to API: $url');
+      print('Payload: {tripId: $tripId,  closekm: $closeKm, Hcl: $hcl, duty: $duty}');
+
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'}, // Set JSON header
+        body: jsonEncode({
+          'tripId': tripId,
+          'closekm': closeKm,
+          'Hcl': hcl.toString(),
+          'duty': duty,
+        }),
+      );
+
+      print('Response status code: ${closeKm}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('Successfully updated Closing KM details');
+      } else {
+        throw Exception('Failed to update KM details: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+      throw Exception('Error occurred: $e');
+    }
+  }
+
+// uploading closing kilometr to the Trip details upload screen completed
+
+
 
   // Fetch trip details by tripId
   static Future<Map<String, dynamic>?> fetchTripDetails(String tripId) async {
@@ -1054,6 +1173,7 @@ class ApiService {
       return null; // Handle network or parsing errors
     }
   }
+
 
 
 
@@ -1127,6 +1247,31 @@ class ApiService {
       rethrow; // Re-throw the error to handle it in the calling function
     }
   }
+
+
+  // static Future<List<dynamic>> getTripSheetRides(String username) async {
+  //   try {
+  //     final response = await http.get(Uri.parse('${AppConstants.baseUrl}/tripsheetRides/$username'));
+  //
+  //     if (response.statusCode == 200) {
+  //       return jsonDecode(response.body);
+  //     } else {
+  //       throw Exception('Failed to load trip sheet rides');
+  //     }
+  //   } catch (e) {
+  //     print("Error fetching trip sheet rides: $e");
+  //     return [];
+  //   }
+  // }
+
+
+
+
+
+
+
+
+
 
 //close values showing for rides screen end
 
@@ -1223,12 +1368,113 @@ class ApiService {
 
 
 
+//registering driver starts
+  static Future<Map<String, dynamic>> registerDriver({
+    required String username,
+    required String email,
+    required String password,
+    required String mobileNumber,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/driverCredentialRegister');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "username": username,
+          "email": email,
+          "password": password,
+          "mobileNumber": mobileNumber,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        return {"success": true, "message": jsonDecode(response.body)["message"]};
+      } else {
+        return {"success": false, "message": jsonDecode(response.body)["message"]};
+      }
+    } catch (e) {
+      return {"success": false, "message": "Something went wrong: $e"};
+    }
+  }
+
+  //registering driver completed
 
 
 
 
 
+//profile driver data get api starts
+  static Future<bool> updateProfile({
+    required String username,
+    required String mobileNo,
+    required String password,
+    required String email,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/update_updateprofile');
 
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'username': username,
+          'mobileno': mobileNo,
+          'userpassword': password,
+          'email': email,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Profile updated successfully');
+        return true; // Return true if update is successful
+      } else {
+        print('Failed to update profile: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error updating profile: $e');
+      return false;
+    }
+  }
+//profile driver data get api completed
+
+
+//profile driver data image api starts
+
+  static Future<bool> uploadProfilePhoto({
+    required String username,
+    required File imageFile,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/uploadProfilePhoto?username=$username');
+
+    try {
+      var request = http.MultipartRequest('POST', url);
+      request.files.add(await http.MultipartFile.fromPath(
+        'Profile_image',
+        imageFile.path,
+        // filename: basename(imageFile.path),
+        filename: path.basename(imageFile.path),
+
+      ));
+
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        print('Profile photo uploaded successfully');
+        return true;
+      } else {
+        print('Failed to upload profile photo: $responseBody');
+        return false;
+      }
+    } catch (e) {
+      print('Error uploading profile photo: $e');
+      return false;
+    }
+  }
+//profile driver data image api completed
 
 
 

@@ -7,6 +7,11 @@ import 'package:signature/signature.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:driverbooking/Networks/Api_Service.dart';
 import 'dart:convert'; // Add this import at the top of your file
+import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:driverbooking/Bloc/App_Bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 
 
 class Signatureendride extends StatefulWidget {
@@ -18,6 +23,8 @@ class Signatureendride extends StatefulWidget {
 }
 
 class _SignatureendrideState extends State<Signatureendride> {
+  bool _isLoading = false;
+
   // Controller for the signature pad
   final SignatureController _signatureController = SignatureController(
     penColor: Colors.black,
@@ -65,83 +72,99 @@ class _SignatureendrideState extends State<Signatureendride> {
     _signatureController.clear();
   }
 
+
   // void _handleSubmit() async {
+  //   //first api for signature image upload
+  //   final tripId = widget.tripId; // Retrieve the trip ID from your state or context
   //   if (_signatureController.isNotEmpty) {
   //     final signature = await _signatureController.toPngBytes();
   //     if (signature != null) {
-  //       // Do something with the signature (e.g., upload or save locally)
-  //       // ScaffoldMessenger.of(context).showSnackBar(
-  //       //   SnackBar(content: Text("Signature saved successfully!")),
-  //       // );
-  //       // Navigator.push(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "12")));
-  //       showSuccessSnackBar(context, "Signature saved successfully!");
-  //       _handleSubmitModal();
+  //       String base64Signature = 'data:image/png;base64,' + base64Encode(signature);
+  //
+  //       final DateTime now = DateTime.now();
+  //       final String endtrip = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+  //       final String endtime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+  //
+  //       try {
+  //         await ApiService.saveSignature(
+  //           tripId: tripId,
+  //           signatureData: base64Signature,
+  //           imageName: 'signature-${now.millisecondsSinceEpoch}.png',
+  //           endtrip: endtrip,
+  //           endtime: endtime,
+  //         );
+  //         //first api compled
+  //
+  //         //second api for inserting the values in signature times table
+  //         final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+  //         final String signTime = TimeOfDay.now().format(context);
+  //         // Second API call to upload signature details (datesignature, signtime, status = 'Updated')
+  //         await ApiService.sendSignatureDetailsUpdated(
+  //           tripId: tripId,
+  //           dateSignature: dateSignature,
+  //           signTime: signTime,
+  //           status: "Updated", // Status set to "Updated"
+  //         );
+  //         // /second api compled
+  //
+  //         // third api for updated closed in trip sheet
+  //         await ApiService.updateTripStatusCompleted(
+  //           tripId: tripId,
+  //           apps: "Closed", // Set apps status to "Closed"
+  //         );
+  //         //third api completed
+  //
+  //
+  //         showSuccessSnackBar(context, "Signature and ride data uploaded successfully!");
+  //
+  //         // showSuccessSnackBar(context, "Signature saved successfully!");
+  //         _handleSubmitModal();
+  //         _handleClear();
+  //       } catch (e) {
+  //         showFailureSnackBar(context, "Failed to save signature. Error: $e");
+  //       }
   //     }
   //   } else {
-  //     // ScaffoldMessenger.of(context).showSnackBar(
-  //     //   SnackBar(content: Text("Please provide a signature.")),
-  //     // );
   //     showFailureSnackBar(context, "Please provide a signature.");
   //   }
+  //
+  //
   // }
 
-  void _handleSubmit() async {
-    //first api for signature image upload
-    final tripId = widget.tripId; // Retrieve the trip ID from your state or context
+
+
+  void _handleSubmit(BuildContext context) async {
     if (_signatureController.isNotEmpty) {
       final signature = await _signatureController.toPngBytes();
       if (signature != null) {
         String base64Signature = 'data:image/png;base64,' + base64Encode(signature);
-
         final DateTime now = DateTime.now();
         final String endtrip = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
         final String endtime = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+        final String dateSignature = now.toIso8601String().split('T')[0] + ' ' + now.toIso8601String().split('T')[1].split('.')[0];
+        final String signTime = TimeOfDay.now().format(context);
 
-        try {
-          await ApiService.saveSignature(
-            tripId: tripId,
-            signatureData: base64Signature,
+        setState(() {
+          _isLoading = true;
+        });
+
+        // Dispatch first API call
+        BlocProvider.of<TripSignatureBloc>(context).add(
+          SaveSignatureEvent(
+            tripId: widget.tripId,
+            base64Signature: base64Signature,
             imageName: 'signature-${now.millisecondsSinceEpoch}.png',
             endtrip: endtrip,
             endtime: endtime,
-          );
-//first api compled
-
-          //second api for inserting the values in signature times table
-          final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
-          final String signTime = TimeOfDay.now().format(context);
-          // Second API call to upload signature details (datesignature, signtime, status = 'Updated')
-          await ApiService.sendSignatureDetailsUpdated(
-            tripId: tripId,
-            dateSignature: dateSignature,
-            signTime: signTime,
-            status: "Updated", // Status set to "Updated"
-          );
-          // /second api compled
-
-          // third api for updated closed in trip sheet
-          await ApiService.updateTripStatusCompleted(
-            tripId: tripId,
-            apps: "Closed", // Set apps status to "Closed"
-          );
-          //third api completed
-
-
-          showSuccessSnackBar(context, "Signature and ride data uploaded successfully!");
-
-          // showSuccessSnackBar(context, "Signature saved successfully!");
-          _handleSubmitModal();
-          _handleClear();
-        } catch (e) {
-          showFailureSnackBar(context, "Failed to save signature. Error: $e");
-        }
+          ),
+        );
       }
     } else {
       showFailureSnackBar(context, "Please provide a signature.");
     }
-
-
   }
+
+
 
 
   void _handleSubmitModal() {
@@ -191,15 +214,49 @@ class _SignatureendrideState extends State<Signatureendride> {
     );
   }
 
-  // void _handleUpload() {
-  //   // Logic for handling the upload
-  //   print("Ride details uploaded.");
-  //   // Add your API call or relevant code here.
-  // }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+      return BlocListener<TripSignatureBloc, TripSignatureState>(
+        listener: (context, state) {
+      if (state is SaveSignatureSuccess) {
+        final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+        final String signTime = TimeOfDay.now().format(context);
+
+        // Dispatch second API call after first one succeeds
+        BlocProvider.of<TripSignatureBloc>(context).add(
+          SendSignatureDetailsEvent(
+            tripId: widget.tripId,
+            dateSignature: dateSignature,
+            signTime: signTime,
+            status: "Updated",
+          ),
+        );
+      } else if (state is SendSignatureDetailsSuccess) {
+        // Dispatch third API call after second one succeeds
+        BlocProvider.of<TripSignatureBloc>(context).add(
+          UpdateTripStatusEvent(
+            tripId: widget.tripId,
+            apps: "Closed",
+          ),
+        );
+      } else if (state is UpdateTripStatusSuccess) {
+        showSuccessSnackBar(context, "Signature and ride data uploaded successfully!");
+        setState(() {
+          _isLoading = false;
+        });
+        _handleClear();
+        _handleSubmitModal();
+      } else if (state is TripSignatureFailure) {
+        showFailureSnackBar(context, state.error);
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    },
+
+
+     child:  Scaffold(
       appBar: AppBar(
         title: Text("End Ride"),
       ),
@@ -233,17 +290,28 @@ class _SignatureendrideState extends State<Signatureendride> {
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: Text("Clear" ,style: TextStyle(color: Colors.white, fontSize: 18.0),),
                 ),
+
+
                 ElevatedButton(
-                  onPressed: _handleSubmit,
-                  // onPressed: _handleSubmitModal,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, ),
-                  child: Text("Submit & End Ride", style: TextStyle(color: Colors.white, fontSize: 18.0),),
+                  onPressed: _isLoading ? null : () => _handleSubmit(context),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text("Submit & End Ride", style: TextStyle(color: Colors.white, fontSize: 18.0)),
                 ),
+
+
+                // ElevatedButton(
+                //   onPressed: (){},
+                //   // onPressed: _handleSubmit,
+                //   style: ElevatedButton.styleFrom(backgroundColor: Colors.green, ),
+                //   child: Text("Submit & End Ride", style: TextStyle(color: Colors.white, fontSize: 18.0),),
+                // ),
               ],
             ),
           ],
         ),
       ),
-    );
+    ),);
   }
 }

@@ -14,6 +14,8 @@ import '../../Networks/Api_Service.dart';
 import '../../Utils/AppConstants.dart';
 import '../../Utils/AppTheme.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class Login_Screen extends StatefulWidget {
   const Login_Screen({super.key});
@@ -68,6 +70,19 @@ class _Login_ScreenState extends State<Login_Screen> {
   // }
 
   // bgmain
+
+//local storage for user details
+  void _saveLoginDetails(String username, String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
+    await prefs.setString('userId', userId);
+
+    // Debugging print statements
+    print("Saved username: $username");
+    print("Saved userId: $userId");
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -85,11 +100,13 @@ class _Login_ScreenState extends State<Login_Screen> {
               // ScaffoldMessenger.of(context).showSnackBar(
               //   SnackBar(content: Text("Login Successful! User ID: ${state.userId}")),
               // );
+              _saveLoginDetails(_usernameController.text, state.userId);
+
               Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => Homescreen(userId: state.userId ,username: _usernameController.text,)),
               );
-              showSuccessSnackBar(context, "Login Successful! User ID: ${state.userId}");
+              showSuccessSnackBar(context, "Login Successful! User ID: ${_usernameController.text}");
               print('Navigating to HomeScreen with userId: ${state.userId}');
               print('Navigating to HomeScreen with username: ${_usernameController.text}');
               // Navigator.pushReplacement(

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
@@ -6,7 +7,10 @@ import '../Networks/Api_Service.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:io';  // Add this import to access the 'File' class.
+import 'package:http/http.dart' as http;
+import 'package:driverbooking/Utils/AppConstants.dart';
 
+import '../Screens/CustomerLocationReached/CustomerLocationReached.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(LoginInitial()) {
@@ -72,52 +76,52 @@ emit(OtpVerifyLoading());
 
 
 
-class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
-  RegisterBloc() : super(RegisterInitial()) {
-    on<RequestOtpAndRegister>((event, emit) async {
-      emit(RegisterLoading());
-
-      // Step 1: Generate OTP
-      final random = Random();
-      final otp = (1000 + random.nextInt(9000)).toString();
-      print("Generated OTP: $otp");
-
-      // Step 2: Send OTP to User's Email
-      try {
-        final sendOtpEmailResult = await ApiService.sendOtpEmail(
-          otp,
-          event.email,
-          event.username,
-        );
-
-        if (sendOtpEmailResult) {
-          print("OTP successfully sent.");
-
-          // Step 3: Proceed with Registration if OTP Sending Succeeds
-          final success = await ApiService.registers(
-            // context: context,
-            username: event.username,
-            password: event.password,
-            phonenumber: event.phone,
-            email: event.email,
-            otp: otp,
-          );
-
-          if (success) {
-            emit(RegisterSuccess());
-          } else {
-            emit(RegisterFailure("Registration failed."));
-          }
-        } else {
-          emit(RequestOtpFailure(
-              "Failed to send OTP. Username or email might already be taken."));
-        }
-      } catch (error) {
-        emit(RegisterFailure("An error occurred during registration: $error"));
-      }
-    });
-  }
-}
+// class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
+//   RegisterBloc() : super(RegisterInitial()) {
+//     on<RequestOtpAndRegister>((event, emit) async {
+//       emit(RegisterLoading());
+//
+//       // Step 1: Generate OTP
+//       final random = Random();
+//       final otp = (1000 + random.nextInt(9000)).toString();
+//       print("Generated OTP: $otp");
+//
+//       // Step 2: Send OTP to User's Email
+//       try {
+//         final sendOtpEmailResult = await ApiService.sendOtpEmail(
+//           otp,
+//           event.email,
+//           event.username,
+//         );
+//
+//         if (sendOtpEmailResult) {
+//           print("OTP successfully sent.");
+//
+//           // Step 3: Proceed with Registration if OTP Sending Succeeds
+//           final success = await ApiService.registers(
+//             // context: context,
+//             username: event.username,
+//             password: event.password,
+//             phonenumber: event.phone,
+//             email: event.email,
+//             otp: otp,
+//           );
+//
+//           if (success) {
+//             emit(RegisterSuccess());
+//           } else {
+//             emit(RegisterFailure("Registration failed."));
+//           }
+//         } else {
+//           emit(RequestOtpFailure(
+//               "Failed to send OTP. Username or email might already be taken."));
+//         }
+//       } catch (error) {
+//         emit(RegisterFailure("An error occurred during registration: $error"));
+//       }
+//     });
+//   }
+// }
 
 class UpdateUserBloc extends Bloc<UpdateUserEvent, UpdateUserState> {
   UpdateUserBloc() : super(UpdateUserInitial()) {
@@ -366,4 +370,716 @@ void _onChangePasswordForgotAtempt(ChangePasswordForgotAttempt event,
 //     }
 //   }
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//// Above bloc codes are old below are new for apis
+
+//Registering Bloc codes start
+
+class RegisterBloc extends Bloc<RegisterEvent, RegisterState>{
+  RegisterBloc(): super(RegisteringInitial()){
+    on<RegisterUserEvent>(_onRegisterUser);
+  }
+
+
+  Future<void> _onRegisterUser(
+      RegisterUserEvent event,
+      Emitter<RegisterState> emit,
+      )async{
+    emit(RegisteringLoading());
+
+    try{
+      final response = await ApiService.registerDriver(
+        username: event.username,
+        password: event.password,
+        email: event.email,
+        mobileNumber: event.mobileNumber,
+      );
+      if(response['success']){
+        emit(RegisteringSucces(response['message']));
+
+      }else{
+        emit(RegisteringFailure(response['message']));
+      }
+    }catch(e){
+      emit(RegisteringFailure("Something went wrong. Please try again."));
+
+    };
+
+}
+
+}
+
+//Registering Bloc codes ends
+
+
+//for TripSheet values getingapi bloc code started
+
+class TripSheetValuesBloc extends Bloc<TripSheetValuesEvent , TripSheetValuesState>{
+  TripSheetValuesBloc():super(FetchingTripSheetValuesInitial()){
+    on<FetchTripSheetValues>(_onGettingTripSheetValues);
+  }
+
+  Future<void> _onGettingTripSheetValues(FetchTripSheetValues event , Emitter<TripSheetValuesState> emit)async{
+  try{
+    final data = await ApiService.fetchTripSheet(
+      userId: event.userid,
+      username: event.username,
+    );
+    emit(FetchingTripSheetValuesLoaded(data));
+  }catch(e){
+    emit(FetchingTripSheetValuesFailure('Error fetching trip sheet: $e'));
+  }
+  }
+}
+
+//for TripSheet values getingapi bloc code ended
+
+
+//for Rides screen tripSheet closed values geting api bloc start
+class TripSheetClosedValuesBloc extends Bloc<TripSheetClosedValuesEvent , TripSheetClosedValuesState>{
+  TripSheetClosedValuesBloc() :super(TripSheetStatusClosedLoading()) {
+    on<TripsheetStatusClosed>(_onGettingTripSheetClosedValues);
+  }
+
+  Future<void> _onGettingTripSheetClosedValues(TripsheetStatusClosed event,
+      Emitter<TripSheetClosedValuesState> emit) async {
+    try {
+      emit(TripSheetStatusClosedLoading());
+      final Data = await ApiService.fetchTripSheetClosedRides(
+        userId: event.userid,
+        username: event.username
+      );
+      emit(TripsheetStatusClosedLoaded(Data));
+
+    } catch (e) {
+      emit(TripSheetClosedFailure('Failed to Load Closed Values $e'));
+    }
+  }
+}
+
+//for Rides screen tripSheet closed values geting api bloc completed
+
+
+
+
+
+
+
+//for Drawer profile driver details bloc start
+class DrawerDriverDataBloc extends Bloc<DrawerDriverDetaisEvent, DrawerDriverDetailsState> {
+  DrawerDriverDataBloc() : super(DrawerDriverDataLoading()) {
+    on<DrawerDriverData>(_onGettingDriverValuesForDrawer);
+  }
+
+  Future<void> _onGettingDriverValuesForDrawer(
+      DrawerDriverData event, Emitter<DrawerDriverDetailsState> emit) async {
+    try {
+      print("Fetching driver details for username: ${event.username}");
+      emit(DrawerDriverDataLoading()); // Show loading state
+
+      final getDriverDetails = await ApiService.getDriverProfile(event.username);
+
+      if (getDriverDetails != null) {
+        print("User details fetched successfully: $getDriverDetails");
+
+        emit(DrawerDriverDataLoaded(
+          username: getDriverDetails['username'] ?? '',
+          email: getDriverDetails['Email'] ?? '',
+          phoneNumber: getDriverDetails['Mobileno'] ?? '',
+          password: getDriverDetails['userpassword'] ?? '',
+          profileImage: getDriverDetails['Profile_image']??'',
+          // profileImage:getDriverDetails['Profile_image']??','
+        ));
+      } else {
+        print("Failed to retrieve user details.");
+        emit(DrawerDriverDataFailure("Failed to retrieve user details."));
+      }
+    } catch (e) {
+      print("Error fetching user details: $e");
+      emit(DrawerDriverDataFailure("Error fetching user details: $e"));
+    }
+  }
+}
+
+//for Drawer profile driver details bloc completed
+
+
+
+
+
+//for fetching values from tripsheet by userid bloc start
+
+class GettingTripSheetDetailsByUseridBloc extends Bloc< GettingTripSheetDetailsByUserIdEvent , GettingTripSheetDetilsByUseridState>{
+  GettingTripSheetDetailsByUseridBloc():super(Getting_TripSheetDetails_ByUserid_Loading()){
+    on<Getting_TripSheet_Details_By_Userid>(_onGettingTripdetailsValuesBasedUseriD);
+  }
+
+  Future<void> _onGettingTripdetailsValuesBasedUseriD(
+      Getting_TripSheet_Details_By_Userid event , Emitter <GettingTripSheetDetilsByUseridState> emit)async{
+
+    try{
+      emit(Getting_TripSheetDetails_ByUserid_Loading());
+      final tripSheets  = await ApiService.fetchTripSheetbytripid(
+        username: event.username,
+        userId: event.userId,
+        duty: event.duty,
+        tripId: event.tripId
+      );
+      emit(Getting_TripSheetDetails_ByUserid_Loaded(tripSheets));
+    }catch(e){
+      emit(Getting_TripSheetDetails_ByUserid_Failure("Failed to fetch trip sheet: $e"));
+    }
+
+  }
+}
+
+//for fetching values from tripsheet by userid bloc completed
+
+
+
+
+//update TripSheet status Accepts,onGoing,Closed,Waiting bloc Starts
+class UpdateTripStatusInTripsheetBloc extends Bloc<UpdateTripStatusInTripSheetEvent, UpdateTripStatusInTripsheetState> {
+  UpdateTripStatusInTripsheetBloc() : super(UpdateTripStatusInTripsheetInitial()) {
+    on<UpdateTripStatusEventClass>(_onUpdateStatusOnTheTrip);
+  }
+
+  Future<void> _onUpdateStatusOnTheTrip(
+      UpdateTripStatusEventClass event,
+      Emitter<UpdateTripStatusInTripsheetState> emit) async {
+    try {
+      emit(UpdateTripStatusInTripsheetLoading());
+
+      await ApiService.updateTripStatus(
+        tripId: event.tripId,
+        status: event.status,
+      );
+
+      emit(UpdateTripStatusInTripsheetSuccess());
+    } catch (e) {
+      emit(UpdateTripStatusInTripsheetFailure(e.toString())); // Fix: Return actual error message
+    }
+  }
+}
+//update TripSheet status Accepts,onGoing,Closed,Waiting bloc completed
+
+
+
+
+//for enteringStarting Kilometer text to the tripsheet bloc start
+class StartKmBloc extends Bloc<StartKmEvent, StartKmState> {
+  StartKmBloc() : super(StartKmInitial()) {
+
+    // Handling text submission event
+    on<SubmitStartingKilometerText>((event, emit) async {
+      try {
+
+        emit(StartKmTextLoading()); // Show loading state
+
+        // Ensure hclValue is parsed correctly
+        int hclInt = int.tryParse(event.hclValue) ?? 0;
+
+        // API Call
+        await ApiService.updateStartinKMToSratingkmScreen(
+          tripId: event.tripId,
+          startKm: event.startKm,
+          hcl: hclInt,
+          duty: event.dutyValue,
+        );
+
+        emit(StartKmTextSubmitted()); // Emit success state
+      } catch (e, stackTrace) {
+        emit(StartKmError("Failed to submit starting km text: $e"));
+      }
+    });
+
+
+    // Handling image upload event
+    on<UploadStartingKilometerImage>((event, emit) async {
+      try {
+        emit(StartKmImageUploading()); // Show loading state
+
+        bool result = await ApiService.uploadstartingkm(
+          tripid: event.tripId,
+          documenttype: 'StartingKm',
+          startingkilometer: event.startingKilometerImage,
+        );
+
+        if (result) {
+          emit(StartKmImageUploaded()); // Success state
+        } else {
+          emit(StartKmError("Image upload failed"));
+        }
+      } catch (e) {
+        emit(StartKmError("Failed to upload starting km image: ${e.toString()}"));
+      }
+    });
+  }
+}
+//for enteringStarting Kilometer text to the tripsheet bloc completed
+
+
+
+
+
+//this the total bloc implementing 3 apis in the Trip details Upload page starts
+class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
+  TripUploadBloc() : super(TripUploadInitial()) {
+    on<UploadClosingKmText>(_uploadClosingKmText);
+    on<UploadClosingKmImage>(_uploadClosingKmImage);
+    on<UpdateSignatureStatus>(_updateSignatureStatus);
+  }
+
+
+  //updating closing kilometer
+  Future<void> _uploadClosingKmText(UploadClosingKmText event, Emitter<TripUploadState> emit) async {
+    emit(TripUploadLoading());
+    try {
+      final String dateSignature = DateTime.now().toIso8601String().split('T')[0] +
+          ' ' +
+          DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+
+      // final String signTime = TimeOfDay.now().format(DateTime.now().hour);
+      final TimeOfDay now = TimeOfDay.now();
+      final String signTime = "${now.hour}:${now.minute}"; // Simple fallback formatting
+
+
+      await ApiService.sendSignatureDetails(
+        tripId: event.tripId,
+        dateSignature: dateSignature,
+        signTime: signTime,
+        status: "Accept",
+      );
+
+      emit(TripUploadSuccess("Closing Kilometer text uploaded successfully"));
+    } catch (error) {
+      emit(TripUploadFailure("Error uploading data: $error"));
+    }
+  }
+
+  //update closing kilometer image
+  Future<void> _uploadClosingKmImage(UploadClosingKmImage event, Emitter<TripUploadState> emit) async {
+    emit(TripUploadLoading());
+    try {
+      bool result = await ApiService.uploadClosingkm(
+        tripid: event.tripId,
+        documenttype: 'ClosingKm',
+        closingkilometer: event.image,
+      );
+
+      if (result) {
+        emit(TripUploadSuccess("Closing Kilometer image uploaded successfully"));
+      } else {
+        emit(TripUploadFailure("Failed to upload Closing Kilometer image"));
+      }
+    } catch (error) {
+      emit(TripUploadFailure("Error uploading image: $error"));
+    }
+  }
+
+  //update signature status bloc
+  Future<void> _updateSignatureStatus(UpdateSignatureStatus event, Emitter<TripUploadState> emit) async {
+    emit(TripUploadLoading());
+    try {
+      await ApiService.updateCloseKMToTripDetailsUploadScreen(
+        tripId: event.tripId,
+        closeKm: event.closeKm,
+        hcl: event.hcl,
+        duty: event.duty,
+      );
+
+      emit(TripUploadSuccess("Closing Kilometer details updated successfully"));
+    } catch (error) {
+      emit(TripUploadFailure("Error updating data: $error"));
+    }
+  }
+}
+//this the total bloc implementing 3 apis in the Trip details Upload page completed
+
+
+
+//this is total bloc based on events for end ride screen where sign image save, sign status , trip status event starts
+
+
+
+class TripSignatureBloc extends Bloc<TripSignatureEvent, TripSignatureState> {
+  TripSignatureBloc() : super(TripSignatureInitial()) {
+    on<SaveSignatureEvent>(_saveSignature);
+    on<SendSignatureDetailsEvent>(_sendSignatureDetails);
+    on<UpdateTripStatusEvent>(_updateTripStatus);
+  }
+
+  //save signature to the signature db bloc
+
+
+  Future<void> _saveSignature(
+      SaveSignatureEvent event, Emitter<TripSignatureState> emit) async {
+    emit(TripSignatureLoading());
+    try {
+      await ApiService.saveSignature(
+        tripId: event.tripId,
+        signatureData: event.base64Signature,
+        imageName: event.imageName,
+        endtrip: event.endtrip,
+        endtime: event.endtime,
+      );
+      emit(SaveSignatureSuccess());
+    } catch (e) {
+      emit(TripSignatureFailure("Failed to save signature: $e"));
+    }
+  }
+
+
+//save signature status to the Signaturetimedetails db bloc
+
+  Future<void> _sendSignatureDetails(
+      SendSignatureDetailsEvent event, Emitter<TripSignatureState> emit) async {
+    try {
+      await ApiService.sendSignatureDetailsUpdated(
+        tripId: event.tripId,
+        dateSignature: event.dateSignature,
+        signTime: event.signTime,
+        status: event.status,
+      );
+      emit(SendSignatureDetailsSuccess());
+    } catch (e) {
+      emit(TripSignatureFailure("Failed to send signature details: $e"));
+    }
+  }
+
+
+//update trip status in tripsheet db bloc
+
+  Future<void> _updateTripStatus(
+      UpdateTripStatusEvent event, Emitter<TripSignatureState> emit) async {
+    try {
+      await ApiService.updateTripStatusCompleted(
+        tripId: event.tripId,
+        apps: event.apps,
+      );
+      emit(UpdateTripStatusSuccess());
+    } catch (e) {
+      emit(TripSignatureFailure("Failed to update trip status: $e"));
+    }
+  }
+}
+
+//this is total bloc based on events for end ride screen where sign image save, sign status , trip status event completed
+
+
+
+//For fetching tripsheet details based on tripId bloc starts TripSheetDetailsTripIdEvent
+
+// class TripSignatureBloc extends Bloc<TripSignatureEvent, TripSignatureState> {
+class TripSheetDetailsTripIdBloc extends Bloc<TripSheetDetailsTripIdEvent, TripSheetDetailsTripIdState> {
+  TripSheetDetailsTripIdBloc() : super(TripDetailsByTripIdInitial()) {
+    on<FetchTripDetailsByTripIdEventClass>(_onFetchTripDetailsByTripId);
+  }
+
+  Future<void> _onFetchTripDetailsByTripId(
+      FetchTripDetailsByTripIdEventClass event, Emitter<TripSheetDetailsTripIdState> emit) async {
+    emit(TripDetailsByTripIdLoading());
+
+    try {
+      final tripDetails = await ApiService.fetchTripDetails(event.tripId);
+
+      if (tripDetails != null) {
+        emit(TripDetailsByTripIdLoaded(tripDetails: tripDetails));
+      } else {
+        emit(TripDetailsByTripIdError(message: "No trip details found."));
+      }
+    } catch (e) {
+      emit(TripDetailsByTripIdError(message: "Error loading trip details: $e"));
+    }
+  }
+}
+//For fetching tripsheet details based on tripId bloc completed
+
+
+
+//toll and parking text upload and tool and parking image upload bloc starts TollParkingDetailsState
+
+
+
+// class TripSignatureBloc extends Bloc<TripSignatureEvent, TripSignatureState> {
+class TollParkingDetailsBloc extends Bloc<TollParkingDetailsEvent, TollParkingDetailsState> {
+  TollParkingDetailsBloc() : super(TollParkingDetailsInitial()) {
+    on<UpdateTollParking>(_onUpdateTollParking);
+    on<UploadParkingFile>(_onUploadParkingFile);
+    on<UploadTollFile>(_onUploadTollFile);
+  }
+
+  // API Call: Update Toll & Parking Details
+  Future<void> _onUpdateTollParking(
+      UpdateTollParking event, Emitter<TollParkingDetailsState> emit) async {
+    emit(TollParkingDetailsLoading());
+
+    try {
+      bool result = await ApiService.updateTripDetailsTollParking(
+        tripid: event.tripId,
+        toll: event.toll,
+        parking: event.parking,
+      );
+
+      if (result) {
+        emit(TollParkingUpdated());
+      } else {
+        emit(TollParkingDetailsError(message: "Failed to update toll and parking details."));
+      }
+    } catch (e) {
+      emit(TollParkingDetailsError(message: "Error updating toll and parking: $e"));
+    }
+  }
+
+  // API Call: Upload Parking File
+  Future<void> _onUploadParkingFile(
+      UploadParkingFile event, Emitter<TollParkingDetailsState> emit) async {
+    emit(TollParkingDetailsLoading());
+
+    try {
+      bool result = await ApiService.uploadParkingFile(
+        tripid: event.tripId,
+        documenttype: 'Parking',
+        parkingFile: event.parkingFile,
+      );
+
+      if (result) {
+        emit(ParkingFileUploaded());
+      } else {
+        emit(TollParkingDetailsError(message: "Failed to upload parking file."));
+      }
+    } catch (e) {
+      emit(TollParkingDetailsError(message: "Error uploading parking file: $e"));
+    }
+  }
+
+  // API Call: Upload Toll File
+  Future<void> _onUploadTollFile(
+      UploadTollFile event, Emitter<TollParkingDetailsState> emit) async {
+    emit(TollParkingDetailsLoading());
+
+    try {
+      bool result = await ApiService.uploadTollFile(
+        tripid: event.tripId,
+        documenttype: 'Toll',
+        tollFile: event.tollFile,
+      );
+
+      if (result) {
+        emit(TollFileUploaded());
+      } else {
+        emit(TollParkingDetailsError(message: "Failed to upload toll file."));
+      }
+    } catch (e) {
+      emit(TollParkingDetailsError(message: "Error uploading toll file: $e"));
+    }
+  }
+}
+
+
+//toll and parking text upload and tool and parking image upload bloc completed
+
+
+
+
+// saving status as On_Going bloc start
+class TripBloc extends Bloc<TripEvent, TripState> {
+  TripBloc() : super(TripInitial()) {
+    // ✅ Register the event handler for StartRideEvent
+    on<StartRideEvent>((event, emit) async {
+      emit(TripLoading());
+      try {
+        final response = await ApiService.updateTripStatusStartRide(event.tripId, 'On_Going');
+
+        if (response.statusCode == 200) {
+          emit(TripSuccess());
+        } else {
+          emit(TripFailure(error: 'Failed to update status'));
+        }
+      } catch (e) {
+        emit(TripFailure(error: e.toString()));
+      }
+    });
+  }
+}
+// saving status as On_Going bloc competed
+
+
+//history page Tripsheet values closed bloc starts
+class TripSheetBloc extends Bloc<TripSheetEvent, TripSheetState> {
+  TripSheetBloc() : super(TripSheetInitial()) {
+    on<FetchTripSheetClosedRides>(_onFetchTripSheetClosedRides);
+  }
+
+  Future<void> _onFetchTripSheetClosedRides(
+      FetchTripSheetClosedRides event, Emitter<TripSheetState> emit) async {
+    print("🟢 Event received: FetchTripSheetClosedRides");
+    emit(TripSheetLoading());
+    print("⏳ Loading state emitted");
+
+    try {
+      final data = await ApiService.fetchTripSheetClosedRides(
+        userId: event.userId,
+        username: event.username,
+      );
+
+      print("📦 API Responses: $data");
+
+      if (data.isNotEmpty) {
+        print("✅ Data received, emitting TripSheetLoaded");
+        emit(TripSheetLoaded(tripSheetData: data));
+      } else {
+        print("⚠️ Empty data, emitting TripSheetError");
+        emit(TripSheetError(message: "No trips available"));
+      }
+    } catch (e) {
+      print("❌ Error fetching data: $e");
+      emit(TripSheetError(message: "Failed to load trips"));
+    }
+  }
+}
+
+//history page Tripsheet values closed bloc completed
+
+
+
+
+
+//history page Tripsheet values closed filtered dates bloc starts
+
+
+class FetchFilteredRidesBloc extends Bloc<FetchFilteredRidesEvents, FetchFilteredRidesState> {
+  FetchFilteredRidesBloc() : super(FetchFilteredRidesInitial()) {
+    on<FetchFilteredRides>(_onFetchFilteredRides);
+  }
+
+  Future<void> _onFetchFilteredRides(
+      FetchFilteredRides event, Emitter<FetchFilteredRidesState> emit) async {
+    emit(FetchFilteredRidesLoading());
+
+    try {
+      final data = await ApiService.fetchTripSheetFilteredRides(
+        username: event.username,
+        startDate: event.startDate,
+        endDate: event.endDate,
+      );
+      emit(FetchFilteredRidesLoaded(data));
+    } catch (e) {
+      emit(FetchFilteredRidesError( "No trips available, Please Select Valid Date Range"));
+    }
+  }
+}
+
+//history page Tripsheet values closed filtered dates bloc completed
+
+
+
+
+//
+// class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+//   ProfileBloc() : super(ProfileInitial()) {
+//     on<UpdateProfileEvent>(_onUpdateProfile);
+//   }
+//
+//   Future<void> _onUpdateProfile(UpdateProfileEvent event, Emitter<ProfileState> emit) async {
+//     emit(ProfileLoading());
+//     try {
+//       bool success = await ApiService.updateProfile(
+//         username: event.username,
+//         mobileNo: event.mobileNo,
+//         password: event.password,
+//         email: event.email,
+//       );
+//
+//       if (success) {
+//         print("Success Ajay");
+//         emit(ProfileUpdated());
+//       } else {
+//         emit(ProfileError("Profile update failed"));
+//         print(" no Success Ajay");
+//
+//       }
+//     } catch (e) {
+//       emit(ProfileError("An error occurred: ${e.toString()}"));
+//       print("nooooo Success Ajay");
+//
+//     }
+//   }
+// }
+
+
+
+class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  ProfileBloc() : super(ProfileInitial()) {
+    on<UpdateProfileEvent>((event, emit) async {
+      emit(ProfileLoading());
+
+      bool success = await ApiService.updateProfile(
+        username: event.username,
+        mobileNo: event.mobileNo,
+        password: event.password,
+        email: event.email,
+      );
+
+      if (success) {
+        emit(ProfileUpdated());
+      } else {
+        emit(ProfileError("Failed to update profile"));
+      }
+    });
+
+    on<UploadProfilePhotoEvent>((event, emit) async {
+      emit(ProfileLoading());
+
+      bool success = await ApiService.uploadProfilePhoto(
+        username: event.username,
+        imageFile: event.imageFile,
+      );
+
+      if (success) {
+        emit(ProfilePhotoUploaded());
+      } else {
+        emit(ProfilePhotoUploadError("Failed to upload profile photo"));
+      }
+    });
+  }
+}
 

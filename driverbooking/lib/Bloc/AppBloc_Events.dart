@@ -1,4 +1,11 @@
 import 'dart:io';
+import 'package:equatable/equatable.dart';
+import 'dart:typed_data';
+
+import 'package:signature/signature.dart';
+
+import '../Utils/AllImports.dart';
+
 
 
 
@@ -10,21 +17,21 @@ class LoginAtempt extends LoginEvent {
   LoginAtempt({required this.username, required this.password});
 }
 
-abstract class RegisterEvent {}
-
-class RequestOtpAndRegister extends RegisterEvent {
-  final String username;
-  final String password;
-  final String email;
-  final String phone;
-
-  RequestOtpAndRegister({
-    required this.username,
-    required this.password,
-    required this.email,
-    required this.phone,
-  });
-}
+// abstract class RegisterEvent {}
+//
+// class RequestOtpAndRegister extends RegisterEvent {
+//   final String username;
+//   final String password;
+//   final String email;
+//   final String phone;
+//
+//   RequestOtpAndRegister({
+//     required this.username,
+//     required this.password,
+//     required this.email,
+//     required this.phone,
+//   });
+// }
 
 abstract class UpdateUserEvent {}
 
@@ -146,3 +153,461 @@ class UploadCloseKmImageEvent extends TripDetailsUploadEvent {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Above events codes are old below are new for apis
+
+// for registering the driver starts
+abstract class RegisterEvent extends Equatable {
+  @override
+  List<Object> get props =>[];
+}
+
+
+class RegisterUserEvent extends RegisterEvent{
+  final String username;
+  final String email;
+  final String password;
+  final String mobileNumber;
+
+  RegisterUserEvent({
+    required this.username,
+    required this.email,
+    required this.password,
+    required this.mobileNumber,
+
+});
+@override
+  List<Object> get props => [username, email, password, mobileNumber];
+}
+// for registering the driver completed
+
+
+
+
+
+//for homescreen values geting api started
+abstract class TripSheetValuesEvent{}
+
+  class FetchTripSheetValues extends TripSheetValuesEvent{
+    final String userid;
+    final String username;
+
+    FetchTripSheetValues({required this.username, required this.userid});
+  }
+//for homescreen values geting api completed
+
+
+
+
+
+//for Rides screen tripSheet closed values geting api event startes
+abstract class TripSheetClosedValuesEvent{}
+
+class TripsheetStatusClosed extends TripSheetClosedValuesEvent{
+  final String userid;
+  final String username;
+
+  TripsheetStatusClosed({required this.userid, required this.username});
+}
+//for Rides screen tripSheet closed values geting api event closed
+
+
+
+
+
+//for profile driver details event start
+abstract class DrawerDriverDetaisEvent{}
+class DrawerDriverData extends DrawerDriverDetaisEvent{
+  final String username;
+  DrawerDriverData(this.username);
+}
+//for profile driver details event completed
+
+
+
+
+//for fetching values from tripsheet by userid starts
+
+abstract class GettingTripSheetDetailsByUserIdEvent{}
+
+class Getting_TripSheet_Details_By_Userid extends GettingTripSheetDetailsByUserIdEvent{
+  final String userId;
+  final String username;
+  final String tripId;
+  final String duty;
+
+  Getting_TripSheet_Details_By_Userid({
+    required this.userId,
+    required this.username,
+    required this.tripId,
+    required this.duty
+});
+}
+
+//for fetching values from tripsheet by userid completed
+
+
+//update TripSheet status Accepts,onGoing,Closed,Waiting Events starts
+
+abstract class UpdateTripStatusInTripSheetEvent{}
+
+class UpdateTripStatusEventClass extends UpdateTripStatusInTripSheetEvent{
+  final String tripId;
+  final String status;
+
+  UpdateTripStatusEventClass({required this.tripId, required this.status});
+}
+
+//update TripSheet status Accepts,onGoing,Closed,Waiting Events completed
+
+
+
+//for enteringStarting Kilometer text to the tripsheet event starts
+abstract class StartKmEvent extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+// Event to submit starting kilometer text
+class SubmitStartingKilometerText extends StartKmEvent {
+  final String tripId;
+  final String startKm;
+  final String hclValue;
+  final String dutyValue;
+
+  SubmitStartingKilometerText({
+    required this.tripId,
+    required this.startKm,
+    required this.hclValue,
+    required this.dutyValue,
+  });
+
+  @override
+  List<Object?> get props => [tripId, startKm, hclValue, dutyValue];
+}
+
+// Event to upload starting kilometer image
+class UploadStartingKilometerImage extends StartKmEvent {
+  final String tripId;
+  final File startingKilometerImage; // Changed from String to File
+
+  UploadStartingKilometerImage({
+    required this.tripId,
+    required this.startingKilometerImage,
+  });
+
+  @override
+  List<Object?> get props => [tripId, startingKilometerImage];
+}
+//for enteringStarting Kilometer text to the tripsheet event completed
+
+
+
+
+
+//this the totall event implementing 3 apis in the Trip details Upload page starts
+abstract class TripUploadEvent extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+//Uploading Closing kilometer event
+class UploadClosingKmText extends TripUploadEvent {
+  final String tripId;
+
+  UploadClosingKmText({required this.tripId});
+}
+
+//uploading closing kilometer image event
+class UploadClosingKmImage extends TripUploadEvent {
+  final String tripId;
+  final File image;
+
+  UploadClosingKmImage({required this.tripId, required this.image});
+}
+
+
+//uploading signature status as accept event
+class UpdateSignatureStatus extends TripUploadEvent {
+  final String tripId;
+  final String closeKm;
+  final String duty;
+  final int hcl;
+
+  UpdateSignatureStatus({
+    required this.tripId,
+    required this.closeKm,
+    required this.duty,
+    required this.hcl,
+  });
+}
+
+//this the totall event implementing 3 apis in the Trip details Upload page completed
+
+
+
+
+//this is total events for end ride screen where sign image save, sign status , trip status event Starts
+// signature_event.dart
+abstract class TripSignatureEvent {}
+//save signature to the signature db event
+class SaveSignatureEvent extends TripSignatureEvent {
+  final String tripId;
+  final String base64Signature;
+  final String imageName;
+  final String endtrip;
+  final String endtime;
+
+  SaveSignatureEvent({
+    required this.tripId,
+    required this.base64Signature,
+    required this.imageName,
+    required this.endtrip,
+    required this.endtime,
+  });
+}
+//save signature status to the Signaturetimedetails db event
+class SendSignatureDetailsEvent extends TripSignatureEvent {
+  final String tripId;
+  final String dateSignature;
+  final String signTime;
+  final String status;
+
+  SendSignatureDetailsEvent({
+    required this.tripId,
+    required this.dateSignature,
+    required this.signTime,
+    required this.status,
+  });
+}
+
+//update triSp status in tripsheet db event
+class UpdateTripStatusEvent extends TripSignatureEvent {
+  final String tripId;
+  final String apps;
+
+  UpdateTripStatusEvent({
+    required this.tripId,
+    required this.apps,
+  });
+}
+//this is total events for end ride screen where sign image save, sign status , trip status event completed
+
+
+
+//For fetching tripsheet details based on tripId event Starts
+abstract class TripSheetDetailsTripIdEvent extends Equatable {
+  const TripSheetDetailsTripIdEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class FetchTripDetailsByTripIdEventClass extends TripSheetDetailsTripIdEvent {
+  final String tripId;
+
+  const FetchTripDetailsByTripIdEventClass({required this.tripId});
+
+  @override
+  List<Object?> get props => [tripId];
+}
+
+// For fetching tripsheet details based on tripId event completed
+
+
+//toll and parking text upload nd tool and parking image upload event starts
+
+
+abstract class TollParkingDetailsEvent extends Equatable {
+  const TollParkingDetailsEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+// Event for updating toll & parking details
+class UpdateTollParking extends TollParkingDetailsEvent {
+  final String tripId;
+  final String toll;
+  final String parking;
+
+  const UpdateTollParking({required this.tripId, required this.toll, required this.parking});
+
+  @override
+  List<Object?> get props => [tripId, toll, parking];
+}
+
+// Event for uploading parking file
+class UploadParkingFile extends TollParkingDetailsEvent {
+  final String tripId;
+  final File parkingFile;
+
+  const UploadParkingFile({required this.tripId, required this.parkingFile});
+
+  @override
+  List<Object?> get props => [tripId, parkingFile];
+}
+
+// Event for uploading toll file
+class UploadTollFile extends TollParkingDetailsEvent {
+  final String tripId;
+  final File tollFile;
+
+  const UploadTollFile({required this.tripId, required this.tollFile});
+
+  @override
+  List<Object?> get props => [tripId, tollFile];
+}
+
+
+//toll and parking text upload and tool and parking image upload event completed
+
+
+
+
+// saving status as On_Going Event starts
+abstract class TripEvent extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
+class StartRideEvent extends TripEvent {
+  final String tripId;
+  StartRideEvent({required this.tripId});
+
+  @override
+  List<Object> get props => [tripId];
+}
+// saving status as On_Going Event completed
+
+
+//history page Tripsheet values closed events Starts
+abstract class TripSheetEvent {}
+
+class FetchTripSheetClosedRides extends TripSheetEvent {
+  final String userId;
+  final String username;
+
+  FetchTripSheetClosedRides({required this.userId, required this.username});
+}
+
+
+//history page Tripsheet values closed events completed
+
+
+
+
+
+
+
+//history page Tripsheet values closed filtered dates events starts
+
+abstract class FetchFilteredRidesEvents extends Equatable {
+  const FetchFilteredRidesEvents();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class FetchFilteredRides extends FetchFilteredRidesEvents {
+  final String username;
+  final DateTime startDate;
+  final DateTime endDate;
+
+  const FetchFilteredRides({
+    required this.username,
+    required this.startDate,
+    required this.endDate,
+  });
+
+  @override
+  List<Object?> get props => [username, startDate, endDate];
+}
+//history page Tripsheet values closed filtered dates events completed
+
+
+// abstract class ProfileEvent {}
+
+// class UpdateProfileEvent extends ProfileEvent {
+//   final String username;
+//   final String mobileNo;
+//   final String password;
+//   final String email;
+//
+//   UpdateProfileEvent({
+//     required this.username,
+//     required this.mobileNo,
+//     required this.password,
+//     required this.email,
+//   });
+// }
+
+abstract class ProfileEvent {}
+
+class UpdateProfileEvent extends ProfileEvent {
+  final String username;
+  final String mobileNo;
+  final String password;
+  final String email;
+
+  UpdateProfileEvent({
+    required this.username,
+    required this.mobileNo,
+    required this.password,
+    required this.email,
+  });
+}
+
+class UploadProfilePhotoEvent extends ProfileEvent {
+  final String username;
+  final File imageFile;
+
+  UploadProfilePhotoEvent({
+    required this.username,
+    required this.imageFile,
+  });
+}

@@ -7,6 +7,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:driverbooking/Screens/BookingDetails/BookingDetails.dart';
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:driverbooking/Bloc/App_Bloc.dart';
+import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+
 class Pickupscreen extends StatefulWidget {
   final String address;
   final String tripId;
@@ -17,10 +23,17 @@ class Pickupscreen extends StatefulWidget {
 }
 
 class _PickupscreenState extends State<Pickupscreen> {
+
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
     final LatLng _initialPosition = LatLng(13.082680, 80.270721); // Replace with desired coordinates (e.g., Bengaluru, India)
+    void initState() {
+      super.initState();
 
+      // Print the values to debug
+      print("Addressss: ${widget.address}");
+      print("Trip ID: ${widget.tripId}");
+    }
     @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -163,6 +176,8 @@ class _PickupscreenState extends State<Pickupscreen> {
                       onPressed: () {
                         // Add your button action here
                         Navigator.push(context, MaterialPageRoute(builder: (context) => TrackingPage(address: widget.address, tripId: widget.tripId,)));
+
+
                       },
                       child: Text(
                         'Go to the Location',

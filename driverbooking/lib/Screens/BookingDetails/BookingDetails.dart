@@ -1,8 +1,14 @@
+import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:driverbooking/Bloc/App_Bloc.dart';
+
 import 'package:driverbooking/Screens/PickupScreen/PickupScreen.dart';
+import 'package:driverbooking/Screens/StartingKilometer/StartingKilometer.dart';
 import 'package:driverbooking/Utils/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:driverbooking/GlobalVariable/global_variable.dart' as globals;
 import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -34,6 +40,8 @@ class _BookingdetailsState extends State<Bookingdetails> {
   void initState() {
     super.initState();
     globals.dropLocation = Dropaddress; // Set the global variable
+    BlocProvider.of<GettingTripSheetDetailsByUseridBloc>(context).add(Getting_TripSheet_Details_By_Userid(userId: widget.userId, username: widget.username, tripId: widget.tripId, duty: widget.duty));
+
   }
   @override
   void didChangeDependencies() {
@@ -95,132 +103,202 @@ class _BookingdetailsState extends State<Bookingdetails> {
         backgroundColor: AppTheme.Navblue1,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: ListView.builder(
-        itemCount: tripSheetData.length,
-        itemBuilder: (context, index) {
-          final tripDetails = tripSheetData[index];
-          _saveTripDetailsToLocalStorage(tripDetails);
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 16.0),
-                  // Booking Details Section
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+      body:
+      BlocBuilder<GettingTripSheetDetailsByUseridBloc, GettingTripSheetDetilsByUseridState>(builder: (context , state){
+        if (state is Getting_TripSheetDetails_ByUserid_Loading){
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }else if(state is Getting_TripSheetDetails_ByUserid_Loaded){
+          return ListView.builder(
+            itemCount: state. tripSheets.length,
+            itemBuilder: (context, index) {
+              final tripDetails = state.tripSheets[index];
+              _saveTripDetailsToLocalStorage(tripDetails);
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16.0),
+                      // Booking Details Section
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        _buildDetailTile(
+                        child: Column(
+                          children: [
+                            _buildDetailTile(
+                              context,
+                              label: "Trip Sheet Number",
+                              value: (tripDetails['tripid']?.toString() ?? "Not available"),
+                              icon: Icons.description,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Trip Date",
+                              value: tripDetails['tripsheetdate'] ?? "Not available", // Default text when null
+                              icon: Icons.calendar_today,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Start Time",
+                              value: tripDetails['starttime'] ?? "Not available", // Default text when null
+                              icon: Icons.access_time,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Duty Type",
+                              value: tripDetails['duty'] ?? "Not available", // Default text when null
+                              icon: Icons.business_center,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Vehicle Type",
+                              value: tripDetails['vehType'] ?? "Not available", // Default text when null
+                              icon: Icons.directions_car,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Company Name",
+                              value: tripDetails['customer'] ?? "Not available", // Default text when null
+                              icon: Icons.business,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Guest Name",
+                              value: tripDetails['guestname'] ?? "Not available", // Default text when null
+                              icon: Icons.person,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Contact Number",
+                              value: tripDetails['guestmobileno'] ?? "Not available", // Default text when null
+                              icon: Icons.phone,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Address",
+                              // value: address.isNotEmpty ? address : "Not available", // Default text when empty
+                              value: tripDetails['address1'] ?? "Not available", // Default text when null
+
+                              icon: Icons.location_pin,
+                              isLast: true,
+                            ),
+                            _buildDetailTile(
+                              context,
+                              label: "Drop Location",
+                              // value: Dropaddress.isNotEmpty ? Dropaddress : "Not available", // Default text when empty
+                              value: tripDetails['address1'] ?? "Not available", // Default text when null
+
+                              icon: Icons.location_pin,
+                              isLast: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      // Accept Button
+                      // ElevatedButton(
+                      //   onPressed: () async {
+                      //     await ApiService.updateTripStatus(
+                      //       tripId: widget.tripId,
+                      //       status: "Accept",
+                      //     );
+                      //
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => StartingKilometer(address: address, tripId: widget.tripId,),
+                      //       ),
+                      //     );
+                      //   },
+                      //   style: ElevatedButton.styleFrom(
+                      //     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 16.0),
+                      //     shape: RoundedRectangleBorder(
+                      //       borderRadius: BorderRadius.circular(12.0),
+                      //     ),
+                      //     backgroundColor: AppTheme.Navblue1,
+                      //     foregroundColor: Colors.white,
+                      //     elevation: 6,
+                      //   ),
+                      //   child: const Text(
+                      //     "Accept Booking",
+                      //     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                      //   ),
+                      // ),
+
+                  BlocConsumer<UpdateTripStatusInTripsheetBloc, UpdateTripStatusInTripsheetState>(
+                    listener: (context, state) {
+                      if (state is UpdateTripStatusInTripsheetSuccess) {
+                        Navigator.push(
                           context,
-                          label: "Trip Sheet Number",
-                          value: (tripDetails['tripid']?.toString() ?? "Not available"),
-                          icon: Icons.description,
+                          MaterialPageRoute(
+                            builder: (context) => StartingKilometer(address: tripDetails['address1'], tripId: widget.tripId),
+                          ),
+                        );
+
+
+                      } else if (state is UpdateTripStatusInTripsheetFailure) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Error: ${state.error}")),
+                        );
+                      }
+                    },
+                    builder: (context, state) {
+                      return ElevatedButton(
+                        onPressed: state is UpdateTripStatusInTripsheetLoading
+                            ? null // Disable button when loading
+                            : () {
+                          context.read<UpdateTripStatusInTripsheetBloc>().add(
+                            UpdateTripStatusEventClass(
+                              tripId: widget.tripId,
+                              status: "Accept",
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          backgroundColor: AppTheme.Navblue1,
+                          foregroundColor: Colors.white,
+                          elevation: 6,
                         ),
-                        _buildDetailTile(
-                          context,
-                          label: "Trip Date",
-                          value: tripDetails['tripsheetdate'] ?? "Not available", // Default text when null
-                          icon: Icons.calendar_today,
-                        ),
-                        _buildDetailTile(
-                          context,
-                          label: "Start Time",
-                          value: tripDetails['starttime'] ?? "Not available", // Default text when null
-                          icon: Icons.access_time,
-                        ),
-                        _buildDetailTile(
-                          context,
-                          label: "Duty Type",
-                          value: tripDetails['duty'] ?? "Not available", // Default text when null
-                          icon: Icons.business_center,
-                        ),
-                        _buildDetailTile(
-                          context,
-                          label: "Vehicle Type",
-                          value: tripDetails['vehType'] ?? "Not available", // Default text when null
-                          icon: Icons.directions_car,
-                        ),
-                        _buildDetailTile(
-                          context,
-                          label: "Company Name",
-                          value: tripDetails['customer'] ?? "Not available", // Default text when null
-                          icon: Icons.business,
-                        ),
-                        _buildDetailTile(
-                          context,
-                          label: "Guest Name",
-                          value: tripDetails['guestname'] ?? "Not available", // Default text when null
-                          icon: Icons.person,
-                        ),
-                        _buildDetailTile(
-                          context,
-                          label: "Contact Number",
-                          value: tripDetails['guestmobileno'] ?? "Not available", // Default text when null
-                          icon: Icons.phone,
-                        ),
-                        _buildDetailTile(
-                          context,
-                          label: "Address",
-                          value: address.isNotEmpty ? address : "Not available", // Default text when empty
-                          icon: Icons.location_pin,
-                          isLast: true,
-                        ),
-                        _buildDetailTile(
-                          context,
-                          label: "Drop Location",
-                          value: Dropaddress.isNotEmpty ? Dropaddress : "Not available", // Default text when empty
-                          icon: Icons.location_pin,
-                          isLast: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20.0),
-                  // Accept Button
-                  ElevatedButton(
-                    onPressed: () async {
-                      await ApiService.updateTripStatus(
-                        tripId: widget.tripId,
-                        status: "Accept",
-                      );
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Pickupscreen(address: address, tripId: widget.tripId,),
+                        child: state is UpdateTripStatusInTripsheetLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text(
+                          "Accept Booking",
+                          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      backgroundColor: AppTheme.Navblue1,
-                      foregroundColor: Colors.white,
-                      elevation: 6,
-                    ),
-                    child: const Text(
-                      "Accept Booking",
-                      style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                    ),
+                  )
+
+                  ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
-        },
-      ),
+
+        }else{
+          return const Center(
+            child: Text('Failed to Load Data '),
+          );
+        }
+      })
+
+
 
 
     );
