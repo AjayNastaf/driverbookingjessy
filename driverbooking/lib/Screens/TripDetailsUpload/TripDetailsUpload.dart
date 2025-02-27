@@ -795,13 +795,15 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         body: BlocListener<TripUploadBloc, TripUploadState>(
             listener: (context, state) {
               if (state is TripUploadSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.message)),
-                );
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   SnackBar(content: Text(state.message)),
+                // );
+                showSuccessSnackBar(context, state.message);
               } else if (state is TripUploadFailure) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.error)),
-                );
+                // ScaffoldMessenger.of(context).showSnackBar(
+                //   SnackBar(content: Text(state.error)),
+                // );
+                showFailureSnackBar(context, state.error);
               }
             },
             child:
@@ -951,9 +953,10 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                     // },
                     onPressed: () {
                       if (closeKmController.text.isEmpty || _selectedImage2 == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Please fill all fields")),
-                        );
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   const SnackBar(content: Text("Please fill all fields")),
+                        // );
+                        showWarningSnackBar(context, 'Please upload closing kilometer and image');
                         return;
                       }
 

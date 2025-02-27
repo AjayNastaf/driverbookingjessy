@@ -12,10 +12,14 @@ class AppConstants {  // only use asset
   static const String driver_waiting = 'assets/image/driver-waiting.jpg';
   static const String navigation = 'assets/image/navigation.png';
 
-
+//aws
   static const String baseUrl = "http://75.101.215.49:7002";
+
+  //local
   // static const String baseUrl = "http://192.168.0.115:3000";
 
+
+  //jessycabs
   // static const String baseUrl = "https://192.168.1.170:7001";
   static const Color primaryColor = Colors.blue;
   static const String ApiKey = "AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk";

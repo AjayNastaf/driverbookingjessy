@@ -789,11 +789,12 @@ app.get('/uploads', (req, res) => {
   });
 });
 
-
+//local
 //app.listen(3000, () => {
-//  console.log("Server started on port 3000000");
+//  console.log("Server started on port 3000");
 //});
 
+//aws
 app.listen(7002, () => {
   console.log("Server started on port 7002");
 });

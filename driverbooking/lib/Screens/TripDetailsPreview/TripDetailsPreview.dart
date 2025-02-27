@@ -139,7 +139,7 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
 
 
   Future<void> fetchImages() async {
-    final String apiUrll = 'http://192.168.0.114:3000/get-images'; // Your server URL
+    final String apiUrll = '${AppConstants.baseUrl}/get-images'; // Your server URL
 
     try {
       final response = await http.get(Uri.parse(apiUrll));
@@ -147,7 +147,6 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
       print('Response received, Status code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        print("Ajay");
         final data = json.decode(response.body);
 
         // Print the full response for debugging
@@ -198,9 +197,10 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
         });
         print('Trip details guest: ${state.tripDetails}');
       }else if(state is TripDetailsByTripIdError){
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(state.message)),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text(state.message)),
+        // );
+        showFailureSnackBar(context, state.message);
       }
     },child:Scaffold(
       appBar: AppBar(

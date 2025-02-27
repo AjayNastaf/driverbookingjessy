@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'dart:io';  // Add this import to access the 'File' class.
 import 'package:http/http.dart' as http;
 import 'package:driverbooking/Utils/AppConstants.dart';
-
+import 'package:driverbooking/Utils/AllImports.dart';
 import '../Screens/CustomerLocationReached/CustomerLocationReached.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
@@ -688,8 +688,11 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
         signTime: signTime,
         status: "Accept",
       );
+// showSuccessSnackBar(context, "Closing Kilometer text uploaded successfully");
+      emit(TripUploadSuccess(
 
-      emit(TripUploadSuccess("Closing Kilometer text uploaded successfully"));
+          "Closing Kilometer text uploaded successfully"
+      ));
     } catch (error) {
       emit(TripUploadFailure("Error uploading data: $error"));
     }

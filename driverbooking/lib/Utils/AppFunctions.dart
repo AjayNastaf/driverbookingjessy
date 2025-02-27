@@ -165,18 +165,18 @@ Widget buildTextField(String label, TextEditingController controller, {bool obsc
 // rideScreen'
 class CustomCard extends StatelessWidget {
   final String name;
-  final String image;
+  // final String image;
   final String vehicle;
-  final String price;
+  final String status;
   final String dateTime;
   final String startAddress;
   final String endAddress;
 
   const CustomCard({
     required this.name,
-    required this.image,
+    // required this.image,
     required this.vehicle,
-    required this.price,
+    required this.status,
     required this.dateTime,
     required this.startAddress,
     required this.endAddress,
@@ -206,10 +206,10 @@ class CustomCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundImage: AssetImage(image), // Dynamic image
-              ),
+              // CircleAvatar(
+              //   radius: 30,
+              //   backgroundImage: AssetImage(image), // Dynamic image
+              // ),
               const SizedBox(width: 12), // Space between avatar and details
               Expanded(
                 child: Column(
@@ -225,14 +225,22 @@ class CustomCard extends StatelessWidget {
                             fontSize: 16,
                           ),
                         ),
-                        Text(
-                          price,
-                          style: const TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Adjust padding as needed
+                          decoration: BoxDecoration(
+                            color: Colors.orange, // Background color
+                            borderRadius: BorderRadius.circular(8), // Rounded corners
+                          ),
+                          child: Text(
+                            status,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
+
                       ],
                     ),
                     Text(

@@ -428,6 +428,7 @@
 
 
 import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
+import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -729,7 +730,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return BlocProvider(
       create: (context) => ProfileBloc(),
       child: Scaffold(
-        appBar: AppBar(title: const Text("Profile"), backgroundColor: Colors.blue),
+        appBar: AppBar(title: const Text("Profile", style: TextStyle(color:AppTheme.white1, ),),
+          backgroundColor: AppTheme.Navblue1,
+          iconTheme: IconThemeData(color: AppTheme.white1), // Changes the back button color
+        ),
         body: BlocListener<ProfileBloc, ProfileState>(
           listener: (context, state) {
             if (state is ProfileLoading) {
@@ -831,16 +835,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 10),
                 _buildTextField("Email", emailController),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: handleUpdateProfileAndImage,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: handleUpdateProfileAndImage,
+                    style: ElevatedButton.styleFrom(
+
+                      backgroundColor: AppTheme.Navblue1,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
+                    child: const Text("Save", style: TextStyle(color: AppTheme.white1, ),),
                   ),
-                  child: const Text("Save"),
                 ),
               ],
             ),

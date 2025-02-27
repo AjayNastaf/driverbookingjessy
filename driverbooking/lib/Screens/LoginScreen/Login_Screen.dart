@@ -106,7 +106,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                   context,
                   MaterialPageRoute(builder: (context) => Homescreen(userId: state.userId ,username: _usernameController.text,)),
               );
-              showSuccessSnackBar(context, "Login Successful! User ID: ${_usernameController.text}");
+              showSuccessSnackBar(context, "Login Successful! User Name: ${_usernameController.text}");
               print('Navigating to HomeScreen with userId: ${state.userId}');
               print('Navigating to HomeScreen with username: ${_usernameController.text}');
               // Navigator.pushReplacement(
@@ -311,10 +311,12 @@ class _Login_ScreenState extends State<Login_Screen> {
                               },
                               child: Text(
                                 'Login',
-                                style: TextStyle(fontSize: 20.0),
+                                style: TextStyle(fontSize: 23.0,color: AppTheme.white1),
+
                               ),
                               style: ElevatedButton.styleFrom(
                                 minimumSize: Size(double.infinity, 50),
+                                backgroundColor: AppTheme.Navblue1,
                               ),
                             ),
                             SizedBox(

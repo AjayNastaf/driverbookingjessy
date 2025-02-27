@@ -688,13 +688,13 @@ class _HomescreenState extends State<Homescreen> {
             ),
 
 
-          ListTile(
-            leading: Icon(Icons.home),
-            title: Text('Home'),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.home),
+          //   title: Text('Home'),
+          //   onTap: () {
+          //     Navigator.pop(context);
+          //   },
+          // ),
           ListTile(
             leading: Icon(Icons.car_repair_rounded),
             title: Text('My Rides'),
@@ -703,23 +703,23 @@ class _HomescreenState extends State<Homescreen> {
               Navigator.push(context, MaterialPageRoute(builder: (context)=>Ridescreen(userId: widget.userId,username: widget.username,)));
             },
           ),
-          ListTile(
-            leading: Icon(Icons.account_balance_wallet),
-            title: Text('Wallet'),
-            onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context)=>Walletscreen()));
-              // Navigator.pop(context);
-            },
-
-          ),
-          ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text('Notifications'),
-            onTap: () {
-              // Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>Notificationscreen()));
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.account_balance_wallet),
+          //   title: Text('Wallet'),
+          //   onTap: () {
+          //   Navigator.push(context, MaterialPageRoute(builder: (context)=>Walletscreen()));
+          //     // Navigator.pop(context);
+          //   },
+          //
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.notifications),
+          //   title: Text('Notifications'),
+          //   onTap: () {
+          //     // Navigator.pop(context);
+          //     Navigator.push(context, MaterialPageRoute(builder: (context)=>Notificationscreen()));
+          //   },
+          // ),
           ListTile(
             leading: Icon(Icons.group_add),
             title: Text('Invite Friends'),
@@ -728,20 +728,20 @@ class _HomescreenState extends State<Homescreen> {
               Navigator.push(context, MaterialPageRoute(builder: (context)=>ReferFriendScreen()));
             },
           ),
-          ListTile(
-            leading: Icon(Icons.help_outline),
-            title: Text("Faq's"),
-            onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>FAQScreen()));
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.supervised_user_circle_rounded),
-            title: Text('Contact'),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>Contactscreen()));
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.help_outline),
+          //   title: Text("Faq's"),
+          //   onTap: () {
+          //       Navigator.push(context, MaterialPageRoute(builder: (context)=>FAQScreen()));
+          //   },
+          // ),
+          // ListTile(
+          //   leading: Icon(Icons.supervised_user_circle_rounded),
+          //   title: Text('Contact'),
+          //   onTap: () {
+          //     Navigator.push(context, MaterialPageRoute(builder: (context)=>Contactscreen()));
+          //   },
+          // ),
           ListTile(
             leading: Icon(Icons.supervised_user_circle_rounded),
             title: Text('History'),
@@ -750,19 +750,19 @@ class _HomescreenState extends State<Homescreen> {
               )));
             },
           ),
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-            onTap: () {
-              // Navigator.push(context, MaterialPageRoute(builder: (context)=>Settings(
-              //     userId: widget.userId,
-              //     username: '$username',
-              //     password: '$password',
-              //     phonenumber: '$phonenumber',
-              //     email: '$email'
-              // )));
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.settings),
+          //   title: Text('Settings'),
+          //   onTap: () {
+          //     // Navigator.push(context, MaterialPageRoute(builder: (context)=>Settings(
+          //     //     userId: widget.userId,
+          //     //     username: '$username',
+          //     //     password: '$password',
+          //     //     phonenumber: '$phonenumber',
+          //     //     email: '$email'
+          //     // )));
+          //   },
+          // ),
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),

@@ -3,6 +3,7 @@ import 'package:driverbooking/Screens/TollParkingUpload/TollParkingUpload.dart';
 import 'package:driverbooking/Screens/TripDetailsPreview/TripDetailsPreview.dart';
 import 'package:driverbooking/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:driverbooking/Networks/Api_Service.dart';
@@ -47,16 +48,18 @@ class _SignatureendrideState extends State<Signatureendride> {
             tripId: widget.tripId,
             dateSignature: dateSignature,
             signTime: signTime,
-            status: "onGoing",
+            status: "OnSign",
           );
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Signature data uploaded successfully")),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text("Signature data uploaded successfully")),
+          // );
+          showInfoSnackBar(context, "Signature Status uploading");
         } catch (error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error uploading signature data: $error")),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text("Error uploading signature data: $error")),
+          // );
+          showFailureSnackBar(context, "Error uploading signature data: $error");
         }
       }
     };
@@ -164,8 +167,24 @@ class _SignatureendrideState extends State<Signatureendride> {
     }
   }
 
+//local storage of username
+  void _loadLoginDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    String storedUsername = prefs.getString('username') ?? "Guest";
+    String storedUserId = prefs.getString('userId') ?? "N/A";
 
+    // Debugging print statements
+    print("Local Storage - username: $storedUsername");
+    print("Local Storage - userId: $storedUserId");
 
+    // Navigate to Homescreen with stored values
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Homescreen(userId: storedUserId, username: storedUsername),
+      ),
+    );
+  }
 
   void _handleSubmitModal() {
     // Show the popup dialog
@@ -187,8 +206,8 @@ class _SignatureendrideState extends State<Signatureendride> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
+                // Navigator.of(context).pop(); // Close the dialog
+                _loadLoginDetails();              },
               child: Text(
                 'Cancel',
                 style: TextStyle(color: Colors.red, fontSize: 16),

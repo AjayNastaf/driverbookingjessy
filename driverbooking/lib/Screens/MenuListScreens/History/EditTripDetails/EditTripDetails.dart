@@ -11,7 +11,7 @@ import 'package:driverbooking/Networks/Api_Service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart'; // Import this for DateFormat
-
+import 'package:driverbooking/Utils/AppFunctions.dart';
 import '../../../../Bloc/AppBloc_Events.dart';
 import '../../../../Bloc/AppBloc_State.dart';
 import '../../../../Bloc/App_Bloc.dart';
@@ -228,13 +228,15 @@ class _EditTripDetailsState extends State<EditTripDetails> {
       final signature = await _signatureController.toPngBytes();
       // Save or upload signature here
       print("Signature saved.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Signature saved successfully!")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text("Signature saved successfully!")),
+      // );
+      showSuccessSnackBar(context, "Signature saved successfully!");
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please provide a signature first.")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text("Please provide a signature first.")),
+      // );
+      showInfoSnackBar(context, "Please provide a signature first.");
     }
   }
 
@@ -270,7 +272,8 @@ class _EditTripDetailsState extends State<EditTripDetails> {
     // Your logic to handle submit (e.g., saving the data, calling API)
     print("Details submitted");
     // For now, just showing a message as an example
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Details Submitted")));
+    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Details Submitted")));
+    showSuccessSnackBar(context, "Details Submitted");
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "",username: '',)));
   }
 
@@ -515,14 +518,16 @@ class _EditTripDetailsState extends State<EditTripDetails> {
 
     // Show appropriate message
     if (dataSubmitted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Details submitted successfully!")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Details submitted successfully!")),
+      // );
+      showSuccessSnackBar(context, "Details submitted successfully!");
       _loadLoginDetails(); // Navigate after submission
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please provide either a signature or toll/parking details.")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Please provide either a signature or toll/parking details.")),
+      // );
+      showInfoSnackBar(context, "Please provide either a signature or toll/parking details.");
     }
   }
 
@@ -549,17 +554,22 @@ class _EditTripDetailsState extends State<EditTripDetails> {
     return BlocListener<TollParkingDetailsBloc, TollParkingDetailsState>(
         listener: (context, state) {
           if (state is TollParkingUpdated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Toll & Parking updated successfully!")),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text("Toll & Parking updated successfully!")),
+            // );
+            showSuccessSnackBar(context, "Toll & Parking updated successfully!");
           } else if (state is ParkingFileUploaded) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Parking file uploaded successfully!")),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text("Parking file uploaded successfully!")),
+            // );
+            showSuccessSnackBar(context, "Parking file uploaded successfully!");
+
           } else if (state is TollFileUploaded) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Toll file uploaded successfully!")),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text("Toll file uploaded successfully!")),
+            // );
+            showSuccessSnackBar(context, "Toll file uploaded successfully!");
+
 
             // Navigate to HomeScreen after success
             // Navigator.pushReplacement(context, MaterialPageRoute(

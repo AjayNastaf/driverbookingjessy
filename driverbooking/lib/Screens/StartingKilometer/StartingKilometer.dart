@@ -1,13 +1,10 @@
 import 'dart:io';
-import 'package:driverbooking/Bloc/AppBloc_Events.dart';
-import 'package:driverbooking/Bloc/AppBloc_State.dart';
-import 'package:driverbooking/Bloc/App_Bloc.dart';
+
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../PickupScreen/PickupScreen.dart';
-import 'package:driverbooking/Networks/Api_Service.dart';
 
 class StartingKilometer extends StatefulWidget {
   final String address;
@@ -145,8 +142,9 @@ class _StartingKilometerState extends State<StartingKilometer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Upload File", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, )),
+        title: Text("Upload Starting Kilometer", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, )),
         backgroundColor: AppTheme.Navblue1,
+        iconTheme: IconThemeData(color: AppTheme.white1),
 
         elevation: 2,
       ),
@@ -236,11 +234,14 @@ class _StartingKilometerState extends State<StartingKilometer> {
             BlocConsumer<StartKmBloc, StartKmState>(
               listener: (context, state) {
                 if (state is StartKmTextSubmitted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("KM Submitted Successfully")));
+                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("KM Submitted Successfully")));
+                  showSuccessSnackBar(context, "KM Submitted Successfully");
                 } else if (state is StartKmImageUploaded) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image Uploaded Successfully")));
+                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image Uploaded Successfully")));
+                  showSuccessSnackBar(context, "Image Uploaded Successfully");
                 } else if (state is StartKmError) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+                  showFailureSnackBar(context, state.message);
                 }
               },
               builder: (context, state) {
@@ -253,16 +254,18 @@ class _StartingKilometerState extends State<StartingKilometer> {
              // onPressed: _goToNextScreen,
                   onPressed: () {
                     if (_startKM.text.isEmpty){
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Please enter the Starting Kilometer")),
-                      );
+                      // ScaffoldMessenger.of(context).showSnackBar(
+                      //   const SnackBar(content: Text("Please enter the Starting Kilometer")),
+                      // );
+                      showWarningSnackBar(context, "Please enter the Starting Kilometer");
                       return;
                     }
 
                     if(_selectedFile == null){
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Please Select Starting Kilometer image")),
-                      );
+                      // ScaffoldMessenger.of(context).showSnackBar(
+                      //   const SnackBar(content: Text("Please Select Starting Kilometer image")),
+                      // );
+                      showWarningSnackBar(context, "Please Select Starting Kilometer image");
                       return;
 
                     }

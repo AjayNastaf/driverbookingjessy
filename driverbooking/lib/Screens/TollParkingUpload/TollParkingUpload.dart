@@ -253,6 +253,42 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
   void _handleSubmit(BuildContext context) {
     final tripId = widget.tripId;
 
+    if (tollController.text.isEmpty) {
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Please enter the toll amount.')),
+      // );
+      showWarningSnackBar(context, 'Please enter the toll amount.');
+      return;
+    }
+
+    if (tollFile == null) {
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Please upload a file or take a photo for Toll.')),
+      // );
+      showWarningSnackBar(context, 'Please upload a file or take a photo for Toll.');
+
+      return;
+    }
+
+    if (parkingController.text.isEmpty) {
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Please enter the parking amount.')),
+      // );
+      showWarningSnackBar(context, 'Please enter the parking amount.');
+
+      return;
+    }
+
+    if (parkingFile == null) {
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Please upload a file or take a photo for Parking.')),
+      // );
+      showWarningSnackBar(context, 'Please upload a file or take a photo for Parking.');
+
+      return;
+    }
+
+
     context.read<TollParkingDetailsBloc>().add(UpdateTollParking(
       tripId: tripId,
       toll: tollController.text,
@@ -272,8 +308,9 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
         tollFile: tollFile!,
       ));
     }
-    _loadLoginDetails();
-
+    if ((parkingController.text.isNotEmpty) && (tollController.text.isNotEmpty) && (tollFile != null) && (parkingFile != null)) {
+      _loadLoginDetails();
+    }
 
   }
 
@@ -282,26 +319,33 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
     return  BlocListener<TollParkingDetailsBloc, TollParkingDetailsState>(
         listener: (context, state) {
       if (state is TollParkingUpdated) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Toll & Parking updated successfully!")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Toll & Parking updated successfully!")),
+        // );
+        showSuccessSnackBar(context, "Toll & Parking updated successfully!");
+
       } else if (state is ParkingFileUploaded) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Parking file uploaded successfully!")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Parking file uploaded successfully!")),
+        // );
+        showSuccessSnackBar(context, "Parking file uploaded successfully!");
+
       } else if (state is TollFileUploaded) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Toll file uploaded successfully!")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Toll file uploaded successfully!")),
+        // );
+        showSuccessSnackBar(context, "Toll file uploaded successfully!");
+
 
         // Navigate to HomeScreen after success
         // Navigator.pushReplacement(context, MaterialPageRoute(
         //   builder: (context) => Homescreen(userId: '', username: ''),
         // ));
       } else if (state is TollParkingDetailsError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(state.message)),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text(state.message)),
+        // );
+        showFailureSnackBar(context, state.message);
       }
     },
     child: Scaffold(

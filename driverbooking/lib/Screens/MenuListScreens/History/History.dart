@@ -140,9 +140,10 @@ class _HistoryState extends State<History> {
 
   void fetchFilteredData() {
     if (fromDate == null || toDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a valid date range')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('Please select a valid date range')),
+      // );
+      showWarningSnackBar(context, 'Please select a valid date range');
       return;
     }
 
@@ -177,9 +178,10 @@ class _HistoryState extends State<History> {
         ]);
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No data to export!')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(content: Text('No data to export!')),
+      // );
+      showFailureSnackBar(context, 'No data to export!');
       return;
     }
 
