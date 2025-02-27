@@ -125,6 +125,7 @@ void main() {
         // BlocProvider(create: (context) => FetchFilteredRidesBloc()),
         BlocProvider(create: (context) => FetchFilteredRidesBloc()),
         BlocProvider(create: (context) => ProfileBloc()),
+        BlocProvider(create: (context) => SaveLocationBloc()),
 
 
 

@@ -1064,7 +1064,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
 //saving lat long of pickup location  in db bloc  starts
 
-
 class SaveLocationBloc extends Bloc<SaveLocationEvent, SaveLocationState> {
   SaveLocationBloc() : super(SaveLocationInitial()) {
     on<SaveLocationRequested>(_onSaveLocationRequested);
@@ -1096,14 +1095,14 @@ class SaveLocationBloc extends Bloc<SaveLocationEvent, SaveLocationState> {
 
       if (response.statusCode == 200) {
         emit(SaveLocationSuccess());
+        print('sucess location');
       } else {
         emit(SaveLocationFailure("Failed to save location: ${response.body}"));
       }
     } catch (e) {
-      emit(SaveLocationFailure("Error: $e"));
+      emit(SaveLocationFailure("Errorrrr: $e"));
     }
   }
 }
-
 
 //saving lat long of pickup location  in db bloc completed
