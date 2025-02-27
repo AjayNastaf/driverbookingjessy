@@ -20,7 +20,7 @@ class AppConstants {  // only use asset
 
 
   //jessycabs
-  // static const String baseUrl = "https://192.168.1.79:7001";
+  // static const String baseUrl = "https://jessycabs.com:7001";
   static const Color primaryColor = Colors.blue;
   static const String ApiKey = "AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk";
   static const String mailerEmail = "ravi.vinoth997@gmail.com";

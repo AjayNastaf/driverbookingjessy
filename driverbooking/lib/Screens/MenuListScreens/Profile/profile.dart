@@ -745,32 +745,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
               setState(() {
                 isLoading = false;
               });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Profile updated successfully!")),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   const SnackBar(content: Text("Profile updated successfully!")),
+              // );
+              showSuccessSnackBar(context, "Profile updated successfully!");
             } else if (state is ProfilePhotoUploaded) {
               setState(() {
                 isLoading = false;
               });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Profile photo uploaded successfully!")),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   const SnackBar(content: Text("Profile photo uploaded successfully!")),
+              // );
+              showSuccessSnackBar(context, "Profile photo uploaded successfully!");
             } else if (state is ProfilePhotoUploadError) {
               setState(() {
                 isLoading = false;
                 errorMessage = state.message;
               });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text(state.message)),
+              // );
+              showFailureSnackBar(context, 'state.message');
             } else if (state is ProfileError) {
               setState(() {
                 isLoading = false;
                 errorMessage = state.message;
               });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message)),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text(state.message)),
+              // );
+              showFailureSnackBar(context, 'state.message');
+
             }
           },
           child: isLoading

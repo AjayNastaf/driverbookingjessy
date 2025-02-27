@@ -86,7 +86,8 @@ router.post('/logoutDriver',(req,res)=>{
 router.post('/getDriverProfile', (req, res) => {
         const { username } = req.body;
 console.log(username,'username checkkk');
-    const query = 'SELECT * FROM drivercreation WHERE drivername = ?';
+//    const query = 'SELECT * FROM drivercreation WHERE drivername = ?';
+    const query = 'SELECT * FROM drivercreation WHERE username = ?';
     db.query(query, [username], (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Server error' });
@@ -168,7 +169,8 @@ let parts = filePath.split("\\");
 let fileName = parts.pop();
 console.log(fileName); // Output: 1715926172877-792287503-car.jpeg
 
-    const updateQuery = 'UPDATE drivercreation SET Profile_image = ? WHERE drivername = ?';
+//    const updateQuery = 'UPDATE drivercreation SET Profile_image = ? WHERE drivername = ?';
+    const updateQuery = 'UPDATE drivercreation SET Profile_image = ? WHERE username = ?';
     db.query(updateQuery, [fileName, username], (err, results) => {
         if (err) {
             res.status(500).json({ message: 'Internal server error' });
@@ -184,6 +186,7 @@ router.get('/profile_photos', (req, res) => {
     const { username } = req.query;
    
     const selectQuery = 'SELECT Profile_image FROM drivercreation WHERE drivername = ?';
+//    const selectQuery = 'SELECT Profile_image FROM drivercreation WHERE username = ?';
     db.query(selectQuery, [username], (err, results) => {
         if (err) {
             res.status(500).json({ message: 'Internal server error' });
