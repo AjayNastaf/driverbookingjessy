@@ -1016,42 +1016,13 @@ class FetchFilteredRidesBloc extends Bloc<FetchFilteredRidesEvents, FetchFiltere
 
 
 
-//
-// class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
-//   ProfileBloc() : super(ProfileInitial()) {
-//     on<UpdateProfileEvent>(_onUpdateProfile);
-//   }
-//
-//   Future<void> _onUpdateProfile(UpdateProfileEvent event, Emitter<ProfileState> emit) async {
-//     emit(ProfileLoading());
-//     try {
-//       bool success = await ApiService.updateProfile(
-//         username: event.username,
-//         mobileNo: event.mobileNo,
-//         password: event.password,
-//         email: event.email,
-//       );
-//
-//       if (success) {
-//         print("Success Ajay");
-//         emit(ProfileUpdated());
-//       } else {
-//         emit(ProfileError("Profile update failed"));
-//         print(" no Success Ajay");
-//
-//       }
-//     } catch (e) {
-//       emit(ProfileError("An error occurred: ${e.toString()}"));
-//       print("nooooo Success Ajay");
-//
-//     }
-//   }
-// }
 
-
+//profile photo and profile details upload bloc completed
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc() : super(ProfileInitial()) {
+
+ //profile details
     on<UpdateProfileEvent>((event, emit) async {
       emit(ProfileLoading());
 
@@ -1068,7 +1039,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         emit(ProfileError("Failed to update profile"));
       }
     });
-
+//profile photo
     on<UploadProfilePhotoEvent>((event, emit) async {
       emit(ProfileLoading());
 
@@ -1086,3 +1057,53 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   }
 }
 
+//profile photo and profile details upload bloc completed
+
+
+
+
+//saving lat long of pickup location  in db bloc  starts
+
+
+class SaveLocationBloc extends Bloc<SaveLocationEvent, SaveLocationState> {
+  SaveLocationBloc() : super(SaveLocationInitial()) {
+    on<SaveLocationRequested>(_onSaveLocationRequested);
+  }
+
+  Future<void> _onSaveLocationRequested(
+      SaveLocationRequested event, Emitter<SaveLocationState> emit) async {
+    emit(SaveLocationLoading());
+
+    final Map<String, dynamic> requestData = {
+      "vehicleno": event.vehicleNo,
+      "latitudeloc": event.latitude,
+      "longitutdeloc": event.longitude,
+      "Trip_id": event.tripId,
+      "Runing_Date": DateTime.now().toIso8601String().split("T")[0], // Current Date
+      "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1], // Current Time
+      "Trip_Status": event.tripStatus,
+      "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
+      "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
+      "created_at": DateTime.now().toIso8601String(),
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(requestData),
+      );
+
+      if (response.statusCode == 200) {
+        emit(SaveLocationSuccess());
+      } else {
+        emit(SaveLocationFailure("Failed to save location: ${response.body}"));
+      }
+    } catch (e) {
+      emit(SaveLocationFailure("Error: $e"));
+    }
+  }
+}
+
+
+//saving lat long of pickup location  in db bloc completed

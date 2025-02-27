@@ -613,23 +613,13 @@ class FetchFilteredRidesError extends FetchFilteredRidesState {
 
 
 
-
-// abstract class ProfileState {}
-//
-// class ProfileInitial extends ProfileState {}
-//
-// class ProfileLoading extends ProfileState {}
-//
-// class ProfileUpdated extends ProfileState {}
-//
-// class ProfileError extends ProfileState {
-//   final String message;
-//   ProfileError(this.message);
-// }
+//profile photo and profile details upload state starts
 
 
 abstract class ProfileState {}
 
+
+//profile details
 class ProfileInitial extends ProfileState {}
 
 class ProfileLoading extends ProfileState {}
@@ -642,6 +632,8 @@ class ProfileError extends ProfileState {
   ProfileError(this.message);
 }
 
+
+//profile photo
 class ProfilePhotoUploaded extends ProfileState {}
 
 class ProfilePhotoUploadError extends ProfileState {
@@ -649,3 +641,32 @@ class ProfilePhotoUploadError extends ProfileState {
 
   ProfilePhotoUploadError(this.message);
 }
+//profile photo and profile details upload state completed
+
+
+
+//saving lat long of pickup location  in db state starts
+
+abstract class SaveLocationState extends Equatable {
+  const SaveLocationState();
+
+  @override
+  List<Object> get props => [];
+}
+
+class SaveLocationInitial extends SaveLocationState {}
+
+class SaveLocationLoading extends SaveLocationState {}
+
+class SaveLocationSuccess extends SaveLocationState {}
+
+class SaveLocationFailure extends SaveLocationState {
+  final String error;
+
+  const SaveLocationFailure(this.error);
+
+  @override
+  List<Object> get props => [error];
+}
+
+//saving lat long of pickup location  in db state completed

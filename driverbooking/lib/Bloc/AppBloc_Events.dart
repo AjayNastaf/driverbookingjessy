@@ -570,24 +570,11 @@ class FetchFilteredRides extends FetchFilteredRidesEvents {
 //history page Tripsheet values closed filtered dates events completed
 
 
-// abstract class ProfileEvent {}
 
-// class UpdateProfileEvent extends ProfileEvent {
-//   final String username;
-//   final String mobileNo;
-//   final String password;
-//   final String email;
-//
-//   UpdateProfileEvent({
-//     required this.username,
-//     required this.mobileNo,
-//     required this.password,
-//     required this.email,
-//   });
-// }
-
+//profile photo and profile details upload event starts
 abstract class ProfileEvent {}
 
+// profile details
 class UpdateProfileEvent extends ProfileEvent {
   final String username;
   final String mobileNo;
@@ -602,6 +589,8 @@ class UpdateProfileEvent extends ProfileEvent {
   });
 }
 
+
+// profle photo
 class UploadProfilePhotoEvent extends ProfileEvent {
   final String username;
   final File imageFile;
@@ -611,3 +600,34 @@ class UploadProfilePhotoEvent extends ProfileEvent {
     required this.imageFile,
   });
 }
+//profile photo and profile details upload event completed
+
+
+
+//saving lat long of pickup location  in db events starts
+
+
+abstract class SaveLocationEvent extends Equatable {
+  const SaveLocationEvent();
+}
+
+class SaveLocationRequested extends SaveLocationEvent {
+  final double latitude;
+  final double longitude;
+  final String vehicleNo;
+  final String tripId;
+  final String tripStatus;
+
+  const SaveLocationRequested({
+    required this.latitude,
+    required this.longitude,
+    required this.vehicleNo,
+    required this.tripId,
+    required this.tripStatus,
+  });
+
+  @override
+  List<Object> get props => [latitude, longitude, vehicleNo, tripId, tripStatus];
+}
+
+//saving lat long of pickup location  in db events completd
