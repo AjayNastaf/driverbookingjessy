@@ -166,6 +166,57 @@ router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
 
 
 
+//for inserting start data
+//router.post('/insertStartData',(req,res)=>{
+//  const insertUserSql = ` INSERT INTO VehicleAccessLocation
+//                (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at)
+//                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) `;
+//            db.query(insertUserSql,(error,result)=>{
+//            if(error){
+//            console.log(error,"error")
+//            }
+//                            res.status(200).send({ message: "Start Vehicle registered successfully." });
+//            })
+//})
+
+
+router.post('/insertStartData', (req, res) => {
+    console.log("📢 Received request at /insertStartData");
+    console.log("📝 Request Body:", req.body);
+
+    const insertUserSql = `
+        INSERT INTO VehicleAccessLocation
+        (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+        req.body.Vehicle_No,
+        req.body.Trip_id,
+        req.body.Latitude_loc,
+        req.body.Longtitude_loc,
+        req.body.Runing_Date,
+        req.body.Runing_Time,
+        req.body.Trip_Status,
+        req.body.Tripstarttime,
+        req.body.TripEndTime,
+        new Date().toISOString() // Auto-generate created_at timestamp
+    ];
+
+    console.log("📌 Query to be executed:", insertUserSql);
+    console.log("📊 Query Values:", values);
+
+    db.query(insertUserSql, values, (error, result) => {
+        if (error) {
+            console.error("❌ Database Error:", error);
+            return res.status(500).send({ message: "Database error", error: error });
+        }
+
+        console.log("✅ Data inserted successfully:", result);
+        res.status(200).send({ message: "Start Vehicle registered successfully." });
+    });
+});
+
 
 
 

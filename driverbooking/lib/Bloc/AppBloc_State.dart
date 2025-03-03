@@ -646,27 +646,28 @@ class ProfilePhotoUploadError extends ProfileState {
 
 
 //saving lat long of pickup location  in db state starts
+//
+// abstract class LocationState extends Equatable {
+//   const LocationState();
+//
+//   @override
+//   List<Object?> get props => [];
+// }
+//
+// class LocationInitial extends LocationState {}
+//
+// class LocationSaving extends LocationState {}
+//
+// class LocationSaved extends LocationState {}
+//
+// class LocationSaveFailed extends LocationState {
+//   final String error;
+//
+//   const LocationSaveFailed(this.error);
+//
+//   @override
+//   List<Object?> get props => [error];
+// }
 
-abstract class SaveLocationState extends Equatable {
-  const SaveLocationState();
-
-  @override
-  List<Object> get props => [];
-}
-
-class SaveLocationInitial extends SaveLocationState {}
-
-class SaveLocationLoading extends SaveLocationState {}
-
-class SaveLocationSuccess extends SaveLocationState {}
-
-class SaveLocationFailure extends SaveLocationState {
-  final String error;
-
-  const SaveLocationFailure(this.error);
-
-  @override
-  List<Object> get props => [error];
-}
 
 //saving lat long of pickup location  in db state completed

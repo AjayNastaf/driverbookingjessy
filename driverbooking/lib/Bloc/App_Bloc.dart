@@ -1064,45 +1064,45 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
 //saving lat long of pickup location  in db bloc  starts
 
-class SaveLocationBloc extends Bloc<SaveLocationEvent, SaveLocationState> {
-  SaveLocationBloc() : super(SaveLocationInitial()) {
-    on<SaveLocationRequested>(_onSaveLocationRequested);
-  }
-
-  Future<void> _onSaveLocationRequested(
-      SaveLocationRequested event, Emitter<SaveLocationState> emit) async {
-    emit(SaveLocationLoading());
-
-    final Map<String, dynamic> requestData = {
-      "vehicleno": event.vehicleNo,
-      "latitudeloc": event.latitude,
-      "longitutdeloc": event.longitude,
-      "Trip_id": event.tripId,
-      "Runing_Date": DateTime.now().toIso8601String().split("T")[0], // Current Date
-      "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1], // Current Time
-      "Trip_Status": event.tripStatus,
-      "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
-      "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
-      "created_at": DateTime.now().toIso8601String(),
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
-        headers: {"Content-Type": "application/json"},
-        body: json.encode(requestData),
-      );
-
-      if (response.statusCode == 200) {
-        emit(SaveLocationSuccess());
-        print('sucess location');
-      } else {
-        emit(SaveLocationFailure("Failed to save location: ${response.body}"));
-      }
-    } catch (e) {
-      emit(SaveLocationFailure("Errorrrr: $e"));
-    }
-  }
-}
+//
+// class LocationBloc extends Bloc<LocationEvent, LocationState> {
+//   LocationBloc() : super(LocationInitial()) {
+//     on<SaveLocationEvent>(_saveLocationToDatabase);
+//   }
+//
+//   Future<void> _saveLocationToDatabase(
+//       SaveLocationEvent event, Emitter<LocationState> emit) async {
+//     emit(LocationSaving());
+//
+//     final requestData = {
+//       "vehicleno": event.vehicleNo,
+//       "latitudeloc": event.latitude,
+//       "longitutdeloc": event.longitude,
+//       "Trip_id": event.tripId,
+//       "Runing_Date": DateTime.now().toIso8601String().split("T")[0], // Current Date
+//       "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1], // Current Time
+//       "Trip_Status": event.tripStatus,
+//       "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
+//       "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
+//       "created_at": DateTime.now().toIso8601String(),
+//     };
+//
+//     try {
+//       final response = await http.post(
+//         Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
+//         headers: {"Content-Type": "application/json"},
+//         body: json.encode(requestData),
+//       );
+//
+//       if (response.statusCode == 200) {
+//         emit(LocationSaved());
+//       } else {
+//         emit(LocationSaveFailed("Failed to save location"));
+//       }
+//     } catch (e) {
+//       emit(LocationSaveFailed(e.toString()));
+//     }
+//   }
+// }
 
 //saving lat long of pickup location  in db bloc completed

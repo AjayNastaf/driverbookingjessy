@@ -12,6 +12,7 @@ class AppConstants {  // only use asset
   static const String driver_waiting = 'assets/image/driver-waiting.jpg';
   static const String navigation = 'assets/image/navigation.png';
 
+
 //aws
   static const String baseUrl = "http://75.101.215.49:7002";
 

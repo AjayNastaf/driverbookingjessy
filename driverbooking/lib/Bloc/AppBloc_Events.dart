@@ -606,28 +606,32 @@ class UploadProfilePhotoEvent extends ProfileEvent {
 
 //saving lat long of pickup location  in db events starts
 
+//
+// abstract class LocationEvent extends Equatable {
+//   const LocationEvent();
+// }
+//
+// class SaveLocationEvent extends LocationEvent {
+//   final double latitude;
+//   final double longitude;
+//   final String? vehicleNo;
+//   final String? tripId;
+//   final String? tripStatus;
+//
+//   const SaveLocationEvent({
+//     required this.latitude,
+//     required this.longitude,
+//     required this.vehicleNo,
+//     required this.tripId,
+//     required this.tripStatus,
+//   });
+//
+//   @override
+//   List<Object?> get props => [latitude, longitude, vehicleNo, tripId, tripStatus];
+// }
 
-abstract class SaveLocationEvent extends Equatable {
-  const SaveLocationEvent();
-}
-
-class SaveLocationRequested extends SaveLocationEvent {
-  final double latitude;
-  final double longitude;
-  final String vehicleNo;
-  final String tripId;
-  final String tripStatus;
-
-  const SaveLocationRequested({
-    required this.latitude,
-    required this.longitude,
-    required this.vehicleNo,
-    required this.tripId,
-    required this.tripStatus,
-  });
-
-  @override
-  List<Object> get props => [latitude, longitude, vehicleNo, tripId, tripStatus];
-}
 
 //saving lat long of pickup location  in db events completd
+
+
+
