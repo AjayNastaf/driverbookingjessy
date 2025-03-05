@@ -629,9 +629,95 @@ class UploadProfilePhotoEvent extends ProfileEvent {
 //   @override
 //   List<Object?> get props => [latitude, longitude, vehicleNo, tripId, tripStatus];
 // }
+//
 
 
+
+
+
+abstract class LocationEvent extends Equatable {
+  const LocationEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
+// Event to trigger location saving
+class SaveLocation extends LocationEvent {
+  final double latitude;
+  final double longitude;
+  final String vehicleNo;
+  final String tripId;
+  final String statusValue;
+
+  const SaveLocation({
+    required this.latitude,
+    required this.longitude,
+    required this.vehicleNo,
+    required this.tripId,
+    required this.statusValue,
+  });
+
+  @override
+  List<Object> get props => [latitude, longitude, vehicleNo, tripId, statusValue];
+}
 //saving lat long of pickup location  in db events completd
 
 
 
+
+
+
+// abstract class TripTrackingDetailsEvent extends Equatable {
+//   @override
+//   List<Object?> get props => [];
+// }
+//
+// class FetchTripTrackingDetails extends TripTrackingDetailsEvent {
+//   final String tripId;
+//
+//   FetchTripTrackingDetails(this.tripId);
+//
+//   @override
+//   List<Object?> get props => [tripId];
+// }
+
+
+
+
+
+
+abstract class TripTrackingDetailsEvent extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+// Event for fetching trip details
+class FetchTripTrackingDetails extends TripTrackingDetailsEvent {
+  final String tripId;
+
+  FetchTripTrackingDetails(this.tripId);
+
+  @override
+  List<Object?> get props => [tripId];
+}
+
+// Event for saving location data
+class SaveLocationToDatabase extends TripTrackingDetailsEvent {
+  final double latitude;
+  final double longitude;
+  final String vehicleNo;
+  final String tripId;
+  final String tripStatus;
+
+  SaveLocationToDatabase({
+    required this.latitude,
+    required this.longitude,
+    required this.vehicleNo,
+    required this.tripId,
+    required this.tripStatus,
+  });
+
+  @override
+  List<Object?> get props => [latitude, longitude, vehicleNo, tripId, tripStatus];
+}

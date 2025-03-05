@@ -646,7 +646,7 @@ class ProfilePhotoUploadError extends ProfileState {
 
 
 //saving lat long of pickup location  in db state starts
-//
+
 // abstract class LocationState extends Equatable {
 //   const LocationState();
 //
@@ -669,5 +669,118 @@ class ProfilePhotoUploadError extends ProfileState {
 //   List<Object?> get props => [error];
 // }
 
+class LocationState {
+  final double latitude;
+  final double longitude;
+  final String vehicleNo;
+  final String tripId;
+  final String status;
+
+  LocationState({
+    required this.latitude,
+    required this.longitude,
+    required this.vehicleNo,
+    required this.tripId,
+    required this.status,
+  });
+
+  LocationState copyWith({
+    double? latitude,
+    double? longitude,
+    String? vehicleNo,
+    String? tripId,
+    String? status,
+  }) {
+    return LocationState(
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      vehicleNo: vehicleNo ?? this.vehicleNo,
+      tripId: tripId ?? this.tripId,
+      status: status ?? this.status,
+    );
+  }
+}
+
 
 //saving lat long of pickup location  in db state completed
+
+
+
+
+//
+// abstract class TripTrackingDetailsState extends Equatable {
+//   @override
+//   List<Object?> get props => [];
+// }
+//
+// class TripTrackingDetailsLoading extends TripTrackingDetailsState {}
+//
+// class TripTrackingDetailsLoaded extends TripTrackingDetailsState {
+//   final String vehicleNumber;
+//   final String status;
+//
+//   TripTrackingDetailsLoaded({required this.vehicleNumber, required this.status});
+//
+//   @override
+//   List<Object?> get props => [vehicleNumber, status];
+// }
+//
+// class TripTrackingDetailsError extends TripTrackingDetailsState {
+//   final String message;
+//
+//   TripTrackingDetailsError(this.message);
+//
+//   @override
+//   List<Object?> get props => [message];
+// }
+
+
+
+
+
+abstract class TripTrackingDetailsState extends Equatable {
+  @override
+  List<Object?> get props => [];
+}
+
+// Initial state
+class TripTrackingDetailsInitial extends TripTrackingDetailsState {}
+
+// Loading state
+class TripTrackingDetailsLoading extends TripTrackingDetailsState {}
+
+// Loaded state for trip details
+class TripTrackingDetailsLoaded extends TripTrackingDetailsState {
+  final String vehicleNumber;
+  final String status;
+
+  TripTrackingDetailsLoaded({required this.vehicleNumber, required this.status});
+
+  @override
+  List<Object?> get props => [vehicleNumber, status];
+}
+
+// Error state
+class TripTrackingDetailsError extends TripTrackingDetailsState {
+  final String message;
+
+  TripTrackingDetailsError(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+// Location saving states
+class SaveLocationLoading extends TripTrackingDetailsState {}
+
+class SaveLocationSuccess extends TripTrackingDetailsState {}
+
+class SaveLocationFailure extends TripTrackingDetailsState {
+  final String errorMessage;
+
+  SaveLocationFailure(this.errorMessage);
+
+  @override
+  List<Object?> get props => [errorMessage];
+}
+

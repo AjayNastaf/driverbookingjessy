@@ -27,8 +27,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   LatLng _destination = LatLng(13.028159, 80.243306); // Chennai Central Railway Station
   List<LatLng> _routeCoordinates = [];
   Stream<LocationData>? _locationStream;
-  bool _hasReachedDestination = false;
-  List<TextEditingController> _otpControllers = [];
   bool isOtpVerified = false;
   bool isStartRideEnabled = false;
   String? latitude;
@@ -37,15 +35,19 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   String? vehiclevalue;
   String? Statusvalue;
   // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
+  String vehicleNumber = "";
+  String tripStatus = "";
 
   @override
   void initState() {
     super.initState();
     _initializeCustomerLocationTracking();
-    _loadTripDetailsCustomer();
+    // _loadTripDetailsCustomer();
     // _getLatLngFromAddress(globals.dropLocation);
     // _locationSubscription?.cancel(); // ✅ Safe way to cancel without crashing
     // _locationSubscription = null;
+    context.read<TripTrackingDetailsBloc>().add(
+        FetchTripTrackingDetails(widget.tripId));
   }
 
   Future<void> _loadTripDetailsCustomer() async {
@@ -154,7 +156,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
   // Function to send location data to API
   Future<void> _saveLocationToDatabaseCustomer(double latitude, double longitude) async {
-    print("Saving location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
+    print("Savinggg location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
 
     final Map<String, dynamic> requestData = {
       "vehicleno": vehiclevalue,
@@ -168,6 +170,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
       "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
       "created_at": DateTime.now().toIso8601String(),
     };
+    print("hhhh: $Statusvalue");
 
     print("Request Data: ${json.encode(requestData)}"); // Debugging print
 
@@ -194,19 +197,43 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
       }
     } catch (e) {
       print("Error sending location data: $e"); // Debugging print
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error occurred")),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Error occurred")),
+      // );
+      showFailureSnackBar(context, "Error occurred");
     }
   }
 
 
 
-  void _updateCustomerCurrentLocation(LocationData locationData) {
-    if (locationData.latitude != null && locationData.longitude != null) {
-      print("Received Location: ${locationData.latitude}, ${locationData.longitude}");
+  // void _updateCustomerCurrentLocation(LocationData locationData) {
+  //   if (locationData.latitude != null && locationData.longitude != null) {
+  //     print("Received Location: ${locationData.latitude}, ${locationData.longitude}");
+  //
+  //     final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
+  //
+  //     setState(() {
+  //       _currentLatLng = newLatLng;
+  //     });
+  //
+  //     _fetchRouteCustomer();
+  //     _updateCustomerCameraPosition();
+  //     // _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
+  //     _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
+  //
+  //   } else {
+  //     print("Location data is null");
+  //   }
+  // }
 
-      final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
+  void _updateCustomerCurrentLocation(LocationData locationData) {
+    double? latitude = locationData.latitude;
+    double? longitude = locationData.longitude;
+
+    if (latitude != null && longitude != null) {
+      print("Received Location: $latitude, $longitude");
+
+      final newLatLng = LatLng(latitude, longitude);
 
       setState(() {
         _currentLatLng = newLatLng;
@@ -215,12 +242,127 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
       _fetchRouteCustomer();
       _updateCustomerCameraPosition();
       // _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
-      _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
 
+
+      // Check if location is (0.0, 0.0) – if so, do nothing
+      if (latitude == 0.0 && longitude == 0.0) {
+        print("⚠ Invalid location (0.0, 0.0), skipping saveLocation.");
+        return; // Stop execution here
+      }
+
+      if (isRideStopped == true) {
+        print("Successsss Ajay");
+        print("object");
+        saveWayPointLocationCustomer(latitude, longitude);
+        return;
+      }
+
+      // Ensure vehicleNumber and tripStatus are available before calling saveLocation
+      if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
+        saveLocationCustomer(latitude, longitude);
+      } else {
+        print("⚠ Trip details not loaded yet, waiting...");
+      }
     } else {
-      print("Location data is null");
+      print("⚠ Location data is null, skipping update");
     }
   }
+
+
+
+
+  void saveLocationCustomer(double latitude, double longitude) {
+    print("Inside saveLocation function");
+    print("Vehicle Number: $vehicleNumber, Trip Status: $tripStatus");
+    // Prevent saving if latitude and longitude are (0.0, 0.0)
+    if (latitude == 0.0 && longitude == 0.0) {
+      print("⚠ Invalidd location (0.0, 0.0) - Not saving to database.");
+      return; // Stop execution
+    }
+
+    if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
+      print("Dispatching SaveLocationToDatabase eevent...");
+      context.read<TripTrackingDetailsBloc>().add(
+        SaveLocationToDatabase(
+          latitude: latitude,
+          longitude: longitude,
+          vehicleNo: vehicleNumber,
+          tripId: widget.tripId,
+          tripStatus: tripStatus,
+        ),
+      );
+    } else {
+      print("Trip details are not yet loaded. Cannot save location.");
+    }
+  }
+  void saveWayPointLocationCustomer(double latitude, double longitude) {
+    print("iInside saveLocation function");
+    print("Vehicle Number: $vehicleNumber, Trip Status: $tripStatus");
+    // Prevent saving if latitude and longitude are (0.0, 0.0)
+    if (latitude == 0.0 && longitude == 0.0) {
+      print("⚠ Invalidd location (0.0, 0.0) - Not saving to database.");
+      return; // Stop execution
+    }
+
+    if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
+      print("Dispatching SaveLocationToDatabase eevent...");
+      context.read<TripTrackingDetailsBloc>().add(
+        SaveLocationToDatabase(
+          latitude: latitude,
+          longitude: longitude,
+          vehicleNo: vehicleNumber,
+          tripId: widget.tripId,
+          tripStatus: 'waypoint',
+        ),
+      );
+    } else {
+      print("Trip details are not yet loaded. Cannot save location.");
+    }
+  }
+
+
+//for reached status starts
+  Future<void> _handleReachedTrip(double latitude, double longitude) async {
+    print(
+        "ssSaving start location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
+    if (latitude == 0.0 && longitude == 0.0) {
+      print("⚠ Invalidd location (0.0, 0.0) - Not saving to database.");
+      return; // Stop execution
+    }
+
+    bool success = await ApiService.insertStartData( // ✅ Now called statically
+      vehicleNo: vehicleNumber,
+      tripId: widget.tripId ?? '',
+      latitude: latitude,
+      longitude: longitude,
+      runningDate: DateTime.now().toIso8601String().split("T")[0],
+      // Current Date,
+      runningTime: DateTime.now().toLocal().toString().split(" ")[1],
+      tripStatus: "Reached",
+      tripStartTime: DateTime.now().toLocal().toString().split(" ")[1],
+      tripEndTime: DateTime.now().toIso8601String(),
+
+
+    );
+
+
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(content: Text(success
+    //       ? "Trippppppppp started successfully!"
+    //       : "Failed to start trip!")),
+    // );
+
+    if (success) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TripDetailsUpload(tripId: widget.tripId),
+        ),
+      );
+    }
+  }
+//for reached status completed
+
 
 
   Future<void> _fetchRouteCustomer() async {
@@ -286,9 +428,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
   @override
   void dispose() {
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
     // _locationSubscription?.cancel(); // Stop tracking when widget is removed
     _locationSubscription!.cancel();
     _locationSubscription = null;// Remove reference
@@ -325,7 +464,34 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   Widget build(BuildContext context) {
     String dropLocation = globals.dropLocation; // Access the global variable
 
-    return Scaffold (
+    return BlocListener<TripTrackingDetailsBloc, TripTrackingDetailsState>(
+        listener: (context, state) {
+          if (state is TripTrackingDetailsLoaded) {
+            setState(() {
+              vehicleNumber = state.vehicleNumber;
+              tripStatus = state.status;
+            });
+
+            print("Trip details loaded. Vehicle: $vehicleNumber, Status: $tripStatus");
+
+            // Ensure trip details are set before calling saveLocation
+            if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
+              saveLocationCustomer(0.0 , 0.0); // Example coordinates
+            } else {
+              print("Trip details are still empty after setting state.");
+            }
+          } else if (state is SaveLocationSuccess) {
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text("Location saved successfully!")),
+            // );
+          } else if (state is SaveLocationFailure) {
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text(state.errorMessage)),
+            // );
+            showFailureSnackBar(context, state.errorMessage);
+          }
+        },
+        child:Scaffold (
       appBar: AppBar(
         title: Text("Trip Started"),
       ),
@@ -425,18 +591,30 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                           onPressed: () {
                             setState(() {
                               isRideStopped = true; // Hide Stop, Show Start
-                              Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
+                              // Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
                             });
 
                             // Call the function to save location with updated status
                             if (_currentLatLng != null) {
-                              _saveLocationToDatabaseCustomer(
+                              saveWayPointLocationCustomer(
                                 _currentLatLng!.latitude,
                                 _currentLatLng!.longitude,
                               );
                             } else {
                               print("Error: _currentLatLng is null");
                             }
+
+
+
+                            // if (_currentLatLng != null) {
+                            //   print("eeee");
+                            //   _handleWayPointTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
+                            //
+                            // } else {
+                            //   ScaffoldMessenger.of(context).showSnackBar(
+                            //     SnackBar(content: Text("llLocation not available yet!")),
+                            //   );
+                            // }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepPurple,
@@ -615,28 +793,52 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                         //     );
                         //   }
                         // },
-                        onPressed: () {
-                          setState(() {
-                            Statusvalue = 'Reached'; // Set Trip_Status to "waypoint"
-                          });
 
-                          // Call the function to save location with updated status
+
+
+//                         onPressed: () {
+//                           setState(() {
+//                             Statusvalue = 'Reached'; // Update Trip_Status in state
+//                           });
+// print('Ajay status" $Statusvalue');
+//                           Future.delayed(Duration(milliseconds: 100), () {
+//                             print('Ajay status2" $Statusvalue');
+//
+//                             if (_currentLatLng != null) {
+//                               saveLocationCustomer(
+//                                 _currentLatLng!.latitude,
+//                                 _currentLatLng!.longitude,
+//                               );
+// print("in side");
+//                               Navigator.push(
+//                                 context,
+//                                 MaterialPageRoute(
+//                                   builder: (context) => TripDetailsUpload(tripId: widget.tripId),
+//                                 ),
+//                               );
+//                             } else {
+//                               print("⚠ Erroor: _currentLatLng is null");
+//                             }
+//                           });
+//                         },
+
+
+
+
+                        onPressed: () {
                           if (_currentLatLng != null) {
-                            _saveLocationToDatabaseCustomer(
-                              _currentLatLng!.latitude,
-                              _currentLatLng!.longitude,
-                            );
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TripDetailsUpload(tripId: widget.tripId),
-                                  ),
-                                );
+                            _handleReachedTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
 
                           } else {
-                            print("Error: _currentLatLng is null");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("llLocation not available yet!")),
+                            );
+                            showWarningSnackBar(context, "Location not available yet!");
                           }
                         },
+
+
+
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           padding: EdgeInsets.symmetric(vertical: 16),
@@ -659,6 +861,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
           ),
         ],
       ),
+    )
     );
   }
 }
