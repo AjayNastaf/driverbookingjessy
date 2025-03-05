@@ -1064,45 +1064,113 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
 //saving lat long of pickup location  in db bloc  starts
 
+
+//saving lat long of pickup location  in db bloc completed
+
+
+
+
+
+
+
+
 //
-// class LocationBloc extends Bloc<LocationEvent, LocationState> {
-//   LocationBloc() : super(LocationInitial()) {
-//     on<SaveLocationEvent>(_saveLocationToDatabase);
-//   }
 //
-//   Future<void> _saveLocationToDatabase(
-//       SaveLocationEvent event, Emitter<LocationState> emit) async {
-//     emit(LocationSaving());
+// class TripTrackingDetailsBloc extends Bloc<TripTrackingDetailsEvent, TripTrackingDetailsState> {
+//   TripTrackingDetailsBloc() : super(TripTrackingDetailsLoading()) {
+//     on<FetchTripTrackingDetails>((event, emit) async {
+//       emit(TripTrackingDetailsLoading());
+//       try {
+//         final tripDetails = await ApiService.fetchTripDetails(event.tripId);
 //
-//     final requestData = {
-//       "vehicleno": event.vehicleNo,
-//       "latitudeloc": event.latitude,
-//       "longitutdeloc": event.longitude,
-//       "Trip_id": event.tripId,
-//       "Runing_Date": DateTime.now().toIso8601String().split("T")[0], // Current Date
-//       "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1], // Current Time
-//       "Trip_Status": event.tripStatus,
-//       "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
-//       "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
-//       "created_at": DateTime.now().toIso8601String(),
-//     };
+//         if (tripDetails != null) {
+//           final vehicleNo = tripDetails['vehRegNo']?.toString() ?? 'Unknown';
+//           final tripStatus = tripDetails['apps']?.toString() ?? 'Unknown';
 //
-//     try {
-//       final response = await http.post(
-//         Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
-//         headers: {"Content-Type": "application/json"},
-//         body: json.encode(requestData),
-//       );
-//
-//       if (response.statusCode == 200) {
-//         emit(LocationSaved());
-//       } else {
-//         emit(LocationSaveFailed("Failed to save location"));
+//           emit(TripTrackingDetailsLoaded(vehicleNumber: vehicleNo, status: tripStatus));
+//         } else {
+//           emit(TripTrackingDetailsError("No trip details found."));
+//         }
+//       } catch (e) {
+//         emit(TripTrackingDetailsError("Error loading trip details: $e"));
 //       }
-//     } catch (e) {
-//       emit(LocationSaveFailed(e.toString()));
-//     }
+//     });
 //   }
 // }
 
-//saving lat long of pickup location  in db bloc completed
+
+
+
+class TripTrackingDetailsBloc extends Bloc<TripTrackingDetailsEvent, TripTrackingDetailsState> {
+  TripTrackingDetailsBloc() : super(TripTrackingDetailsInitial()) {
+    on<FetchTripTrackingDetails>(_onFetchTripTrackingDetails);
+    on<SaveLocationToDatabase>(_onSaveLocationToDatabase);
+  }
+
+  Future<void> _onFetchTripTrackingDetails(
+      FetchTripTrackingDetails event, Emitter<TripTrackingDetailsState> emit) async {
+    emit(TripTrackingDetailsLoading());
+
+    try {
+      print('Fetching trip details for tripId: ${event.tripId}');
+
+      final tripDetails = await ApiService.fetchTripDetails(event.tripId);
+
+      if (tripDetails != null) {
+        print('API Response Keys: ${tripDetails.keys}'); // Debugging keys
+
+        var vehicleNo = tripDetails['vehRegNo']?.toString() ?? "";
+        var tripStatus = tripDetails['apps']?.toString() ?? "";
+
+        if (vehicleNo.isNotEmpty && tripStatus.isNotEmpty) {
+          emit(TripTrackingDetailsLoaded(vehicleNumber: vehicleNo, status: tripStatus));
+          print("object");
+        } else {
+          print("Trip details missing: vehicleNo=$vehicleNo, tripStatus=$tripStatus");
+          emit(TripTrackingDetailsError("Trip details are incomplete"));
+        }
+      } else {
+        emit(TripTrackingDetailsError("No trip details found."));
+      }
+    } catch (e) {
+      emit(TripTrackingDetailsError("Error fetching trip details: $e"));
+    }
+  }
+
+
+
+  Future<void> _onSaveLocationToDatabase(
+      SaveLocationToDatabase event, Emitter<TripTrackingDetailsState> emit) async {
+    emit(SaveLocationLoading());
+print('yess');
+    final Map<String, dynamic> requestData = {
+      "vehicleno": event.vehicleNo,
+      "latitudeloc": event.latitude,
+      "longitutdeloc": event.longitude,
+      "Trip_id": event.tripId,
+      "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
+      "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
+      "Trip_Status": event.tripStatus,
+      "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
+      "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
+      "created_at": DateTime.now().toIso8601String(),
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse("${AppConstants.baseUrl}/addvehiclelocationUniqueLatlong"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(requestData),
+      );
+
+      if (response.statusCode == 200) {
+        emit(SaveLocationSuccess());
+        print("Lat Long Sav Successfully");
+      } else {
+        emit(SaveLocationFailure("Failed to save location"));
+      }
+    } catch (e) {
+      emit(SaveLocationFailure("Error sending location data: $e"));
+    }
+  }
+}

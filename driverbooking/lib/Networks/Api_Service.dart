@@ -1477,7 +1477,7 @@ class ApiService {
 //profile driver data image api completed
 
 
-//
+// button click on tracking page for status start
 
   static Future<bool> insertStartData({
     required String vehicleNo,
@@ -1528,7 +1528,135 @@ class ApiService {
     }
   }
 
-//
+// button click on tracking page for status completed
+
+// button click on customer location page  for status Reached
+
+  static Future<bool> insertReachedStatus({
+    required String vehicleNo,
+    required String tripId,
+    required double latitude,
+    required double longitude,
+    required String runningDate,
+    required String runningTime,
+    required String tripStatus,
+    required String tripStartTime,
+    required String tripEndTime,
+  }) async {
+    final Uri url = Uri.parse('${AppConstants.baseUrl}/insertReachedData');
+
+    // ✅ Print the API URL
+    print("Sending request to: $url");
+
+    // ✅ Print request body
+    final Map<String, dynamic> requestBody = {
+      "Vehicle_No": vehicleNo,
+      "Trip_id": tripId,
+      "Latitude_loc": latitude,
+      "Longtitude_loc": longitude,
+      "Runing_Date": runningDate,
+      "Runing_Time": runningTime,
+      "Trip_Status": tripStatus,
+      "Tripstarttime": tripStartTime,
+      "TripEndTime": tripEndTime,
+      "created_at": DateTime.now().toIso8601String(),
+    };
+    print("Request Body: ${jsonEncode(requestBody)}");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+
+      // ✅ Print HTTP response status and body
+      print("Response Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print("API Error: $e");
+      return false;
+    }
+  }
+
+// button click on customer location page  for status Reached
+
+
+
+
+// button click on customer location page  for status Reached
+
+  static Future<bool> insertWayPointStatus({
+    required String vehicleNo,
+    required String tripId,
+    required double latitude,
+    required double longitude,
+    required String runningDate,
+    required String runningTime,
+    required String tripStatus,
+    required String tripStartTime,
+    required String tripEndTime,
+  }) async {
+    final Uri url = Uri.parse('${AppConstants.baseUrl}/insertWayPointData');
+
+    // ✅ Print the API URL
+    print("Sending request to: $url");
+
+    // ✅ Print request body
+    final Map<String, dynamic> requestBody = {
+      "Vehicle_No": vehicleNo,
+      "Trip_id": tripId,
+      "Latitude_loc": latitude,
+      "Longtitude_loc": longitude,
+      "Runing_Date": runningDate,
+      "Runing_Time": runningTime,
+      "Trip_Status": tripStatus,
+      "Tripstarttime": tripStartTime,
+      "TripEndTime": tripEndTime,
+      "created_at": DateTime.now().toIso8601String(),
+    };
+    print("Request Body: ${jsonEncode(requestBody)}");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+
+      // ✅ Print HTTP response status and body
+      print("Response Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print("API Error: $e");
+      return false;
+    }
+  }
+
+// button click on customer location page  for status Reached
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 
