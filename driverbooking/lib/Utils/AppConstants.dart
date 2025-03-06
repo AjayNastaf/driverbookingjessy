@@ -18,6 +18,7 @@ class AppConstants {  // only use asset
 
   //local
   // static const String baseUrl = "http://192.168.0.115:3001";
+  static const String baseUrlJessyCabs = "https://jessycabs.com:54462";
 
 
   //jessycabs

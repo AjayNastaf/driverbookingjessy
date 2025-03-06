@@ -234,9 +234,10 @@ abstract class TripSheetValuesEvent{}
 
   class FetchTripSheetValues extends TripSheetValuesEvent{
     final String userid;
-    final String username;
+    // final String username;
+    final String drivername;
 
-    FetchTripSheetValues({required this.username, required this.userid});
+    FetchTripSheetValues({required this.drivername, required this.userid});
   }
 //for homescreen values geting api completed
 
@@ -249,9 +250,11 @@ abstract class TripSheetClosedValuesEvent{}
 
 class TripsheetStatusClosed extends TripSheetClosedValuesEvent{
   final String userid;
-  final String username;
+  // final String username;
+  final String drivername;
 
-  TripsheetStatusClosed({required this.userid, required this.username});
+  // TripsheetStatusClosed({required this.userid, required this.username});
+  TripsheetStatusClosed({required this.userid, required this.drivername});
 }
 //for Rides screen tripSheet closed values geting api event closed
 
@@ -530,9 +533,11 @@ abstract class TripSheetEvent {}
 
 class FetchTripSheetClosedRides extends TripSheetEvent {
   final String userId;
-  final String username;
+  // final String username;
+  final String drivername;
 
-  FetchTripSheetClosedRides({required this.userId, required this.username});
+  // FetchTripSheetClosedRides({required this.userId, required this.username});
+  FetchTripSheetClosedRides({required this.userId, required this.drivername});
 }
 
 
@@ -554,18 +559,21 @@ abstract class FetchFilteredRidesEvents extends Equatable {
 }
 
 class FetchFilteredRides extends FetchFilteredRidesEvents {
-  final String username;
+  // final String username;
+  final String drivername;
   final DateTime startDate;
   final DateTime endDate;
 
   const FetchFilteredRides({
-    required this.username,
+    // required this.username,
+    required this.drivername,
     required this.startDate,
     required this.endDate,
   });
 
   @override
-  List<Object?> get props => [username, startDate, endDate];
+  // List<Object?> get props => [username, startDate, endDate];
+  List<Object?> get props => [drivername, startDate, endDate];
 }
 //history page Tripsheet values closed filtered dates events completed
 

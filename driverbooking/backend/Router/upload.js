@@ -92,7 +92,7 @@ router.post('/update_updatetrip', (req, res) => {
     const { toll, parking, tripid } = req.body;
     const query = 'UPDATE tripsheet SET toll = ?, parking = ?,vendorparking = ?,vendortoll = ? WHERE tripid = ?';
 
-    db.query(query, [toll, parking,toll, parking,tripid], (err, results) => {
+    db.query(query, [toll, parking,parking ,toll,tripid], (err, results) => {
         if (err) {
             res.status(500).json({ message: 'Internal server error' });
             return;

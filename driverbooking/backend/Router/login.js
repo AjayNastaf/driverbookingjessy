@@ -38,9 +38,9 @@ router.post('/login', (req, res) => {
                 console.log(err, "error");
                 return res.status(500).json({ error: 'Failed to update status' });
             }
-            console.log(result1, 'result');
+            console.log(result, 'result');
             return res.status(200).json({ message: 'Login successful', user : result });
-            // return res.status(200).json(result);
+//             return res.status(200).json(result);
         });
     }
     else{

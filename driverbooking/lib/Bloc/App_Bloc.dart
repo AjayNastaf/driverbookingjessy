@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Networks/Api_Service.dart';
 import 'dart:math';
 import 'dart:convert';
@@ -25,10 +26,34 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
       username: event.username,
       password: event.password,
     );
+
     if (response.statusCode == 200) {
+      // final data = jsonDecode(response.body);
+      // print('${data},akll');
+      // final id = data['userId'];
+      // print("idddddddddddddddddddddddddddddddd: $id");
+
       final data = jsonDecode(response.body);
+      String driverName = data['user'][0]['drivername']; // Extracting drivername
+
       final id = data['userId'];
-      print("idddddddddddddddddddddddddddddddd: $id");
+      final driverdata = driverName;
+      print("API Response Data: $data"); // Debug API response
+      print("API Response Dataes: $driverdata, $data"); // Debug API response
+      Map<String, dynamic> userData = {
+        "drivername": driverdata,
+
+      };
+      // Save user data in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      // await prefs.setString('userData', jsonEncode(data));
+      // await prefs.setString('userData', jsonEncode(driverdata));
+      await prefs.setString('userData', jsonEncode(userData)); // Encode as JSON before saving
+
+      // Debugging: Print saved data
+      print("Saved Data local: ${prefs.getString('userData')}");
+
+      print("User data saved successfully!");
       emit(LoginCompleted('$id'));
     } else {
       emit(LoginFailure("Login failed, please check your credentials."));
@@ -461,7 +486,8 @@ class TripSheetValuesBloc extends Bloc<TripSheetValuesEvent , TripSheetValuesSta
   try{
     final data = await ApiService.fetchTripSheet(
       userId: event.userid,
-      username: event.username,
+      // username: event.username,
+      drivername: event.drivername,
     );
     emit(FetchingTripSheetValuesLoaded(data));
   }catch(e){
@@ -485,7 +511,8 @@ class TripSheetClosedValuesBloc extends Bloc<TripSheetClosedValuesEvent , TripSh
       emit(TripSheetStatusClosedLoading());
       final Data = await ApiService.fetchTripSheetClosedRides(
         userId: event.userid,
-        username: event.username
+        // username: event.username
+        drivername: event.drivername
       );
       emit(TripsheetStatusClosedLoaded(Data));
 
@@ -961,7 +988,8 @@ class TripSheetBloc extends Bloc<TripSheetEvent, TripSheetState> {
     try {
       final data = await ApiService.fetchTripSheetClosedRides(
         userId: event.userId,
-        username: event.username,
+        // drivername: event.username,
+        drivername: event.drivername,
       );
 
       print("📦 API Responses: $data");
@@ -1000,7 +1028,8 @@ class FetchFilteredRidesBloc extends Bloc<FetchFilteredRidesEvents, FetchFiltere
 
     try {
       final data = await ApiService.fetchTripSheetFilteredRides(
-        username: event.username,
+        // username: event.username,
+        drivername: event.drivername,
         startDate: event.startDate,
         endDate: event.endDate,
       );

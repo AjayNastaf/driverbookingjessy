@@ -5,6 +5,7 @@ const db = require('../db');
 //get duty type based on login driver name when the apps waiting
 router.get('/tripsheet/:username', async (req, res) => {
   const username = req.params.username;
+  console.log(username, "ajay90")
   try {
     const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "waiting"';
     db.query(query, [username], (err, results) => {
@@ -12,7 +13,7 @@ router.get('/tripsheet/:username', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
         return;
       }
-
+console.log(results,"aaaaaaa")
       res.status(200).json(results);
     });
   } catch (err) {

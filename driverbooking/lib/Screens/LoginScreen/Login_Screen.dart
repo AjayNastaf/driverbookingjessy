@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
@@ -71,7 +73,7 @@ class _Login_ScreenState extends State<Login_Screen> {
 
   // bgmain
 
-//local storage for user details
+// local storage for user details
   void _saveLoginDetails(String username, String userId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', username);
@@ -81,6 +83,19 @@ class _Login_ScreenState extends State<Login_Screen> {
     print("Saved username: $username");
     print("Saved userId: $userId");
   }
+
+
+  Future<Map<String, dynamic>?> getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userDataString = prefs.getString('userData');
+
+    if (userDataString != null) {
+      return jsonDecode(userDataString);
+    }
+    return null;
+  }
+
+
 
 
   @override

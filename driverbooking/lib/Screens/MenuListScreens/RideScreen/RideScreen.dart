@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
 import 'package:driverbooking/Bloc/App_Bloc.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:driverbooking/Networks/Api_Service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Ridescreen extends StatefulWidget {
   final String userId ;
@@ -20,16 +23,51 @@ class Ridescreen extends StatefulWidget {
 class _RidescreenState extends State<Ridescreen> {
   List<Map<String, dynamic>> tripSheetData = [];
   bool isLoading = true;
+  Map<String, dynamic>? userData;
 
   @override
   void initState() {
     super.initState();
 
-    BlocProvider.of<TripSheetClosedValuesBloc>(context).add(
-      TripsheetStatusClosed(username: widget.username, userid: widget.userId),
-    );
+    // BlocProvider.of<TripSheetClosedValuesBloc>(context).add(
+    //   TripsheetStatusClosed(username: widget.username, userid: widget.userId),
+    // );
+    _loadUserData();
+
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userDataString = prefs.getString('userData');
+
+    print("Retrieved userData String: $userDataString");
+
+    if (userDataString != null && userDataString.isNotEmpty) {
+      try {
+        Map<String, dynamic> decodedData = jsonDecode(userDataString);
+
+        setState(() {
+          userData = decodedData;
+        });
+
+        print("After setState, userDatam: $userData");
+
+        // 🚀 Move the event dispatch here, after userData is loaded
 
 
+        BlocProvider.of<TripSheetClosedValuesBloc>(context).add(
+          TripsheetStatusClosed(
+              drivername: userData?['drivername'] ?? 'Notttyu Found',
+              userid: widget.userId),
+        );
+
+        // context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
+      } catch (e) {
+        print("Error decoding userData: $e");
+      }
+    } else {
+      print("No userData found or it's empty in SharedPreferences.");
+    }
   }
 
   @override
@@ -41,7 +79,8 @@ class _RidescreenState extends State<Ridescreen> {
     try {
       final data = await ApiService.fetchTripSheetClosedRides(
         userId: widget.userId,
-        username: widget.username,
+        // username: widget.username,
+        drivername: userData?['drivername'] ?? 'Notttyu Found',
       );
       setState(() {
         tripSheetData = data;

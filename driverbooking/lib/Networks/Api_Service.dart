@@ -40,8 +40,12 @@ class ApiService {
     // } else {
     //   return false; // Login failed
     // }
+    print(response);
     return response;
+
   }
+
+
   static Future<bool> registers({
     // required BuildContext context,
     required String username,
@@ -457,21 +461,21 @@ class ApiService {
 
   static Future<List<Map<String, dynamic>>> fetchTripSheet({
     required String userId,
-    required String username,
+    required String drivername,
   }) async {
     try {
       // Print the inputs to ensure they are passed correctly
-      print('Fetching trip sheet for userId: $userId, username: $username');
+      print('Fetching trip sheet for userId: $userId, username: $drivername');
 
       final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/tripsheet/$username'), // Pass username in the URL
+        Uri.parse('${AppConstants.baseUrl}/tripsheet/$drivername'), // Pass username in the URL
         headers: {
           'userId': userId,
         },
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('Response statusssss: ${response.statusCode}');
+      print('Response bodyyy: ${response.body}');
 
       if (response.statusCode == 200) {
         // Parse the response and return a list of maps
@@ -647,6 +651,51 @@ class ApiService {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
         print("Successsss: ${data['message']}");
+
+
+
+
+        final Uri url = Uri.parse('${AppConstants.baseUrlJessyCabs}/signautureimagedriverapp');
+
+        try {
+          // Prepare the data to send in the request
+          final Map<String, dynamic> requestBody1 = {
+            'signatureData': signatureData,
+            'imageName': imageName,
+          };
+
+          // Convert the body to JSON
+          final String body = json.encode(requestBody1);
+
+          // Send POST request to save signature
+          final response1 = await http.post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: body,
+          );
+
+          // Print full response details
+          print('Response Status Code (jessy): ${response1.statusCode}');
+          print('Full Response Body (jessy): ${response1.body}');
+
+          // Handle response based on status code
+          if (response1.statusCode == 200) {
+            print('jessy Response Body (jessy): ${response1.body}');
+          } else {
+            print('Error Response Body (jessy): ${response1}');
+          }
+        }
+          catch (e){
+            print('Error Response Body (jessy): ${e}');
+          }
+
+
+
+
+
+
       } else {
         final Map<String, dynamic> errorData = json.decode(response.body);
         print("Error: ${errorData['error']}");
@@ -775,6 +824,7 @@ class ApiService {
       // String fileName = 'file_$formattedDate.jpg';
 
       var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+      // var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
       var request = http.MultipartRequest('POST', uri);
 
       request.fields['tripid'] = tripid;
@@ -788,6 +838,37 @@ class ApiService {
       var response = await request.send();
 
       if (response.statusCode == 200) {
+        try {
+          String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+
+          var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+          var request = http.MultipartRequest('POST', uri);
+
+
+
+          // Upload the file with the unique name
+          request.files.add(await http.MultipartFile.fromPath('file', tollFile.path,
+            // filename: fileName
+          ));
+
+          // var response = await request.send();
+          var response1 = await request.send();
+          var responseBody = await response1.stream.bytesToString();
+
+      print("${responseBody},'asdf'");
+      if (response1.statusCode == 200) {
+        print('success request');
+            return true;
+          } else {
+            print("Failed to upload file: ${response1.statusCode}");
+            return false;
+          }
+        } catch (e) {
+          print("Error during upload: $e");
+          return false;
+        }
+
+
         return true;
       } else {
         print("Failed to upload file: ${response.statusCode}");
@@ -824,6 +905,39 @@ class ApiService {
       var response = await request.send();
 
       if (response.statusCode == 200) {
+
+
+        try {
+          // Generate the unique filename based on the current date
+          // String formattedDate = DateFormat('yyyyMMdd_HHmmssSSSZ').format(DateTime.now());
+          String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
+          // String fileName = 'file_$formattedDate.jpg';
+
+          var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+          var request = http.MultipartRequest('POST', uri);
+
+
+
+          // Upload the file with the unique name
+          request.files.add(await http.MultipartFile.fromPath('file', parkingFile.path,
+            // filename: fileName
+          ));
+
+          var response1 = await request.send();
+          var responseBody = await response1.stream.bytesToString();
+          print("repo to upload file: ${responseBody}");
+          if (response1.statusCode == 200) {
+            return true;
+          } else {
+            print("Failed to upload file: ${response.statusCode}");
+            return false;
+          }
+        } catch (e) {
+          print("Error during upload: $e");
+          return false;
+        }
+
+
         return true;
       } else {
         print("Failed to upload file: ${response.statusCode}");
@@ -886,7 +1000,7 @@ class ApiService {
     try {
       print('insie api url');
       // Generate the unique filename based on the current date
-      String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+      String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
 
       var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
       var request = http.MultipartRequest('POST', uri);
@@ -899,10 +1013,45 @@ class ApiService {
         // filename: fileName
       ));
 
-      var response = await request.send();
+      var response= await request.send();
 
       if (response.statusCode == 200) {
         print("success to upload filee: ${response.statusCode}");
+
+        try {
+          print('insie api url');
+          // Generate the unique filename based on the current date
+          String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+
+          var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+          var request = http.MultipartRequest('POST', uri);
+
+          // request.fields['tripid'] = tripid;
+          // request.fields['documenttype'] = documenttype;
+
+          // Upload the file with the unique name
+          request.files.add(await http.MultipartFile.fromPath('file', startingkilometer.path,
+            // filename: fileName
+          ));
+
+          var response1 = await request.send();
+          var responseBody = await response1.stream.bytesToString();
+
+          print("Full API Response: ${response1.statusCode} - $responseBody");
+          print('${response1},insie api url');
+          print('${responseBody},insie api url');
+          if (response1.statusCode == 200) {
+            print("success for starting to upload filee: ${response1.statusCode}");
+
+            return true;
+          } else {
+            print("Failed to upload filee: ${response1.statusCode}");
+            return false;
+          }
+        } catch (e) {
+          print("Error during upload: $e");
+          return false;
+        }
 
         return true;
       } else {
@@ -941,6 +1090,41 @@ class ApiService {
       var response = await request.send();
 
       if (response.statusCode == 200) {
+
+        try {
+          // Generate the unique filename based on the current date
+          String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+
+          var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+          var request = http.MultipartRequest('POST', uri);
+
+          // request.fields['tripid'] = tripid;
+          // request.fields['documenttype'] = documenttype;
+
+          // Upload the file with the unique name
+          request.files.add(await http.MultipartFile.fromPath('file', closingkilometer.path,
+            // filename: fileName
+          ));
+
+          var response1 = await request.send();
+
+          var responseBody = await response1.stream.bytesToString();
+
+          print("Full API Response: ${response1.statusCode} - $responseBody");
+          print('${response1},insie api url');
+          print('${responseBody},insie api url');
+          if (response1.statusCode == 200) {
+            print("success for starting to upload filee: ${response1.statusCode}");
+            return true;
+          } else {
+            print("Failed to upload file: ${response1.statusCode}");
+            return false;
+          }
+        } catch (e) {
+          print("Error during upload: $e");
+          return false;
+        }
+
         return true;
       } else {
         print("Failed to upload file: ${response.statusCode}");
@@ -1218,14 +1402,15 @@ class ApiService {
   //close values showing for rides screen
   static Future<List<Map<String, dynamic>>> fetchTripSheetClosedRides({
     required String userId,
-    required String username,
+    // required String username,
+    required String drivername,
   }) async {
     try {
       // Print the inputs to ensure they are passed correctly
-      print('Fetching trip sheet for userId: $userId, username: $username');
+      print('Fetching trip sheet for userId: $userId, username: $drivername');
 
       final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/tripsheetRides/$username'), // Pass username in the URL
+        Uri.parse('${AppConstants.baseUrl}/tripsheetRides/$drivername'), // Pass username in the URL
         headers: {
           'userId': userId,
         },
@@ -1280,14 +1465,16 @@ class ApiService {
 
 //values getting according to the filter
   static Future<List<Map<String, dynamic>>> fetchTripSheetFilteredRides({
-    required String username,
+    // required String username,
+    required String drivername,
     required DateTime? startDate,
     required DateTime? endDate,
   }) async {
     final url = Uri.parse('${AppConstants.baseUrl}/tripsheetfilterdate');
 
     final body = jsonEncode({
-      "username": username,
+      // "username": username,
+      "username": drivername,
       "startDate": startDate?.toIso8601String(),
       "endDate": endDate?.toIso8601String(),
     });

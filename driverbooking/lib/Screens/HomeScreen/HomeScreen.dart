@@ -287,6 +287,8 @@
 //   }
 // }
 
+import 'dart:convert';
+
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
 import 'package:driverbooking/Bloc/App_Bloc.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
@@ -306,6 +308,8 @@ import 'package:driverbooking/Networks/Api_Service.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Homescreen extends StatefulWidget {
   final String userId;
@@ -327,6 +331,8 @@ class _HomescreenState extends State<Homescreen> {
   String? password;
   String? phonenumber;
   String? email;
+  Map<String, dynamic>? userData;
+  String? driverName;
 
 
   @override
@@ -335,15 +341,128 @@ class _HomescreenState extends State<Homescreen> {
     // _getUserDetails();
     // _getUserDetailsDriver();
     /// Dispatch the event when the screen loads
-    BlocProvider.of<TripSheetValuesBloc>(context).add(
-      FetchTripSheetValues(username: widget.username, userid: widget.userId),
-    );
-    context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
 
 
     print('Userhone: ${widget.userId}, Usernameddd: ${widget.username}');
+    _loadUserData();
+
+    // BlocProvider.of<TripSheetValuesBloc>(context).add(
+    //   // FetchTripSheetValues(username: widget.username, userid: widget.userId),
+    //
+    //   FetchTripSheetValues(
+    //     userid: widget.userId,
+    //     drivername: userData?['user']?[0]?['drivername'] ?? 'Nottt Found',
+    //   ),
+    // );
+    context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
 
   }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userDataString = prefs.getString('userData');
+
+    print("Retrieved userData String: $userDataString");
+
+    if (userDataString != null && userDataString.isNotEmpty) {
+      try {
+        Map<String, dynamic> decodedData = jsonDecode(userDataString);
+
+        setState(() {
+          userData = decodedData;
+        });
+
+        print("After setState, userDatam: $userData");
+
+        // 🚀 Move the event dispatch here, after userData is loaded
+        BlocProvider.of<TripSheetValuesBloc>(context).add(
+          FetchTripSheetValues(
+            userid: widget.userId,
+            drivername: userData?['drivername'] ?? 'Notttyu Found',
+          ),
+        );
+
+        // context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
+      } catch (e) {
+        print("Error decoding userData: $e");
+      }
+    } else {
+      print("No userData found or it's empty in SharedPreferences.");
+    }
+  }
+
+
+  // Future<void> _loadUserData() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? userDataString = prefs.getString('userData');
+  //
+  //   print("Retrieved Data: $userDataString"); // Debugging line
+  //
+  //   if (userDataString != null) {
+  //     setState(() {
+  //       userData = jsonDecode(userDataString);
+  //     });
+  //
+  //     print("Updated userData in state: $userData"); // Check if it's updated
+  //   } else {
+  //     print("No user data found in SharedPreferences!");
+  //   }
+  // }
+
+  // Future<void> _loadUserData() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? userDataString = prefs.getString('userData');
+  //
+  //   print("Retrieved userData String: $userDataString"); // Debugging
+  //
+  //   if (userDataString != null) {
+  //     try {
+  //       Map<String, dynamic> decodedData = jsonDecode(userDataString);
+  //       print("Decoded userData: $decodedData"); // Ensure it’s a Map
+  //
+  //       setState(() {
+  //         userData = decodedData ;
+  //         // userData = decodedData;
+  //       });
+  //
+  //       print("After setState, userData: $userData"); // Debugging after update
+  //     } catch (e) {
+  //       print("Error decoding userData: $e");
+  //     }
+  //   } else {
+  //     print("No userData found in SharedPreferences.");
+  //   }
+  // }
+
+  // Future<void> _loadUserData() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String? userDataString = prefs.getString('userData');
+  //
+  //   print("Retrieved userData String: $userDataString"); // Debugging
+  //
+  //   if (userDataString != null && userDataString.isNotEmpty) {
+  //     try {
+  //       // Check if the stored string is a JSON object or just a plain string
+  //       if (userDataString.startsWith('{')) {
+  //         Map<String, dynamic> decodedData = jsonDecode(userDataString);
+  //
+  //         setState(() {
+  //           userData = decodedData;
+  //         });
+  //
+  //         print("After setState, userData: $userData");
+  //       } else {
+  //         print("Error: Stored value is a plain string, not a JSON object.");
+  //       }
+  //     } catch (e) {
+  //       print("Error decoding userData: $e");
+  //     }
+  //   } else {
+  //     print("No userData found or it's empty in SharedPreferences.");
+  //   }
+  // }
+
+
 
 
 
@@ -423,6 +542,8 @@ class _HomescreenState extends State<Homescreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("Building UI with userData: $userData"); // Debugging
+
     return Scaffold(
       key: _scaffoldKey,
       //   drawer: Drawer(
@@ -779,7 +900,24 @@ class _HomescreenState extends State<Homescreen> {
       appBar: AppBar(
         title: Text("Home Screen"),
       ),
-      body: BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
+      body:
+        // Column(
+        //   children: [
+        //
+        //
+        //     Text("Message: ${userData?['message'] ?? 'Not Found'}"),
+        //     Text("User ID: ${userData?['user']?[0]?['id'] ?? 'Not Found'}"),
+        //     Text("Driver ID: ${userData?['user']?[0]?['driverid'] ?? 'Not Found'}"),
+        //     Text("Driver Name: ${userData?['user']?[0]?['drivername'] ?? 'Not Found'}"),
+        //     Text("Username: ${userData?['user']?[0]?['username'] ?? 'Not Found'}"),
+        //     Text("Stations: ${userData?['user']?[0]?['stations'] ?? 'Not Found'}"),
+        //     Text("Mobile No: ${userData?['user']?[0]?['Mobileno'] ?? 'Not Found'}"),
+        //     Text("Email: ${userData?['user']?[0]?['Email'] ?? 'Not Found'}"),
+        //
+        //   ],
+        // )
+
+      BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
         builder: (context, state) {
           if (state is FetchingTripSheetValuesLoading) {
             return const Center(

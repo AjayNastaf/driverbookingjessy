@@ -11,6 +11,7 @@ class LoginLoading extends LoginState{}
 class LoginCompleted extends LoginState{
   final String userId;
   LoginCompleted(this.userId);
+
 }
 
 class LoginFailure extends LoginState {

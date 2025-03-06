@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:driverbooking/Screens/MenuListScreens/History/EditTripDetails/EditTripDetails.dart';
 import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,7 @@ import 'dart:io';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart' as path;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Bloc/AppBloc_Events.dart';
 import '../../../Bloc/AppBloc_State.dart';
@@ -34,6 +37,7 @@ class _HistoryState extends State<History> {
   DateTime? toDate;
   List<Map<String, dynamic>> tripSheetData = [];
   bool isLoading = true;
+  Map<String, dynamic>? userData;
 
 
   //
@@ -66,10 +70,48 @@ class _HistoryState extends State<History> {
   void initState() {
     super.initState();
     print("📢 Dispatching FetchTripSheetClosedRides event");
-    context.read<TripSheetBloc>().add(FetchTripSheetClosedRides(
-      userId: widget.userId,
-      username: widget.username,
-    ));
+    // context.read<TripSheetBloc>().add(FetchTripSheetClosedRides(
+    //   userId: widget.userId,
+    //   drivername: widget.username,
+    // ));
+
+    _loadUserData();
+  }
+
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userDataString = prefs.getString('userData');
+
+    print("Retrieved userData String: $userDataString");
+
+    if (userDataString != null && userDataString.isNotEmpty) {
+      try {
+        Map<String, dynamic> decodedData = jsonDecode(userDataString);
+
+        setState(() {
+          userData = decodedData;
+        });
+
+        print("After setState, userDatam: $userData");
+
+        // 🚀 Move the event dispatch here, after userData is loaded
+
+
+
+
+        context.read<TripSheetBloc>().add(FetchTripSheetClosedRides(
+          userId: widget.userId,
+          drivername: userData?['drivername'] ?? 'Notttyu Found',
+        ));
+
+        // context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
+      } catch (e) {
+        print("Error decoding userData: $e");
+      }
+    } else {
+      print("No userData found or it's empty in SharedPreferences.");
+    }
   }
 
   // Future<void> selectDateRange() async {
@@ -148,7 +190,8 @@ class _HistoryState extends State<History> {
     }
 
     context.read<FetchFilteredRidesBloc>().add(FetchFilteredRides(
-      username: widget.username,
+      // username: widget.username,
+      drivername: userData?['drivername'] ?? 'Notttyu Found',
       startDate: fromDate!,
       endDate: toDate!,
     ));
