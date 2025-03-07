@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppConstants {  // only use asset
   static const String nastafLogo = 'assets/image/Nastaf-Logo.png';
+  static const String jessyLogo = 'assets/image/logo.png';
   static const String bgmain = 'assets/image/bg-Main.png';
   static const String registration = 'assets/image/regis-tration.png';
   static const String intro_one = 'assets/image/intro1.jpg';
@@ -14,7 +15,7 @@ class AppConstants {  // only use asset
 
 
 //aws
-  static const String baseUrl = "http://75.101.215.49:7002";
+//   static const String baseUrl = "http://75.101.215.49:7002";
 
   //local
   // static const String baseUrl = "http://192.168.0.115:3001";
@@ -22,7 +23,7 @@ class AppConstants {  // only use asset
 
 
   //jessycabs
-  // static const String baseUrl = "https://jessycabs.com:7001";
+  static const String baseUrl = "https://jessycabs.com:7001";
   static const Color primaryColor = Colors.blue;
   static const String ApiKey = "AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk";
   static const String mailerEmail = "ravi.vinoth997@gmail.com";

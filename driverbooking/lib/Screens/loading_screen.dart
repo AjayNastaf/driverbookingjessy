@@ -46,7 +46,9 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
               child: ScaleTransition(
                 scale: _animation,
                 child: Image.asset(
-                  AppConstants.nastafLogo,
+                  // AppConstants.nastafLogo,
+                  AppConstants.jessyLogo,
+
                   width: 250, // Adjusted for better aesthetics.
                   height: 250,
                 ),
