@@ -650,12 +650,13 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
-        print("Successsss: ${data['message']}");
+        print("Successsss sign jessy: ${data['message']}");
 
 
 
 
         final Uri url = Uri.parse('${AppConstants.baseUrlJessyCabs}/signautureimagedriverapp');
+        print("Successsss sign jessyyyy:");
 
         try {
           // Prepare the data to send in the request
@@ -682,7 +683,7 @@ class ApiService {
 
           // Handle response based on status code
           if (response1.statusCode == 200) {
-            print('jessy Response Body (jessy): ${response1.body}');
+            print('jessy Response Body123 (jessy): ${response1.body}');
           } else {
             print('Error Response Body (jessy): ${response1}');
           }
@@ -1016,7 +1017,7 @@ class ApiService {
       var response= await request.send();
 
       if (response.statusCode == 200) {
-        print("success to upload filee: ${response.statusCode}");
+        print("success to upload fileeeeee: ${response.statusCode}");
 
         try {
           print('insie api url');

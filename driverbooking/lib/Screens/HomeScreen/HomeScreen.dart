@@ -750,6 +750,7 @@ class _HomescreenState extends State<Homescreen> {
                               backgroundColor: Colors.grey[300],
                               backgroundImage: (state.profileImage != null && state.profileImage!.isNotEmpty)
                                   ? NetworkImage("${AppConstants.baseUrl}/profile_photos/${state.profileImage!}")
+                                  // ? NetworkImage("${AppConstants.baseUrl}/${state.profileImage!}")
                                   : AssetImage(AppConstants.intro_three) as ImageProvider,
                             ),
 

@@ -36,7 +36,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_bloc: ^8.1.6
   smooth_page_indicator: ^1.0.0
-  image_picker: ^0.8.7+3
   mailer: ^6.1.0
 #  dio: ^5.2.0 # For API calls to fetch route details (optional)
   intl: ^0.18.0
@@ -102,7 +101,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/image/
-    - assets/image/bg-Main.png
+#    - assets/image/bg-Main.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

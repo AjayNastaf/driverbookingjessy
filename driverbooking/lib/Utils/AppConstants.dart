@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class AppConstants {  // only use asset
   static const String nastafLogo = 'assets/image/Nastaf-Logo.png';
   static const String jessyLogo = 'assets/image/logo.png';
-  static const String bgmain = 'assets/image/bg-Main.png';
+  static const String bgmain = 'assets/image/bg-main.png';
   static const String registration = 'assets/image/regis-tration.png';
   static const String intro_one = 'assets/image/intro1.jpg';
   static const String intro_two = 'assets/image/intro2.jpg';
@@ -20,6 +20,7 @@ class AppConstants {  // only use asset
   //local
   // static const String baseUrl = "http://192.168.0.115:3001";
   static const String baseUrlJessyCabs = "https://jessycabs.com:54462";
+  // static const String baseUrlJessyCabs = "http://192.168.0.115:8081";
 
 
   //jessycabs
