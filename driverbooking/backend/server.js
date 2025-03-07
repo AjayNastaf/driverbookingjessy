@@ -790,9 +790,9 @@ app.get('/uploads', (req, res) => {
 });
 
 //local
-//app.listen(3001, () => {
-//  console.log("Server started on port 3001");
-//});
+app.listen(3001, () => {
+  console.log("Server started on port 3001");
+});
 
 //aws
 //app.listen(7002, () => {
@@ -800,8 +800,12 @@ app.get('/uploads', (req, res) => {
 //});
 
 //jessycabs
-app.listen(7001, () => {
+//app.listen(7001, () => {
+//  console.log("Server started on port 700000");
+//});
+
+
+app.listen(7128, () => {
   console.log("Server started on port 700000");
 });
-
 

@@ -197,7 +197,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
                               context,
                               label: "Drop Location",
                               // value: Dropaddress.isNotEmpty ? Dropaddress : "Not available", // Default text when empty
-                              value: tripDetails['address1'] ?? "Not available", // Default text when null
+                              value: tripDetails['useage'] ?? "Not available", // Default text when null
 
                               icon: Icons.location_pin,
                               isLast: true,
