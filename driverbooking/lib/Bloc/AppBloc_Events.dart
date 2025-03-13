@@ -675,26 +675,7 @@ class SaveLocation extends LocationEvent {
 
 
 
-
-// abstract class TripTrackingDetailsEvent extends Equatable {
-//   @override
-//   List<Object?> get props => [];
-// }
-//
-// class FetchTripTrackingDetails extends TripTrackingDetailsEvent {
-//   final String tripId;
-//
-//   FetchTripTrackingDetails(this.tripId);
-//
-//   @override
-//   List<Object?> get props => [tripId];
-// }
-
-
-
-
-
-
+//trip tracking events Started (tracking, customer location reached page)
 abstract class TripTrackingDetailsEvent extends Equatable {
   @override
   List<Object?> get props => [];
@@ -729,3 +710,76 @@ class SaveLocationToDatabase extends TripTrackingDetailsEvent {
   @override
   List<Object?> get props => [latitude, longitude, vehicleNo, tripId, tripStatus];
 }
+
+
+
+//event for end ride reached Status starts
+class EndRideEvent extends TripTrackingDetailsEvent {
+  final double latitude;
+  final double longitude;
+  final String vehicleNo;
+  final String tripId;
+  final String tripStatus;
+
+  EndRideEvent({
+    required this.latitude,
+    required this.longitude,
+    required this.vehicleNo,
+    required this.tripId,
+    required this. tripStatus,
+  });
+}
+//event for end ride reached Status completed
+
+
+//event for way point start Status starts
+
+class StartWayPointEvent extends TripTrackingDetailsEvent {
+  final double latitude;
+  final double longitude;
+  final String vehicleNo;
+  final String tripId;
+  final String tripStatus;
+
+  StartWayPointEvent({
+    required this.latitude,
+    required this.longitude,
+    required this.vehicleNo,
+    required this.tripId,
+    required this. tripStatus,
+  });
+}
+
+//event for way point start Status completed
+
+
+
+//event for way point end Status starts
+
+class EndWayPointEvent extends TripTrackingDetailsEvent {
+  final double latitude;
+  final double longitude;
+  final String vehicleNo;
+  final String tripId;
+  final String tripStatus;
+
+  EndWayPointEvent({
+    required this.latitude,
+    required this.longitude,
+    required this.vehicleNo,
+    required this.tripId,
+    required this. tripStatus,
+  });
+}
+//event for way point end Status starts
+
+
+//trip tracking events completed (tracking, customer location reached page)
+
+
+
+
+
+
+
+

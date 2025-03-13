@@ -561,6 +561,8 @@ import 'package:driverbooking/Bloc/App_Bloc.dart';
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+
 
 class TripDetailsUpload extends StatefulWidget {
   final String tripId;
@@ -595,6 +597,21 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   int? hcl;
   late TripUploadBloc _tripUploadBloc;
 
+
+
+  String setFormattedDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "Not available"; // Handle null case
+
+    try {
+      DateTime parsedDate = DateTime.parse(dateStr); // Parse the date from DB
+      return DateFormat('dd-MM-yyyy').format(parsedDate); // Format to dd/MM/yyyy
+    } catch (e) {
+      return "Invalid date"; // Handle errors
+    }
+  }
+
+
+
   Future<void> _fetchTripDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -611,8 +628,10 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         guestNameController.text = tripDetails['guestname'] ?? 'Not available';
         tripIdController.text = tripDetails['tripid'].toString()  ?? 'Not available';
         vehicleTypeController.text = tripDetails['vehType'] ?? 'Not available';
-        startDateController.text = tripDetails['startdate'] ?? 'Not available';
-        closeDateController.text = tripDetails['closeDate'] ?? 'Not available';
+        // startDateController.text = tripDetails['startdate'] ?? 'Not available';
+        startDateController.text = setFormattedDate(tripDetails['startdate']); // Assuming 'startdate' is from the database;
+        // closeDateController.text = tripDetails['closeDate'] ?? 'Not available';
+        closeDateController.text = setFormattedDate(tripDetails['closedate']);
 
       });
     } else {

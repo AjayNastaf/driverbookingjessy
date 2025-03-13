@@ -593,7 +593,7 @@ class _TrackingPageState extends State<TrackingPage> {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text("Location saved successfully!")),
             // );
-            showSuccessSnackBar(context, "Location saved successfully!");
+            // showSuccessSnackBar(context, "Location saved successfully!");
           } else if (state is SaveLocationFailure) {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text(state.errorMessage)),

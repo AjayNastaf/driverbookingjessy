@@ -1,6 +1,7 @@
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
 import 'package:driverbooking/Bloc/App_Bloc.dart';
+import 'package:intl/intl.dart';
 
 import 'package:driverbooking/Screens/PickupScreen/PickupScreen.dart';
 import 'package:driverbooking/Screens/StartingKilometer/StartingKilometer.dart';
@@ -91,6 +92,27 @@ class _BookingdetailsState extends State<Bookingdetails> {
     print('Trip details saved to local storage.');
   }
 
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "Not available"; // Handle null case
+    try {
+      DateTime parsedDate = DateTime.parse(dateStr); // Parse the string to DateTime
+      return DateFormat('dd-MM-yyyy').format(parsedDate); // Format to "YYYY-MM-DD"
+    } catch (e) {
+      return "Invalid date"; // Handle parsing errors
+    }
+  }
+
+  String _formatTime(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return "Not available"; // Handle null case
+    try {
+      DateTime parsedTime = DateFormat("HH:mm:ss").parse(timeStr); // Parse 'HH:mm:ss'
+      return DateFormat("HH:mm").format(parsedTime); // Format as 'HH:mm'
+    } catch (e) {
+      return "Invalid time"; // Handle parsing errors
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,13 +167,16 @@ class _BookingdetailsState extends State<Bookingdetails> {
                             _buildDetailTile(
                               context,
                               label: "Trip Date",
-                              value: tripDetails['tripsheetdate'] ?? "Not available", // Default text when null
+                              // value: tripDetails['tripsheetdate'] ?? "Not available", // Default text when null
+                              value: _formatDate(tripDetails['tripsheetdate']), // Convert date format
                               icon: Icons.calendar_today,
                             ),
                             _buildDetailTile(
                               context,
                               label: "Start Time",
-                              value: tripDetails['starttime'] ?? "Not available", // Default text when null
+                              value: _formatTime(tripDetails['starttime']), // Format time properly
+
+                              // value: tripDetails['starttime'] ?? "Not available", // Default text when null
                               icon: Icons.access_time,
                             ),
                             _buildDetailTile(

@@ -15,6 +15,8 @@ import 'package:driverbooking/Utils/AppFunctions.dart';
 import '../../../../Bloc/AppBloc_Events.dart';
 import '../../../../Bloc/AppBloc_State.dart';
 import '../../../../Bloc/App_Bloc.dart';
+import 'package:intl/intl.dart';
+
 
 class EditTripDetails extends StatefulWidget {
 
@@ -62,7 +64,16 @@ class _EditTripDetailsState extends State<EditTripDetails> {
 
   }
 
+  String setFormattedDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "Not available"; // Handle null case
 
+    try {
+      DateTime parsedDate = DateTime.parse(dateStr); // Parse the date from DB
+      return DateFormat('dd-MM-yyyy').format(parsedDate); // Format to dd/MM/yyyy
+    } catch (e) {
+      return "Invalid date"; // Handle errors
+    }
+  }
 
 
 
@@ -74,13 +85,13 @@ class _EditTripDetailsState extends State<EditTripDetails> {
       if (tripDetails != null) {
 
         var tripIdvalue = tripDetails['tripid'].toString();
-        var tripdatevalue = tripDetails['tripsheetdate'].toString();
+        var tripdatevalue = setFormattedDate(tripDetails['tripsheetdate']).toString();
         var reporttimevalue = tripDetails['reporttime'].toString();;
         var dutyvalue = tripDetails['duty'].toString();
         var vectypeValue = tripDetails['vehType'].toString();
         var guestnamevalue = tripDetails['guestname'].toString();
         var guestmobilenovalue = tripDetails['guestmobileno'].toString();
-        var 	pickupvalue = tripDetails['address1'].toString();
+        var pickupvalue = tripDetails['address1'].toString();
         var droplocationvalue = tripDetails['useage'].toString();
         var parkingvalue = tripDetails['parking'].toString();
         var tollvalue = tripDetails['toll'].toString();

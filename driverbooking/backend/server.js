@@ -3,7 +3,7 @@ const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
 // const fs = require('fs');
 const path = require('path');
-const db = require('./db'); 
+const db = require('./db');
 const cors = require("cors");
 require("dotenv").config();
 
@@ -790,8 +790,8 @@ app.get('/uploads', (req, res) => {
 });
 
 //local
-//app.listen(3001, () => {
-//  console.log("Server started on port 3001");
+//app.listen(3000, () => {
+//  console.log("Server started on port 3000");
 //});
 
 //aws
@@ -804,7 +804,7 @@ app.get('/uploads', (req, res) => {
 //  console.log("Server started on port 700000");
 //});
 
-
+//
 app.listen(7128, () => {
   console.log("Server started on port 710000");
 });

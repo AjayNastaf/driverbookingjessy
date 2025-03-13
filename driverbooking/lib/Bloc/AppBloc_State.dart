@@ -648,27 +648,6 @@ class ProfilePhotoUploadError extends ProfileState {
 
 //saving lat long of pickup location  in db state starts
 
-// abstract class LocationState extends Equatable {
-//   const LocationState();
-//
-//   @override
-//   List<Object?> get props => [];
-// }
-//
-// class LocationInitial extends LocationState {}
-//
-// class LocationSaving extends LocationState {}
-//
-// class LocationSaved extends LocationState {}
-//
-// class LocationSaveFailed extends LocationState {
-//   final String error;
-//
-//   const LocationSaveFailed(this.error);
-//
-//   @override
-//   List<Object?> get props => [error];
-// }
 
 class LocationState {
   final double latitude;
@@ -708,35 +687,15 @@ class LocationState {
 
 
 
-//
-// abstract class TripTrackingDetailsState extends Equatable {
-//   @override
-//   List<Object?> get props => [];
-// }
-//
-// class TripTrackingDetailsLoading extends TripTrackingDetailsState {}
-//
-// class TripTrackingDetailsLoaded extends TripTrackingDetailsState {
-//   final String vehicleNumber;
-//   final String status;
-//
-//   TripTrackingDetailsLoaded({required this.vehicleNumber, required this.status});
-//
-//   @override
-//   List<Object?> get props => [vehicleNumber, status];
-// }
-//
-// class TripTrackingDetailsError extends TripTrackingDetailsState {
-//   final String message;
-//
-//   TripTrackingDetailsError(this.message);
-//
-//   @override
-//   List<Object?> get props => [message];
-// }
 
 
 
+
+
+
+
+
+//trip tracking state starts (tracking, customer location reached page)
 
 
 abstract class TripTrackingDetailsState extends Equatable {
@@ -784,4 +743,6 @@ class SaveLocationFailure extends TripTrackingDetailsState {
   @override
   List<Object?> get props => [errorMessage];
 }
+//trip tracking states completed (tracking, customer location reached page)
+
 

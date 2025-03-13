@@ -8,6 +8,7 @@ import 'package:driverbooking/Utils/AllImports.dart';
 import 'package:driverbooking/Networks/Api_Service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class Ridescreen extends StatefulWidget {
   final String userId ;
@@ -94,6 +95,17 @@ class _RidescreenState extends State<Ridescreen> {
     }
   }
 
+  String setFormattedDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "Not available"; // Handle null case
+
+    try {
+      DateTime parsedDate = DateTime.parse(dateStr); // Parse the date from DB
+      return DateFormat('dd-MM-yyyy').format(parsedDate); // Format to dd/MM/yyyy
+    } catch (e) {
+      return "Invalid date"; // Handle errors
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,7 +140,9 @@ class _RidescreenState extends State<Ridescreen> {
                 // image: AppConstants.sample,
                 vehicle: '${trip['vehicleName']}',
                 status: '${trip['apps']}',
-                dateTime: '${trip['tripsheetdate']}',
+
+                // dateTime: '${trip['tripsheetdate']}',
+                dateTime: setFormattedDate(trip['tripsheetdate']),
                 startAddress: '${trip['address1']}',
                 endAddress: '${trip['useage']}',
               ),

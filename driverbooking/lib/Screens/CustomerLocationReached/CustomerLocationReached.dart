@@ -1,4 +1,3 @@
-import 'package:driverbooking/Screens/SignatureEndRide/SignatureEndRide.dart';
 import 'package:driverbooking/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -32,81 +31,26 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   String? latitude;
   String? longitude;
   bool isRideStopped = false; // Initially, show "Stop Ride" button
+  bool isEndRideClicked = false; // Initially, show "Stop Ride" button
+  bool isStartWayPointClicked = false;
+  bool isCloseWayPointClicked = false;
   String? vehiclevalue;
   String? Statusvalue;
-  // StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
   String vehicleNumber = "";
   String tripStatus = "";
+  Timer? _timer;
+  int _milliseconds = 0;
+  bool _isRunning = false;
 
   @override
   void initState() {
     super.initState();
     _initializeCustomerLocationTracking();
-    // _loadTripDetailsCustomer();
-    // _getLatLngFromAddress(globals.dropLocation);
-    // _locationSubscription?.cancel(); // ✅ Safe way to cancel without crashing
-    // _locationSubscription = null;
+
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId));
   }
 
-  Future<void> _loadTripDetailsCustomer() async {
-    try {
-      // Fetch trip details from the API
-      final tripDetails = await ApiService.fetchTripDetails(widget.tripId!);
-      print('Raw Trip details fetched: $tripDetails'); // Debugging
-
-      if (tripDetails != null) {
-        // Remove any accidental spaces or tabs in key names
-        var vehicleNo = tripDetails['vehRegNo']?.toString();
-        var tripStatusValue = tripDetails['apps'];
-
-        print('Vehicle No: $vehicleNo');
-        print('Trip Status: $tripStatusValue');
-
-        if((tripStatusValue != null) && (vehicleNo   != null)) {
-          setState(() {
-            vehiclevalue = vehicleNo;
-            Statusvalue = tripStatusValue;
-          });
-          print('Updated vehiclevalue: $vehiclevalue');
-        } else {
-          print('Error: vehicleNo is null');
-        }
-      } else {
-        print('No trip details found.');
-      }
-    } catch (e) {
-      print('Error loading trip details: $e');
-    }
-  }
-
-
-
-  Future<void> _getLatLngFromAddress(String dropLocation) async {
-    const String apiKey = AppConstants.ApiKey; // Replace with your API Key
-    final url =
-        'https://maps.googleapis.com/maps/api/geocode/json?address=${Uri.encodeComponent(dropLocation)}&key=$apiKey';
-
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['status'] == 'OK') {
-          final location = data['results'][0]['geometry']['location'];
-          setState(() {
-            _destination = LatLng(location['lat'], location['lng']);
-          });
-        } else {
-          print('Error: ${data['status']}');
-        }
-      } else {
-        print('Failed to fetch geocoding data');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
 
   StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
 
@@ -140,7 +84,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   }
 
 
-
   void _updateCustomerCameraPosition() {
     if (_currentLatLng != null) {
       _mapController?.animateCamera(
@@ -154,7 +97,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
   }
 
-  // Function to send location data to API
+  // main Function to send location data to API
   Future<void> _saveLocationToDatabaseCustomer(double latitude, double longitude) async {
     print("Savinggg location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
 
@@ -205,27 +148,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   }
 
 
-
-  // void _updateCustomerCurrentLocation(LocationData locationData) {
-  //   if (locationData.latitude != null && locationData.longitude != null) {
-  //     print("Received Location: ${locationData.latitude}, ${locationData.longitude}");
-  //
-  //     final newLatLng = LatLng(locationData.latitude!, locationData.longitude!);
-  //
-  //     setState(() {
-  //       _currentLatLng = newLatLng;
-  //     });
-  //
-  //     _fetchRouteCustomer();
-  //     _updateCustomerCameraPosition();
-  //     // _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
-  //     _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
-  //
-  //   } else {
-  //     print("Location data is null");
-  //   }
-  // }
-
   void _updateCustomerCurrentLocation(LocationData locationData) {
     double? latitude = locationData.latitude;
     double? longitude = locationData.longitude;
@@ -241,7 +163,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
       _fetchRouteCustomer();
       _updateCustomerCameraPosition();
-      // _saveLocationToDatabaseCustomer(locationData.latitude!, locationData.longitude!);
 
 
       // Check if location is (0.0, 0.0) – if so, do nothing
@@ -254,6 +175,26 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         print("Successsss Ajay");
         print("object");
         saveWayPointLocationCustomer(latitude, longitude);
+        return;
+      }
+
+      if (isEndRideClicked == true) {
+        print(" Ajay ERT");
+        print("object");
+        _handleEndRide(latitude, longitude);
+        return;
+      }
+
+      if (isStartWayPointClicked == true) {
+        print(" Ajay ERT");
+        print("object");
+        _handleEndRide(latitude, longitude);
+        return;
+      }
+      if (isCloseWayPointClicked == true) {
+        print(" Ajay ERT");
+        print("object");
+        _handleEndRide(latitude, longitude);
         return;
       }
 
@@ -270,7 +211,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
 
 
-
+//save lat long in bloc starts
   void saveLocationCustomer(double latitude, double longitude) {
     print("Inside saveLocation function");
     print("Vehicle Number: $vehicleNumber, Trip Status: $tripStatus");
@@ -295,6 +236,11 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
       print("Trip details are not yet loaded. Cannot save location.");
     }
   }
+//save lat long in bloc completed
+
+
+
+//save lat long with way point in bloc starts
   void saveWayPointLocationCustomer(double latitude, double longitude) {
     print("iInside saveLocation function");
     print("Vehicle Number: $vehicleNumber, Trip Status: $tripStatus");
@@ -305,7 +251,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     }
 
     if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
-      print("Dispatching SaveLocationToDatabase eevent...");
+      print("Dispatching SaveLocationToDatabase event...");
       context.read<TripTrackingDetailsBloc>().add(
         SaveLocationToDatabase(
           latitude: latitude,
@@ -319,49 +265,71 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
       print("Trip details are not yet loaded. Cannot save location.");
     }
   }
+//save lat long with way point in bloc completed
+
 
 
 //for reached status starts
-  Future<void> _handleReachedTrip(double latitude, double longitude) async {
+  void _handleEndRide(double latitude, double longitude) {
+    context.read<TripTrackingDetailsBloc>().add(
+      EndRideEvent(
+
+        latitude: latitude,
+        longitude: longitude,
+        vehicleNo: vehicleNumber,
+        tripId: widget.tripId,
+        tripStatus: tripStatus,
+      ),
+
+    );
+  }
+//for reached status completed
+
+
+
+//for waypoint start status starts
+  void _handleWaypointStartingStatusB(double latitude, double longitude)  {
     print(
         "ssSaving start location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
     if (latitude == 0.0 && longitude == 0.0) {
       print("⚠ Invalidd location (0.0, 0.0) - Not saving to database.");
       return; // Stop execution
     }
-
-    bool success = await ApiService.insertStartData( // ✅ Now called statically
-      vehicleNo: vehicleNumber,
-      tripId: widget.tripId ?? '',
-      latitude: latitude,
-      longitude: longitude,
-      runningDate: DateTime.now().toIso8601String().split("T")[0],
-      // Current Date,
-      runningTime: DateTime.now().toLocal().toString().split(" ")[1],
-      tripStatus: "Reached",
-      tripStartTime: DateTime.now().toLocal().toString().split(" ")[1],
-      tripEndTime: DateTime.now().toIso8601String(),
-
+    context.read<TripTrackingDetailsBloc>().add(
+      StartWayPointEvent(
+        latitude: latitude,
+        longitude: longitude,
+        vehicleNo: vehicleNumber,
+        tripId: widget.tripId,
+        tripStatus: tripStatus,
+      ),
 
     );
-
-
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text(success
-    //       ? "Trippppppppp started successfully!"
-    //       : "Failed to start trip!")),
-    // );
-
-    if (success) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TripDetailsUpload(tripId: widget.tripId),
-        ),
-      );
-    }
   }
-//for reached status completed
+//for waypoint start status completed
+
+
+
+//for waypoint completed status starts
+  void _handleWaypointCompletedStatusB(double latitude, double longitude)  {
+    print(
+        "ssSaving start location: Latitude = $latitude, Longitude = $longitude"); // Debugging print
+    if (latitude == 0.0 && longitude == 0.0) {
+      print("⚠ Invalidd location (0.0, 0.0) - Not saving to database.");
+      return; // Stop execution
+    }
+    context.read<TripTrackingDetailsBloc>().add(
+      EndWayPointEvent(
+        latitude: latitude,
+        longitude: longitude,
+        vehicleNo: vehicleNumber,
+        tripId: widget.tripId,
+        tripStatus: tripStatus,
+      ),
+
+    );
+  }
+//for waypoint completed status completed
 
 
 
@@ -426,43 +394,68 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   }
 
 
+
+
+
+
+
+
+
+
+  void _startStopwatch() {
+    if (_isRunning) return;
+    _isRunning = true;
+
+    _timer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+      setState(() {
+        _milliseconds += 100;
+      });
+    });
+  }
+
+  void _stopStopwatch() {
+    _isRunning = false;
+    _timer?.cancel();
+  }
+
+  void _resetStopwatch() {
+    _stopStopwatch();
+    setState(() {
+      _milliseconds = 0;
+    });
+  }
+
+  String _formatTime(int milliseconds) {
+    int minutes = (milliseconds ~/ 60000);
+    int seconds = (milliseconds ~/ 1000) % 60;
+    int millis = (milliseconds % 1000) ~/ 100;
+
+    return "${minutes.toString().padLeft(2, '0')}:"
+        "${seconds.toString().padLeft(2, '0')}:"
+        "${millis.toString()}";
+  }
+
+
+
+
+
+
+
+
   @override
   void dispose() {
-    // _locationSubscription?.cancel(); // Stop tracking when widget is removed
     _locationSubscription!.cancel();
     _locationSubscription = null;// Remove reference
+
+    _timer?.cancel(); // Cancel timer when widget is removed
     super.dispose();
   }
-//for saving reached
-  Future<bool> _checkIfStatusReached(String tripId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/Vehilcereachedstatus/$tripId'),
-        headers: {"Content-Type": "application/json"},
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> result = jsonDecode(response.body);
-        print("API Responsessssssssssss: $result");
-
-        return result.isNotEmpty; // True if status already exists
-      } else {
-        print("Failed to fetch status: ${response.statusCode}");
-        return false;
-      }
-    } catch (e) {
-      print("Error fetching status: $e");
-      return false;
-    }
-  }
-
-//for saving reached end
-
 
 
   @override
   Widget build(BuildContext context) {
     String dropLocation = globals.dropLocation; // Access the global variable
+    double progress = (_milliseconds % 60000) / 60000; // Progress for circular animation
 
     return BlocListener<TripTrackingDetailsBloc, TripTrackingDetailsState>(
         listener: (context, state) {
@@ -484,6 +477,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text("Location saved successfully!")),
             // );
+            print("inside the success function");
           } else if (state is SaveLocationFailure) {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text(state.errorMessage)),
@@ -491,11 +485,12 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
             showFailureSnackBar(context, state.errorMessage);
           }
         },
-        child:Scaffold (
-      appBar: AppBar(
-        title: Text("Trip Started"),
-      ),
-      body: Stack(
+
+          child:Scaffold (
+        appBar: AppBar(
+          title: Text("Trip Started"),
+        ),
+       body: Stack(
         children: [
           if (_currentLatLng != null)
             GoogleMap(
@@ -565,18 +560,55 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                         ),
                         SizedBox(width: 12), // Space between icon and address
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                          child: Row(
                             children: [
-                              Text(
-                                'Current Location',
-                                style: TextStyle(color: Colors.grey.shade800, fontSize: 20.0, fontWeight: FontWeight.w500),
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.5, // 70% of screen width
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Current Location',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade800,
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(height: 32),
+                                    Text(
+                                      '$dropLocation',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade800,
+                                        fontSize: 20.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              SizedBox(height: 32),
-                              Text(
-                                // ' ${globals.dropLocation}',
-                                  '$dropLocation',
-                                style: TextStyle(color: Colors.grey.shade800, fontSize: 20.0),
+
+                              SizedBox(width: 30.0,),
+
+                              Center(
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.green, width: 6), // Circular Border
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    _formatTime(_milliseconds),
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                      fontFamily: "Digital",
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -593,9 +625,20 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               isRideStopped = true; // Hide Stop, Show Start
                               // Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
                             });
+                            _startStopwatch();
+                            isStartWayPointClicked = true; // Set flag to true when button is clicked
+
+
+                            Future.delayed(Duration(seconds: 1), () {
+                              isStartWayPointClicked = false;
+                              print("🔄 End Ride button reset, can be clicked again.");
+                            });
 
                             // Call the function to save location with updated status
                             if (_currentLatLng != null) {
+                              // _handleWaypointStartingStatus(_currentLatLng!.latitude, _currentLatLng!.longitude);
+                              _handleWaypointStartingStatusB(_currentLatLng!.latitude, _currentLatLng!.longitude);
+
                               saveWayPointLocationCustomer(
                                 _currentLatLng!.latitude,
                                 _currentLatLng!.longitude,
@@ -604,17 +647,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               print("Error: _currentLatLng is null");
                             }
 
-
-
-                            // if (_currentLatLng != null) {
-                            //   print("eeee");
-                            //   _handleWayPointTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
-                            //
-                            // } else {
-                            //   ScaffoldMessenger.of(context).showSnackBar(
-                            //     SnackBar(content: Text("llLocation not available yet!")),
-                            //   );
-                            // }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.deepPurple,
@@ -640,9 +672,29 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                               isRideStopped = false; // Hide Stop, Show Start
                               Statusvalue = 'On_Going'; // Set Trip_Status to "waypoint"
                             });
+                            _stopStopwatch();
+                            isCloseWayPointClicked = true; // Set flag to true when button is clicked
+
+
+                            Future.delayed(Duration(seconds: 1), () {
+                              isCloseWayPointClicked = false;
+                              print("🔄 End Ride button reset, can be clicked again.");
+                            });
+
 
                             // Call the function to save location with updated status
                             if (_currentLatLng != null) {
+
+                              // _handleWaypointCompletedStatus(
+                              // _currentLatLng!.latitude,
+                              // _currentLatLng!.longitude,
+                              // );
+
+                              _handleWaypointCompletedStatusB(
+                              _currentLatLng!.latitude,
+                              _currentLatLng!.longitude,
+                              );
+
                               _saveLocationToDatabaseCustomer(
                                 _currentLatLng!.latitude,
                                 _currentLatLng!.longitude,
@@ -665,181 +717,81 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                         ),
                       ),
                     SizedBox(height: 20.0,),
-                    SizedBox(
+
+
+
+
+
+
+
+                    SizedBox(height: 20),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     ElevatedButton(
+                    //       onPressed: _startTimer,
+                    //       child: Text("Start Timer"),
+                    //     ),
+                    //     SizedBox(width: 10),
+                    //     ElevatedButton(
+                    //       onPressed: _stopTimer,
+                    //       child: Text("Stop Timer"),
+                    //     ),
+                    //   ],
+                    // ),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                      SizedBox(
                       width: double.infinity,
-                      child:
-                      // ElevatedButton(
-                      //   // onPressed: () {
-                      //   //   // Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
-                      //   //   Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
-                      //   // },
-                      //   onPressed: () {
-                      //     setState(() {
-                      //       Statusvalue = 'Reached'; // Set Trip_Status to "waypoint"
-                      //     });
-                      //
-                      //     // Call the function to save location with updated status
-                      //     if (_currentLatLng != null) {
-                      //       _saveLocationToDatabaseCustomer(
-                      //         _currentLatLng!.latitude,
-                      //         _currentLatLng!.longitude,
-                      //       );
-                      //       // _locationSubscription?.cancel();
-                      //
-                      //     } else {
-                      //       print("Error: _currentLatLng is null");
-                      //     }
-                      //     // _locationSubscription?.cancel();
-                      //
-                      //     Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
-                      //     // _locationSubscription?.cancel();
-                      //
-                      //   },
-                      //
-                      //   style: ElevatedButton.styleFrom(
-                      //     backgroundColor: Colors.red,
-                      //     padding: EdgeInsets.symmetric(vertical: 16),
-                      //     shape: RoundedRectangleBorder(
-                      //       borderRadius: BorderRadius.circular(8),
-                      //     ),
-                      //   ),
-                      //   child: Text(
-                      //      'End Ride',
-                      //     style: TextStyle(fontSize: 20.0, color: Colors.white),
-                      //   ),
-                      // ),
-
-                      // ElevatedButton(
-                      //   onPressed: () async {
-                      //     bool isStatusAlreadyReached = await _checkIfStatusReached(widget.tripId);
-                      //
-                      //     if (!isStatusAlreadyReached) {
-                      //       setState(() {
-                      //         Statusvalue = 'Reached';
-                      //       });
-                      //       // If status is NOT "Reached", update it
-                      //       if (_currentLatLng != null) {
-                      //         await _saveLocationToDatabaseCustomer(
-                      //           _currentLatLng!.latitude,
-                      //           _currentLatLng!.longitude,
-                      //           // Statusvalue, // Pass status explicitly
-                      //
-                      //         );
-                      //         print("Trip status updated to 'Reached'.");
-                      //       } else {
-                      //         print("Error: _currentLatLng is null");
-                      //       }
-                      //     } else {
-                      //       print("Trip status is already 'Reached'. Navigating only.");
-                      //     }
-                      //
-                      //     // Navigate to TripDetailsUpload
-                      //     if (mounted) {
-                      //       Navigator.push(
-                      //         context,
-                      //         MaterialPageRoute(
-                      //           builder: (context) => TripDetailsUpload(tripId: widget.tripId),
-                      //         ),
-                      //       );
-                      //     }
-                      //   },
-                      //   style: ElevatedButton.styleFrom(
-                      //     backgroundColor: Colors.red,
-                      //     padding: EdgeInsets.symmetric(vertical: 16),
-                      //     shape: RoundedRectangleBorder(
-                      //       borderRadius: BorderRadius.circular(8),
-                      //     ),
-                      //   ),
-                      //   child: Text(
-                      //     'End Ride',
-                      //     style: TextStyle(fontSize: 20.0, color: Colors.white),
-                      //   ),
-                      // ),
-                      ElevatedButton(
-                        // onPressed: () async {
-                        //   bool isStatusAlreadyReached = await _checkIfStatusReached(widget.tripId);
-                        //
-                        //   if (!isStatusAlreadyReached) {
-                        //     setState(() {
-                        //       Statusvalue = 'Reached';
-                        //     });
-                        //
-                        //     if (_currentLatLng != null) {
-                        //       await _saveLocationToDatabaseCustomer(
-                        //         _currentLatLng!.latitude,
-                        //         _currentLatLng!.longitude,
-                        //       );
-                        //     } else {
-                        //       print("Error: _currentLatLng is null");
-                        //     }
-                        //     print("Trip status is alreadyyy.");
-                        //
-                        //   } else {
-                        //     print("Trip status is already 'Reached'. Navigating only.");
-                        //     Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //         builder: (context) => TripDetailsUpload(tripId: widget.tripId),
-                        //       ),
-                        //     );
-                        //   }
-                        //
-                        //   if (mounted) {
-                        //     Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //         builder: (context) => TripDetailsUpload(tripId: widget.tripId),
-                        //       ),
-                        //     );
-                        //   }
-                        // },
-
-
-
-//                         onPressed: () {
-//                           setState(() {
-//                             Statusvalue = 'Reached'; // Update Trip_Status in state
-//                           });
-// print('Ajay status" $Statusvalue');
-//                           Future.delayed(Duration(milliseconds: 100), () {
-//                             print('Ajay status2" $Statusvalue');
-//
-//                             if (_currentLatLng != null) {
-//                               saveLocationCustomer(
-//                                 _currentLatLng!.latitude,
-//                                 _currentLatLng!.longitude,
-//                               );
-// print("in side");
-//                               Navigator.push(
-//                                 context,
-//                                 MaterialPageRoute(
-//                                   builder: (context) => TripDetailsUpload(tripId: widget.tripId),
-//                                 ),
-//                               );
-//                             } else {
-//                               print("⚠ Erroor: _currentLatLng is null");
-//                             }
-//                           });
-//                         },
-
-
-
-
+                      child: ElevatedButton(
                         onPressed: () {
+                          print('for current ');
+                          isEndRideClicked = true; // Set flag to true when button is clicked
+
+                          setState(() {
+                            // isEndRideClicked = true; // Set flag to true when button is clicked
+                            // Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
+                          });
+                          Future.delayed(Duration(seconds: 1), () {
+                            isEndRideClicked = false;
+                            print("🔄 End Ride button reset, can be clicked again.");
+                          });
                           if (_currentLatLng != null) {
-                            _handleReachedTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
 
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("llLocation not available yet!")),
+                            // _handleEndRide(double latitude, double longitude);
+                            _handleEndRide(_currentLatLng!.latitude, _currentLatLng!.longitude);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TripDetailsUpload(tripId: widget.tripId),
+                              ),
                             );
-                            showWarningSnackBar(context, "Location not available yet!");
-                          }
-                        },
+                            print('for current location');
 
 
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("llLocation not available yet!")),
+                              );
+                              showWarningSnackBar(context, "Location not available yet!");
+                            }
 
-                        style: ElevatedButton.styleFrom(
+                        }, style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           padding: EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -851,9 +803,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                           style: TextStyle(fontSize: 20.0, color: Colors.white),
                         ),
                       ),
-
                     ),
-
                   ],
                 ),
               ),
@@ -864,4 +814,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     )
     );
   }
+
+
+
+
 }

@@ -10,6 +10,7 @@ import 'package:driverbooking/Bloc/App_Bloc.dart';
 import 'package:driverbooking/Bloc/AppBloc_Events.dart';
 import 'package:driverbooking/Bloc/AppBloc_State.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 
 class TripDetailsPreview extends StatefulWidget {
@@ -134,7 +135,16 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
       },
     );
   }
+  String setFormattedDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return "Not available"; // Handle null case
 
+    try {
+      DateTime parsedDate = DateTime.parse(dateStr); // Parse the date from DB
+      return DateFormat('dd-MM-yyyy').format(parsedDate); // Format to dd/MM/yyyy
+    } catch (e) {
+      return "Invalid date"; // Handle errors
+    }
+  }
 
 
 
@@ -192,8 +202,10 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
           vehicleTypeController.text = state.tripDetails['vehType'].toString() ?? '';
           startKmController.text = state.tripDetails['startkm'].toString() ?? '';
           closeKmController.text = state.tripDetails['closekm'].toString() ?? '';
-          startDateController.text = state.tripDetails['startdate'].toString() ?? '';
-          closeDateController.text = state.tripDetails['closedate'].toString() ?? '';
+          // startDateController.text = state.tripDetails['startdate'].toString() ?? '';
+          startDateController.text = setFormattedDate(state.tripDetails['startdate'].toString()) ?? '';
+          closeDateController.text = setFormattedDate(state.tripDetails['closedate'].toString()) ?? '';
+          // closeDateController.text = state.tripDetails['closedate'].toString() ?? '';
         });
         print('Trip details guest: ${state.tripDetails}');
       }else if(state is TripDetailsByTripIdError){

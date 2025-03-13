@@ -221,6 +221,28 @@ router.post('/insertStartData', (req, res) => {
 router.post('/insertReachedData', (req, res) => {
     console.log("📢 Received request at /insertReachedData");
     console.log("📝 Request Body:", req.body);
+    const { vehicleno, latitudeloc, longitutdeloc, Trip_id, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at } = req.body;
+
+        console.log('vengy');
+
+        // Query to check if the trip status is already 'Reached'
+        const sqlReachedQuery = "SELECT * FROM VehicleAccessLocation WHERE Trip_id = ? AND Trip_Status = 'Reached'";
+
+        db.query(sqlReachedQuery, [Trip_id], (err, reachedresult) => {
+            if (err) {
+                console.log("Error checking trip status:", err);
+                return res.status(500).send({ message: "Database error while checking trip status." });
+            }
+
+            console.log(reachedresult, "reachhhhhhhhhhhhhhhh");
+
+            // If trip status is already 'Reached', do not insert
+            if (reachedresult.length > 0) {
+                return res.status(200).send({ message: "Trip already marked as 'Reached'. No further insertion required." });
+            }
+
+
+
 
     const insertUserSql = `
         INSERT INTO VehicleAccessLocation
@@ -242,7 +264,7 @@ router.post('/insertReachedData', (req, res) => {
     ];
 
     console.log("📌 Query to be executed:", insertUserSql);
-    console.log("📊 Query Values:", values);
+    console.log("📊 Query Valuess:", values);
 
     db.query(insertUserSql, values, (error, result) => {
         if (error) {
@@ -254,10 +276,11 @@ router.post('/insertReachedData', (req, res) => {
         res.status(200).send({ message: "Reached successfully." });
     });
 });
+});
 
 
 router.post('/insertWayPointData', (req, res) => {
-    console.log("📢 Received request at /insertReachedData");
+    console.log("📢 Received request at /insertReachedData for way point");
     console.log("📝 Request Body:", req.body);
 
     const insertUserSql = `
