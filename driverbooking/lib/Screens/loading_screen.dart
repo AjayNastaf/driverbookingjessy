@@ -54,16 +54,16 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
                 ),
               ),
             ),
-            const SizedBox(height: 30),
-            const Text(
-              "Welcome to Nastaf",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 20),
+            // const SizedBox(height: 30),
+            // const Text(
+            //   "Welcome to Nastaf",
+            //   style: TextStyle(
+            //     fontSize: 24,
+            //     fontWeight: FontWeight.bold,
+            //     color: Colors.black54,
+            //   ),
+            // ),
+            // const SizedBox(height: 20),
             const CircularProgressIndicator(
               color: Colors.green, // Adjusted to match theme colors.
               strokeWidth: 3,
