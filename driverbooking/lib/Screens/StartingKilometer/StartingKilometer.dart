@@ -314,16 +314,8 @@ class _StartingKilometerState extends State<StartingKilometer> {
           ),
         );
 
-
-
-
-
   },
   ),
-
-
-
-
 
           ],
         ),

@@ -41,7 +41,11 @@ class _SignatureendrideState extends State<Signatureendride> {
     _signatureController.onDrawEnd = () async {
       if (_signatureController.isNotEmpty) {
         final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
-        final String signTime = TimeOfDay.now().format(context);
+        // final String signTime = TimeOfDay.now().format(context);
+        final DateTime now = DateTime.now();
+        final String signTime = '${now.hour.toString().padLeft(2, '0')}:'
+            '${now.minute.toString().padLeft(2, '0')}:'
+            '${now.second.toString().padLeft(2, '0')}';
 
         try {
           await ApiService.sendSignatureDetails(
@@ -240,7 +244,11 @@ class _SignatureendrideState extends State<Signatureendride> {
         listener: (context, state) {
       if (state is SaveSignatureSuccess) {
         final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
-        final String signTime = TimeOfDay.now().format(context);
+        // final String signTime = TimeOfDay.now().format(context);
+        final DateTime now = DateTime.now();
+        final String signTime = '${now.hour.toString().padLeft(2, '0')}:'
+            '${now.minute.toString().padLeft(2, '0')}:'
+            '${now.second.toString().padLeft(2, '0')}';
 
         // Dispatch second API call after first one succeeds
         BlocProvider.of<TripSignatureBloc>(context).add(

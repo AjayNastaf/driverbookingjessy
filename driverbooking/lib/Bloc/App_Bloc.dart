@@ -705,9 +705,12 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
           DateTime.now().toIso8601String().split('T')[1].split('.')[0];
 
       // final String signTime = TimeOfDay.now().format(DateTime.now().hour);
-      final TimeOfDay now = TimeOfDay.now();
-      final String signTime = "${now.hour}:${now.minute}"; // Simple fallback formatting
-
+      // final TimeOfDay now = TimeOfDay.now();
+      // final String signTime = "${now.hour}:${now.minute}"; // Simple fallback formatting
+      final DateTime now = DateTime.now();
+      final String signTime = '${now.hour.toString().padLeft(2, '0')}:'
+          '${now.minute.toString().padLeft(2, '0')}:'
+          '${now.second.toString().padLeft(2, '0')}';
 
       await ApiService.sendSignatureDetails(
         tripId: event.tripId,

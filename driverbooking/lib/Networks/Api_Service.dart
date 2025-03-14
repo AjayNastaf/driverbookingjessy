@@ -1039,7 +1039,7 @@ class ApiService {
           var responseBody = await response1.stream.bytesToString();
 
           print("Full API Response: ${response1.statusCode} - $responseBody");
-          print('${response1},insie api url');
+          print('${response1},insiee api url');
           print('${responseBody},insie api url');
           if (response1.statusCode == 200) {
             print("success for starting to upload filee: ${response1.statusCode}");

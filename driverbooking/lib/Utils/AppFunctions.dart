@@ -148,6 +148,98 @@ Widget buildSection(
 }
 
 
+
+// Widget buildSection(
+//     BuildContext context, {
+//       required String title,
+//       required String dateTime,
+//       required String buttonText,
+//       required VoidCallback onTap,
+//     }) {
+//   // Determine button color based on buttonText value
+//   Color buttonColor;
+//   switch (buttonText.toLowerCase()) {
+//     case "waiting":
+//       buttonColor = Colors.orange;
+//       break;
+//     case "accept":
+//       buttonColor = Colors.green;
+//       break;
+//     case "on_going":
+//       buttonColor = Colors.red;
+//       break;
+//     default:
+//       buttonColor = Colors.blue; // Default color if no match
+//   }
+//
+//   return GestureDetector(
+//     onTap: onTap,
+//     child: Container(
+//       margin: EdgeInsets.only(bottom: 16.0),
+//       padding: EdgeInsets.all(16.0),
+//       decoration: BoxDecoration(
+//         color: Colors.white,
+//         borderRadius: BorderRadius.circular(12.0),
+//         boxShadow: [
+//           BoxShadow(
+//             color: Colors.black12,
+//             blurRadius: 6.0,
+//             offset: Offset(0, 2),
+//           ),
+//         ],
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Text(
+//             title,
+//             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+//           ),
+//           Divider(thickness: 1, color: Colors.grey.shade300),
+//           Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Text(
+//                 dateTime,
+//                 style: TextStyle(color: Colors.grey, fontSize: 14.0),
+//               ),
+//               ElevatedButton(
+//                 onPressed: () {},
+//                 style: ElevatedButton.styleFrom(
+//                   backgroundColor: buttonColor,
+//                   foregroundColor: Colors.white,
+//                   shape: RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.circular(20.0),
+//                   ),
+//                 ),
+//                 child: Text(buttonText),
+//               ),
+//             ],
+//           ),
+//         ],
+//       ),
+//     ),
+//   );
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //profile page
 Widget buildTextField(String label, TextEditingController controller, {bool obscureText = false}) {
   return TextField(

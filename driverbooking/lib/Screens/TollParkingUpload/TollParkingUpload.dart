@@ -261,14 +261,10 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
       return;
     }
 
-    if (tollFile == null) {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('Please upload a file or take a photo for Toll.')),
-      // );
-      showWarningSnackBar(context, 'Please upload a file or take a photo for Toll.');
-
-      return;
-    }
+    // if (tollFile == null) {
+    //   showWarningSnackBar(context, 'Please upload a file or take a photo for Toll.');
+    //   return;
+    // }
 
     if (parkingController.text.isEmpty) {
       // ScaffoldMessenger.of(context).showSnackBar(
@@ -279,14 +275,12 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
       return;
     }
 
-    if (parkingFile == null) {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('Please upload a file or take a photo for Parking.')),
-      // );
-      showWarningSnackBar(context, 'Please upload a file or take a photo for Parking.');
-
-      return;
-    }
+    // if (parkingFile == null) {
+    //
+    //   showWarningSnackBar(context, 'Please upload a file or take a photo for Parking.');
+    //
+    //   return;
+    // }
 
 
     context.read<TollParkingDetailsBloc>().add(UpdateTollParking(
@@ -308,7 +302,8 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
         tollFile: tollFile!,
       ));
     }
-    if ((parkingController.text.isNotEmpty) && (tollController.text.isNotEmpty) && (tollFile != null) && (parkingFile != null)) {
+    // if ((parkingController.text.isNotEmpty) && (tollController.text.isNotEmpty) && (tollFile != null) && (parkingFile != null)) {
+    if ((parkingController.text.isNotEmpty) && (tollController.text.isNotEmpty)) {
       _loadLoginDetails();
     }
 
@@ -551,7 +546,8 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
                     ),
                   ),
                 ),
-              )            ],
+              )
+            ],
           ),
         ),
       ),

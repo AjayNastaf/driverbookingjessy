@@ -726,7 +726,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         tripId: widget.tripId,
         dateSignature: dateSignature,
         signTime: signTime,
-        status: "Accept",
+        status: "Accepting",
       );
 
       ScaffoldMessenger.of(context).showSnackBar(

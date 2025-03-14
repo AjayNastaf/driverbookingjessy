@@ -7,7 +7,9 @@ router.get('/tripsheet/:username', async (req, res) => {
   const username = req.params.username;
   console.log(username, "ajay90")
   try {
-    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "waiting"';
+//    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "waiting" ';
+    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept")';
+
     db.query(query, [username], (err, results) => {
       if (err) {
         res.status(500).json({ message: 'Internal server error' });

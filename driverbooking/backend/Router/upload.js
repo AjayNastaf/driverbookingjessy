@@ -65,18 +65,19 @@ router.post('/uploadsdriverapp/:data', upload.single('file'), (req, res) => {
     const documenttypedata=req.body.documenttype
     // const data=req.body.datadate;
     console.log(req.file,"fff")
+
     const fileData = {
         name: req.file.originalname,
         mimetype: req.file.mimetype,
         size: req.file.size,
         path: req.file.path.replace(/\\/g, '/').replace(/^uploads\//, ''),
         tripid: selecteTripid,
-        documenttype:documenttypedata
+        documenttype:documenttypedata,
     };
 
     console.log(req.file,"dadadate233233")
     console.log(documenttypedata,"dooocccc")
-    console.log(fileData,selecteTripid,"data")
+    console.log(fileData,selecteTripid,"dataaaaaaaaaaaaaaaaa")
     const updateQuery = 'INSERT INTO tripsheetupload SET ?';
     db.query(updateQuery, [fileData], (err, results) => {
         if (err) {
@@ -87,6 +88,11 @@ router.post('/uploadsdriverapp/:data', upload.single('file'), (req, res) => {
     });
 });
 //end tripsheet file upload
+
+
+
+
+
 // updating trip toll and parking
 router.post('/update_updatetrip', (req, res) => {
     const { toll, parking, tripid } = req.body;
