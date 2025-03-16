@@ -820,7 +820,6 @@ class ApiService {
   }) async {
     try {
       // Generate the unique filename based on the current date
-      // String formattedDate = DateFormat('yyyyMMdd_HHmmssSSSZ').format(DateTime.now());
       String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
       // String fileName = 'file_$formattedDate.jpg';
 
@@ -840,7 +839,7 @@ class ApiService {
 
       if (response.statusCode == 200) {
         try {
-          String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+          // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
 
           var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
           var request = http.MultipartRequest('POST', uri);
@@ -888,7 +887,6 @@ class ApiService {
   }) async {
     try {
       // Generate the unique filename based on the current date
-      // String formattedDate = DateFormat('yyyyMMdd_HHmmssSSSZ').format(DateTime.now());
       String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
       // String fileName = 'file_$formattedDate.jpg';
 
@@ -910,8 +908,7 @@ class ApiService {
 
         try {
           // Generate the unique filename based on the current date
-          // String formattedDate = DateFormat('yyyyMMdd_HHmmssSSSZ').format(DateTime.now());
-          String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
+          // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
           // String fileName = 'file_$formattedDate.jpg';
 
           var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
@@ -1002,7 +999,7 @@ class ApiService {
       print('insie api url');
       // Generate the unique filename based on the current date
       String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
-
+      print("formattedDate: ${formattedDate}");
       var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
       var request = http.MultipartRequest('POST', uri);
 
@@ -1022,7 +1019,8 @@ class ApiService {
         try {
           print('insie api url');
           // Generate the unique filename based on the current date
-          String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+          // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+          print("formattedDate1: ${formattedDate}");
 
           var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
           var request = http.MultipartRequest('POST', uri);
@@ -1039,8 +1037,8 @@ class ApiService {
           var responseBody = await response1.stream.bytesToString();
 
           print("Full API Response: ${response1.statusCode} - $responseBody");
-          print('${response1},insiee api url');
-          print('${responseBody},insie api url');
+          print('${response1},insiee api urlll');
+          print('${responseBody},insie api urlll');
           if (response1.statusCode == 200) {
             print("success for starting to upload filee: ${response1.statusCode}");
 
@@ -1094,7 +1092,7 @@ class ApiService {
 
         try {
           // Generate the unique filename based on the current date
-          String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+          // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
 
           var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
           var request = http.MultipartRequest('POST', uri);
@@ -1829,7 +1827,25 @@ class ApiService {
 
 
 
+  // Function to fetch all uploads by trip ID
+  static Future<List<Map<String, dynamic>>?> fetchUploadsByTripId(String tripId) async {
+    final Uri apiUrl = Uri.parse('${AppConstants.baseUrl}/getAllUploadsByTripId?tripid=$tripId');
 
+    try {
+      final response = await http.get(apiUrl);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return List<Map<String, dynamic>>.from(data['uploads']); // Extracting the uploads list
+      } else {
+        print('Failed to load uploads: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching uploads: $e');
+      return null;
+    }
+  }
 
 
 

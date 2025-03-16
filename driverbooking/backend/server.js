@@ -789,6 +789,71 @@ app.get('/uploads', (req, res) => {
   });
 });
 
+
+app.get('/uploads', (req, res) => {
+  const { tripid } = req.query;
+  const selectQuery = 'SELECT path FROM tripsheetupload WHERE tripid = ?  And documenttype  not in ("startkm","closekm")';
+
+  db.query(selectQuery, [tripid], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Internal server error' });
+    if (results.length === 0) return res.status(404).json({ message: 'No uploads found' });
+
+    const attachedImagePaths = results.map(result => result.path);
+    res.status(200).json({ attachedImagePaths });
+  });
+});
+
+
+
+app.get('/uploadsfordocumenttype', (req, res) => {
+  const { tripid,documenttype} = req.query;
+  const selectQuery = 'SELECT path FROM tripsheetupload WHERE tripid = ? and documenttype = ?';
+
+  db.query(selectQuery, [tripid,documenttype], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Internal server error' });
+    if (results.length === 0) return res.status(404).json({ message: 'No uploads found' });
+
+    const attachedImagePaths = results.map(result => result.path);
+    res.status(200).json({ attachedImagePaths });
+  });
+});
+
+
+
+app.get('/getAllUploadsByTripId', (req, res) => {
+  const { tripid } = req.query;
+
+  if (!tripid) {
+    return res.status(400).json({ message: 'Trip ID is required' });
+  }
+
+  const selectQuery = 'SELECT * FROM tripsheetupload WHERE tripid = ?';
+
+  db.query(selectQuery, [tripid], (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Internal server error', error: err });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No uploads found' });
+    }
+
+    res.status(200).json({ uploads: results });
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //local
 //app.listen(3001, () => {
 //  console.log("Server started on port 3000");

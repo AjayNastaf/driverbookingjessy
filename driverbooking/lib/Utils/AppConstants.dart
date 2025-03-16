@@ -14,13 +14,14 @@ class AppConstants {  // only use asset
   static const String navigation = 'assets/image/navigation.png';
 
 
-//aws
-//   static const String baseUrl = "http://75.101.215.49:7002";
 
   //local
-  // static const String baseUrl = "http://192.168.100.105:3001";
+  // static const String baseUrl = "http://192.168.96.251:3001";
+
+
+
   static const String baseUrlJessyCabs = "https://jessycabs.com:54462";
-  // static const String baseUrlJessyCabs = "http://192.168.100.105:8081";
+  // static const String baseUrlJessyCabs = "http://192.168.96.251:8081";
 
 
   //jessycabs
