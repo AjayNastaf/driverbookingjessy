@@ -381,6 +381,15 @@ class _TrackingPageState extends State<TrackingPage> {
 
     );
 
+    if (success) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Customerlocationreached(tripId: tripId!),
+        ),
+      );
+    }
+
 
 
     showInfoSnackBar(context, "Trip started status updated!");
@@ -510,12 +519,12 @@ class _TrackingPageState extends State<TrackingPage> {
       if (response.statusCode == 200) {
         print('Status updated successfully ongoing');
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Customerlocationreached(tripId: tripId!),
-          ),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => Customerlocationreached(tripId: tripId!),
+        //   ),
+        // );
         // Stop location tracking before navigating
         _locationSubscription?.cancel();
       } else {
@@ -552,7 +561,7 @@ class _TrackingPageState extends State<TrackingPage> {
       showInfoSnackBar(context, 'Trip started');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Location not available yet!")),
+        SnackBar(content: Text("Location not available yet! Please Wait")),
       );
       showWarningSnackBar(context, "Location not available yet!");
     }
@@ -624,7 +633,8 @@ class _TrackingPageState extends State<TrackingPage> {
                       markerId: MarkerId('currentLocation'),
                       position: _currentLatLng!,
                       icon: BitmapDescriptor.defaultMarkerWithHue(
-                          BitmapDescriptor.hueBlue),
+                          // BitmapDescriptor.hueBlue),
+                          BitmapDescriptor.hueGreen),
                     ),
                     Marker(
                       markerId: MarkerId('destination'),

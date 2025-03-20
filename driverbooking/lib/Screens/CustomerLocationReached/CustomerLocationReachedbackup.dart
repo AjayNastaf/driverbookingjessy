@@ -680,7 +680,11 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                 Marker(
                   markerId: MarkerId('currentLocation'),
                   position: _currentLatLng!,
-                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                      BitmapDescriptor.hueGreen
+                      // BitmapDescriptor.hueBlue
+
+                  ),
 
                 ),
                 Marker(
