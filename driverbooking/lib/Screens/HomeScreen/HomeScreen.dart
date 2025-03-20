@@ -1,21 +1,21 @@
-// import 'package:driverbooking/Screens/BookingDetails/BookingDetails.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/History/History.dart';
+// import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/History/History.dart';
 // import 'package:flutter/material.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:location/location.dart';
-// import 'package:driverbooking/Screens/DestinationLocation/DestinationLocationScreen.dart';
-// import 'package:driverbooking/Screens/LoginScreen/Login_Screen.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/Contacts/ContactScreen.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/Faq/FaqScreen.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/Notifications/NotificationScreen.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/ReferFriends/ReferFriendScreen.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/RideScreen/RideScreen.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/Wallet/WalletScreen.dart';
-// import 'package:driverbooking/Screens/OtpScreen/OtpScreen.dart';
-// import 'package:driverbooking/Utils/AllImports.dart';
-// import 'package:driverbooking/Networks/Api_Service.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/Profile/profile.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/Settings/Settings.dart';
+// import 'package:jessy_cabs/Screens/DestinationLocation/DestinationLocationScreen.dart';
+// import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/Contacts/ContactScreen.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/Faq/FaqScreen.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/Notifications/NotificationScreen.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/ReferFriends/ReferFriendScreen.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/RideScreen/RideScreen.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/Wallet/WalletScreen.dart';
+// import 'package:jessy_cabs/Screens/OtpScreen/OtpScreen.dart';
+// import 'package:jessy_cabs/Utils/AllImports.dart';
+// import 'package:jessy_cabs/Networks/Api_Service.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/Profile/profile.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/Settings/Settings.dart';
 //
 // class Homescreen extends StatefulWidget {
 //   final String userId;
@@ -287,25 +287,30 @@
 //   }
 // }
 
-import 'dart:convert';
 
-import 'package:driverbooking/Bloc/AppBloc_State.dart';
-import 'package:driverbooking/Bloc/App_Bloc.dart';
-import 'package:driverbooking/Bloc/AppBloc_Events.dart';
-import 'package:driverbooking/Screens/BookingDetails/BookingDetails.dart';
-import 'package:driverbooking/Screens/LoginScreen/Login_Screen.dart';
-import 'package:driverbooking/Screens/MenuListScreens/Contacts/ContactScreen.dart';
-import 'package:driverbooking/Screens/MenuListScreens/Faq/FaqScreen.dart';
-import 'package:driverbooking/Screens/MenuListScreens/History/History.dart';
-import 'package:driverbooking/Screens/MenuListScreens/Notifications/NotificationScreen.dart';
-import 'package:driverbooking/Screens/MenuListScreens/Profile/profile.dart';
-import 'package:driverbooking/Screens/MenuListScreens/ReferFriends/ReferFriendScreen.dart';
-import 'package:driverbooking/Screens/MenuListScreens/RideScreen/RideScreen.dart';
-import 'package:driverbooking/Screens/MenuListScreens/Settings/Settings.dart';
-import 'package:driverbooking/Screens/MenuListScreens/Wallet/WalletScreen.dart';
+
+
+
+
+
+
+import 'dart:convert';
+import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
+import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
+import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/Contacts/ContactScreen.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/Faq/FaqScreen.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/Notifications/NotificationScreen.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/Profile/profile.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/ReferFriends/ReferFriendScreen.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/RideScreen/RideScreen.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/Settings/Settings.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/Wallet/WalletScreen.dart';
 import 'package:flutter/material.dart';
-import 'package:driverbooking/Networks/Api_Service.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/Networks/Api_Service.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
 
@@ -538,6 +543,39 @@ class _HomescreenState extends State<Homescreen> {
   //     print('Error fetching user details: $e');
   //   }
   // }
+
+
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent closing by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Logout Confirmation"),
+          content: const Text("Do you really want to log out?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the popup
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the popup
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Login_Screen()),
+                );
+              },
+              child: const Text("Yes", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
 
   @override
@@ -842,14 +880,14 @@ class _HomescreenState extends State<Homescreen> {
           //     Navigator.push(context, MaterialPageRoute(builder: (context)=>Notificationscreen()));
           //   },
           // ),
-          ListTile(
-            leading: Icon(Icons.group_add),
-            title: Text('Invite Friends'),
-            onTap: () {
-              // Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>ReferFriendScreen()));
-            },
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.group_add),
+          //   title: Text('Invite Friends'),
+          //   onTap: () {
+          //     // Navigator.pop(context);
+          //     Navigator.push(context, MaterialPageRoute(builder: (context)=>ReferFriendScreen()));
+          //   },
+          // ),
           // ListTile(
           //   leading: Icon(Icons.help_outline),
           //   title: Text("Faq's"),
@@ -864,14 +902,28 @@ class _HomescreenState extends State<Homescreen> {
           //     Navigator.push(context, MaterialPageRoute(builder: (context)=>Contactscreen()));
           //   },
           // ),
-          ListTile(
-            leading: Icon(Icons.supervised_user_circle_rounded),
-            title: Text('History'),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>History(userId: widget.userId,username: widget.username,tripSheetData: tripSheetData, // Pass tripSheetData to History
-              )));
-            },
-          ),
+
+
+
+
+
+
+
+
+
+          // ListTile(
+          //   leading: Icon(Icons.supervised_user_circle_rounded),
+          //   title: Text('History'),
+          //   onTap: () {
+          //     Navigator.push(context, MaterialPageRoute(builder: (context)=>History(userId: widget.userId,username: widget.username,tripSheetData: tripSheetData, // Pass tripSheetData to History
+          //     )));
+          //   },
+          // ),
+
+
+
+
+
           // ListTile(
           //   leading: Icon(Icons.settings),
           //   title: Text('Settings'),
@@ -888,9 +940,12 @@ class _HomescreenState extends State<Homescreen> {
           ListTile(
             leading: Icon(Icons.logout),
             title: Text('Logout'),
+            // onTap: () {
+            //   Navigator.pop(context);
+            //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Login_Screen()));
+            // },
             onTap: () {
-              Navigator.pop(context);
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Login_Screen()));
+              _showLogoutDialog(context);
             },
           ),
             // Other drawer items...

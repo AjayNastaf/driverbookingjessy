@@ -1,14 +1,14 @@
-import 'package:driverbooking/Screens/TripDetailsUpload/TripDetailsUpload.dart';
+import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:math' as math;
 import 'package:dio/dio.dart';
-import 'package:driverbooking/GlobalVariable/global_variable.dart' as globals;
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/GlobalVariable/global_variable.dart' as globals;
+import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'dart:async';
 
 class Customerlocationreached extends StatefulWidget {
@@ -174,7 +174,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
       if (isRideStopped == true) {
         print("Successsss Ajay");
         print("object");
-        saveWayPointLocationCustomer(latitude, longitude);
+        // saveWayPointLocationCustomer(latitude, longitude);
         return;
       }
 
@@ -564,7 +564,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                           child: Row(
                             children: [
                               Container(
-                                width: MediaQuery.of(context).size.width * 0.5, // 70% of screen width
+                                // width: MediaQuery.of(context).size.width * 0.5, // 70% of screen width
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -590,133 +590,137 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
                               SizedBox(width: 30.0,),
 
-                              Center(
-                                child: Container(
-                                  width: 100,
-                                  height: 100,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.green, width: 6), // Circular Border
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    _formatTime(_milliseconds),
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green,
-                                      fontFamily: "Digital",
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              // Center(
+                              //   child: Container(
+                              //     width: 100,
+                              //     height: 100,
+                              //     decoration: BoxDecoration(
+                              //       shape: BoxShape.circle,
+                              //       border: Border.all(color: Colors.green, width: 6), // Circular Border
+                              //     ),
+                              //     alignment: Alignment.center,
+                              //     child: Text(
+                              //       _formatTime(_milliseconds),
+                              //       style: TextStyle(
+                              //         fontSize: 20,
+                              //         fontWeight: FontWeight.bold,
+                              //         color: Colors.green,
+                              //         fontFamily: "Digital",
+                              //       ),
+                              //     ),
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 20.0,),
-                    if (!isRideStopped)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isRideStopped = true; // Hide Stop, Show Start
-                              // Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
-                            });
-                            _startStopwatch();
-                            isStartWayPointClicked = true; // Set flag to true when button is clicked
 
 
-                            Future.delayed(Duration(seconds: 1), () {
-                              isStartWayPointClicked = false;
-                              print("🔄 End Ride button reset, can be clicked again.");
-                            });
-
-                            // Call the function to save location with updated status
-                            if (_currentLatLng != null) {
-                              // _handleWaypointStartingStatus(_currentLatLng!.latitude, _currentLatLng!.longitude);
-                              _handleWaypointStartingStatusB(_currentLatLng!.latitude, _currentLatLng!.longitude);
-
-                              saveWayPointLocationCustomer(
-                                _currentLatLng!.latitude,
-                                _currentLatLng!.longitude,
-                              );
-                            } else {
-                              print("Error: _currentLatLng is null");
-                            }
-
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'Stop Ride',
-                            style: TextStyle(fontSize: 20.0, color: Colors.white),
-                          ),
-                        ),
-                      ),
-
-                    // Start Ride Button (Shown after Stop Ride is clicked)
-                    if (isRideStopped)
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isRideStopped = false; // Hide Stop, Show Start
-                              Statusvalue = 'On_Going'; // Set Trip_Status to "waypoint"
-                            });
-                            _stopStopwatch();
-                            isCloseWayPointClicked = true; // Set flag to true when button is clicked
 
 
-                            Future.delayed(Duration(seconds: 1), () {
-                              isCloseWayPointClicked = false;
-                              print("🔄 End Ride button reset, can be clicked again.");
-                            });
-
-
-                            // Call the function to save location with updated status
-                            if (_currentLatLng != null) {
-
-                              // _handleWaypointCompletedStatus(
-                              // _currentLatLng!.latitude,
-                              // _currentLatLng!.longitude,
-                              // );
-
-                              _handleWaypointCompletedStatusB(
-                              _currentLatLng!.latitude,
-                              _currentLatLng!.longitude,
-                              );
-
-                              _saveLocationToDatabaseCustomer(
-                                _currentLatLng!.latitude,
-                                _currentLatLng!.longitude,
-                              );
-                            } else {
-                              print("Error: _currentLatLng is null");
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: Text(
-                            'Start Ride',
-                            style: TextStyle(fontSize: 20.0, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    SizedBox(height: 20.0,),
+                    // SizedBox(height: 20.0,),
+                    // if (!isRideStopped)
+                    //   SizedBox(
+                    //     width: double.infinity,
+                    //     child: ElevatedButton(
+                    //       onPressed: () {
+                    //         setState(() {
+                    //           isRideStopped = true; // Hide Stop, Show Start
+                    //           // Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
+                    //         });
+                    //         _startStopwatch();
+                    //         isStartWayPointClicked = true; // Set flag to true when button is clicked
+                    //
+                    //
+                    //         Future.delayed(Duration(seconds: 1), () {
+                    //           isStartWayPointClicked = false;
+                    //           print("🔄 End Ride button reset, can be clicked again.");
+                    //         });
+                    //
+                    //         // Call the function to save location with updated status
+                    //         if (_currentLatLng != null) {
+                    //           // _handleWaypointStartingStatus(_currentLatLng!.latitude, _currentLatLng!.longitude);
+                    //           _handleWaypointStartingStatusB(_currentLatLng!.latitude, _currentLatLng!.longitude);
+                    //
+                    //           saveWayPointLocationCustomer(
+                    //             _currentLatLng!.latitude,
+                    //             _currentLatLng!.longitude,
+                    //           );
+                    //         } else {
+                    //           print("Error: _currentLatLng is null");
+                    //         }
+                    //
+                    //       },
+                    //       style: ElevatedButton.styleFrom(
+                    //         backgroundColor: Colors.deepPurple,
+                    //         padding: EdgeInsets.symmetric(vertical: 16),
+                    //         shape: RoundedRectangleBorder(
+                    //           borderRadius: BorderRadius.circular(8),
+                    //         ),
+                    //       ),
+                    //       child: Text(
+                    //         'Stop Ride',
+                    //         style: TextStyle(fontSize: 20.0, color: Colors.white),
+                    //       ),
+                    //     ),
+                    //   ),
+                    //
+                    // // Start Ride Button (Shown after Stop Ride is clicked)
+                    // if (isRideStopped)
+                    //   SizedBox(
+                    //     width: double.infinity,
+                    //     child: ElevatedButton(
+                    //       onPressed: () {
+                    //         setState(() {
+                    //           isRideStopped = false; // Hide Stop, Show Start
+                    //           Statusvalue = 'On_Going'; // Set Trip_Status to "waypoint"
+                    //         });
+                    //         _stopStopwatch();
+                    //         isCloseWayPointClicked = true; // Set flag to true when button is clicked
+                    //
+                    //
+                    //         Future.delayed(Duration(seconds: 1), () {
+                    //           isCloseWayPointClicked = false;
+                    //           print("🔄 End Ride button reset, can be clicked again.");
+                    //         });
+                    //
+                    //
+                    //         // Call the function to save location with updated status
+                    //         if (_currentLatLng != null) {
+                    //
+                    //           // _handleWaypointCompletedStatus(
+                    //           // _currentLatLng!.latitude,
+                    //           // _currentLatLng!.longitude,
+                    //           // );
+                    //
+                    //           _handleWaypointCompletedStatusB(
+                    //           _currentLatLng!.latitude,
+                    //           _currentLatLng!.longitude,
+                    //           );
+                    //
+                    //           _saveLocationToDatabaseCustomer(
+                    //             _currentLatLng!.latitude,
+                    //             _currentLatLng!.longitude,
+                    //           );
+                    //         } else {
+                    //           print("Error: _currentLatLng is null");
+                    //         }
+                    //       },
+                    //       style: ElevatedButton.styleFrom(
+                    //         backgroundColor: Colors.green,
+                    //         padding: EdgeInsets.symmetric(vertical: 16),
+                    //         shape: RoundedRectangleBorder(
+                    //           borderRadius: BorderRadius.circular(8),
+                    //         ),
+                    //       ),
+                    //       child: Text(
+                    //         'Start Ride',
+                    //         style: TextStyle(fontSize: 20.0, color: Colors.white),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // SizedBox(height: 20.0,),
 
 
 

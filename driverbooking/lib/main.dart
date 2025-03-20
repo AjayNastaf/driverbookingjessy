@@ -1,8 +1,8 @@
-// import 'package:driverbooking/Screens/HomeScreen/HomeScreen.dart';
+// import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
 // import 'package:flutter/material.dart';
 // import 'package:sizer/sizer.dart';
-// import 'package:driverbooking/Screens/HomeScreen/MapScreen.dart';
-// import 'package:driverbooking/Screens/IntroScreens/IntroScreenMain.dart';
+// import 'package:jessy_cabs/Screens/HomeScreen/MapScreen.dart';
+// import 'package:jessy_cabs/Screens/IntroScreens/IntroScreenMain.dart';
 // import './Screens/SplashScreen.dart';
 // import './Screens/Home.dart';
 // import './Screens/LoginScreen/Login_Screen.dart';
@@ -69,17 +69,17 @@
 
 
 
-import 'package:driverbooking/Screens/BookingDetails/BookingDetails.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
-import 'package:driverbooking/Screens/SplashScreen.dart';
-import 'package:driverbooking/Screens/Home.dart';
-import 'package:driverbooking/Screens/LoginScreen/Login_Screen.dart';
-import 'package:driverbooking/Bloc/App_Bloc.dart';
-import 'package:driverbooking/Networks/Api_Service.dart';// Import your Bloc file
-import 'package:driverbooking/Utils/AppConstants.dart';// Import your Bloc file
+import 'package:jessy_cabs/Screens/SplashScreen.dart';
+import 'package:jessy_cabs/Screens/Home.dart';
+import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
+import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+import 'package:jessy_cabs/Networks/Api_Service.dart';// Import your Bloc file
+import 'package:jessy_cabs/Utils/AppConstants.dart';// Import your Bloc file
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -126,7 +126,10 @@ void main() {
         BlocProvider(create: (context) => FetchFilteredRidesBloc()),
         BlocProvider(create: (context) => ProfileBloc()),
         BlocProvider(create: (context) => TripTrackingDetailsBloc()),
+        BlocProvider(create: (context) => TripClosedTodayBloc(apiService)),
 
+        BlocProvider(create: (context) => DocumentImagesBloc(
+            apiService: ApiService(apiUrl: "${AppConstants.baseUrl}"))),
 
 
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:driverbooking/Screens/Home.dart';
-import 'package:driverbooking/Screens/LoginScreen/Login_Screen.dart';
+import 'package:jessy_cabs/Screens/Home.dart';
+import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
 import '../../Networks/Api_Service.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:driverbooking/Bloc/AppBloc_Events.dart';
-import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Networks/Api_Service.dart';
 import 'dart:math';
 import 'dart:convert';
 import 'dart:io';  // Add this import to access the 'File' class.
 import 'package:http/http.dart' as http;
-import 'package:driverbooking/Utils/AppConstants.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/Utils/AppConstants.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
 import '../Screens/CustomerLocationReached/CustomerLocationReached.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
@@ -1360,3 +1360,67 @@ Future<void> _onEndingWayPoint(
 //trip tracking way point reached bloc completed (tracking, customer location reached page)
 
 
+
+
+
+
+
+class TripClosedTodayBloc extends Bloc<TripClosedTodayEvent, TripClosedTodayState> {
+  final ApiService apiService;
+
+  TripClosedTodayBloc(this.apiService) : super(TripClosedTodayInitial()) {
+    on<FetchTripClosedToday>(_onFetchTripClosedToday);
+  }
+
+  Future<void> _onFetchTripClosedToday(
+      FetchTripClosedToday event, Emitter<TripClosedTodayState> emit) async {
+    emit(TripClosedTodayLoading());
+    print('inside in the bloc');
+
+    try {
+      final trips = await apiService.fetchClosedTrips(event.username);
+      emit(TripClosedTodayLoaded(trips));
+      print('success in the bloc');
+    } catch (e) {
+      emit(TripClosedTodayError(e.toString()));
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+class DocumentImagesBloc extends Bloc<DocumentImagesEvent, DocumentImagesState> {
+  final ApiService apiService;
+
+  DocumentImagesBloc({required this.apiService}) : super(DocumentImagesInitial()) {
+    on<FetchBothDocumentImages>(_fetchBothImages);
+  }
+
+  Future<void> _fetchBothImages(FetchBothDocumentImages event, Emitter<DocumentImagesState> emit) async {
+    emit(DocumentImagesLoading());
+    try {
+      final startKmImage = await apiService.fetchSingleDocumentImage(event.tripId, "StartingKm");
+      final closingKmImage = await apiService.fetchSingleDocumentImage(event.tripId, "ClosingKm");
+
+      print("🖼 Start KM Image URL: $startKmImage");
+      print("🖼 Closing KM Image URL: $closingKmImage");
+
+      emit(DocumentImagesLoaded(
+        startKmImage: startKmImage != null ? "${AppConstants.baseUrl}/uploads/$startKmImage" : null,
+        closingKmImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$closingKmImage" : null,
+      ));
+
+
+      // emit(DocumentImagesLoaded(startKmImage: '${AppConstants.baseUrl}/uploads/startKmImage', closingKmImage: '${AppConstants.baseUrl}/uploads/closingKmImage'));
+    } catch (e) {
+      print("🚨 Error in BLoC: $e");
+      emit(DocumentImagesError(error: e.toString()));
+    }
+  }
+}

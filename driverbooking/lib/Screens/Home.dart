@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:driverbooking/Screens/ListScreen/listviewpage.dart';
-import 'package:driverbooking/Screens/LoginScreen/Login_Screen.dart';
-import 'package:driverbooking/Utils/AppStyles.dart';
+import 'package:jessy_cabs/Screens/ListScreen/listviewpage.dart';
+import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
+import 'package:jessy_cabs/Utils/AppStyles.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

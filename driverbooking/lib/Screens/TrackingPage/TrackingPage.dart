@@ -1,6 +1,6 @@
-import 'package:driverbooking/Screens/CustomerLocationReached/CustomerLocationReached.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
-import 'package:driverbooking/Utils/AppTheme.dart';
+import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
+import 'package:jessy_cabs/Utils/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -8,9 +8,9 @@ import 'dart:math' as math;
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:driverbooking/Bloc/App_Bloc.dart';
-import 'package:driverbooking/Bloc/AppBloc_Events.dart';
-import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
+import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -382,12 +382,8 @@ class _TrackingPageState extends State<TrackingPage> {
     );
 
 
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text(success
-    //       ? "Trippppppppp started successfully!"
-    //       : "Failed to start trip!")),
-    // );
-    showSuccessSnackBar(context, "Trip started successfully!");
+
+    showInfoSnackBar(context, "Trip started status updated!");
   }
 
 
@@ -553,6 +549,7 @@ class _TrackingPageState extends State<TrackingPage> {
       //     builder: (context) => Customerlocationreached(tripId:tripId!),
       //   ),
       // );
+      showInfoSnackBar(context, 'Trip started');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Location not available yet!")),

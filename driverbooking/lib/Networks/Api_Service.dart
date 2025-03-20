@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http; // Ensure this is imported correctly
-import 'package:driverbooking/Screens/Home.dart';
-import 'package:driverbooking/Screens/HomeScreen/MapScreen.dart';
+import 'package:jessy_cabs/Screens/Home.dart';
+import 'package:jessy_cabs/Screens/HomeScreen/MapScreen.dart';
 import '../Screens/HomeScreen/MapScreen.dart';
 import '../Utils/AppConstants.dart';
 import 'package:mailer/mailer.dart';
@@ -999,7 +999,7 @@ class ApiService {
       print('insie api url');
       // Generate the unique filename based on the current date
       String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
-      print("formattedDate: ${formattedDate}");
+
       var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
       var request = http.MultipartRequest('POST', uri);
 
@@ -1020,7 +1020,6 @@ class ApiService {
           print('insie api url');
           // Generate the unique filename based on the current date
           // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
-          print("formattedDate1: ${formattedDate}");
 
           var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
           var request = http.MultipartRequest('POST', uri);
@@ -1827,22 +1826,69 @@ class ApiService {
 
 
 
-  // Function to fetch all uploads by trip ID
-  static Future<List<Map<String, dynamic>>?> fetchUploadsByTripId(String tripId) async {
-    final Uri apiUrl = Uri.parse('${AppConstants.baseUrl}/getAllUploadsByTripId?tripid=$tripId');
+
+
+
+
+  Future<List<dynamic>> fetchClosedTrips(String username) async {
+    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    String url = '${AppConstants.baseUrl}/closedtripsheetbasedDate/$username/$todayDate';
 
     try {
-      final response = await http.get(apiUrl);
+      print("object");
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Future<String?> fetchSingleDocumentImage(String tripId, String documentType) async {
+    final url = Uri.parse("${AppConstants.baseUrl}/uploadsfordocumenttype?tripid=$tripId&documenttype=$documentType");
+
+    try {
+      final response = await http.get(url);
+      print("📡 API Response for $documentType: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return List<Map<String, dynamic>>.from(data['uploads']); // Extracting the uploads list
+        if (data['attachedImagePaths'].isNotEmpty) {
+          print("✅ Image Path Found for $documentType: ${data['attachedImagePaths'][0]}");
+          return data['attachedImagePaths'][0];
+        } else {
+          print("⚠️ No Image Found for $documentType");
+          return null;
+        }
       } else {
-        print('Failed to load uploads: ${response.body}');
+        print("❌ API Error for $documentType: ${response.statusCode}");
         return null;
       }
     } catch (e) {
-      print('Error fetching uploads: $e');
+      print("🚨 Exception in API Call: $e");
       return null;
     }
   }
@@ -1852,6 +1898,44 @@ class ApiService {
 
 
 
+
+
+
+
+  // Future<String?> fetchSignaturePhoto(String tripId) async {
+  //   final response = await http.get(Uri.parse('${AppConstants.baseUrl}/signature_photos?tripid=$tripId'));
+  //
+  //   if (response.statusCode == 200) {
+  //     final data = jsonDecode(response.body);
+  //     return '${AppConstants.baseUrl}/${data['uploadedImagePath']}'; // Construct full image URL
+  //   } else {
+  //     return null;
+  //   }
+  // }
+
+  Future<String?> fetchSignaturePhoto(String tripId) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/signature_photos?tripid=$tripId');
+    print('Fetching signature photo from: $url'); // Debugging statement
+
+    try {
+      final response = await http.get(url);
+      print('Response status: ${response.statusCode}');
+      print('Response bodyy: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        String imageUrl = '${AppConstants.baseUrl}/${data['uploadedImagePath']}';
+        print('Image URL: $imageUrl');
+        return imageUrl;
+      } else {
+        print('Error: Signature not found or server error.');
+        return null;
+      }
+    } catch (e) {
+      print('Exception in API call: $e');
+      return null;
+    }
+  }
 
 
 

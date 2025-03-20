@@ -1,4 +1,4 @@
-import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:equatable/equatable.dart';
 
 
@@ -746,3 +746,65 @@ class SaveLocationFailure extends TripTrackingDetailsState {
 //trip tracking states completed (tracking, customer location reached page)
 
 
+
+
+
+abstract class TripClosedTodayState extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
+class TripClosedTodayInitial extends TripClosedTodayState {}
+
+class TripClosedTodayLoading extends TripClosedTodayState {}
+
+class TripClosedTodayLoaded extends TripClosedTodayState {
+  final List<dynamic> trips;
+
+  TripClosedTodayLoaded(this.trips);
+
+  @override
+  List<Object> get props => [trips];
+}
+
+class TripClosedTodayError extends TripClosedTodayState {
+  final String message;
+
+  TripClosedTodayError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+
+
+
+
+
+abstract class DocumentImagesState extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
+class DocumentImagesInitial extends DocumentImagesState {}
+
+class DocumentImagesLoading extends DocumentImagesState {}
+
+class DocumentImagesLoaded extends DocumentImagesState {
+  final String? startKmImage;
+  final String? closingKmImage;
+
+  DocumentImagesLoaded({required this.startKmImage, required this.closingKmImage});
+
+  @override
+  List<Object> get props => [startKmImage ?? '', closingKmImage ?? ''];
+}
+
+class DocumentImagesError extends DocumentImagesState {
+  final String error;
+
+  DocumentImagesError({required this.error});
+
+  @override
+  List<Object> get props => [error];
+}

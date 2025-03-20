@@ -48,7 +48,7 @@ class _LoadingScreenState extends State<LoadingScreen> with SingleTickerProvider
                 child: Image.asset(
                   // AppConstants.nastafLogo,
                   AppConstants.jessyLogo,
-
+                  // AppConstants.jessyLogonav,
                   width: 250, // Adjusted for better aesthetics.
                   height: 250,
                 ),

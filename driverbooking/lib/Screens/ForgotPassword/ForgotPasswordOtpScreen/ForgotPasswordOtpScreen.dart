@@ -1,10 +1,10 @@
-import 'package:driverbooking/Screens/ForgotPassword/ChangePasswordScreen/ChangePasswordScreen.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/Screens/ForgotPassword/ChangePasswordScreen/ChangePasswordScreen.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:driverbooking/Bloc/AppBloc_Events.dart';
-import 'package:driverbooking/Bloc/AppBloc_State.dart';
-import 'package:driverbooking/Bloc/App_Bloc.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
+import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 
 class ForgotPasswordOtpScreen extends StatefulWidget {
   final String userId;

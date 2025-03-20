@@ -1,15 +1,15 @@
-import 'package:driverbooking/Screens/CustomerLocationReached/CustomerLocationReached.dart';
-import 'package:driverbooking/Screens/TrackingPage/TrackingPage.dart';
-// import 'package:driverbooking/Screens/TrackingPage/TrackingPagecopy1.dart';
+import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
+import 'package:jessy_cabs/Screens/TrackingPage/TrackingPage.dart';
+// import 'package:jessy_cabs/Screens/TrackingPage/TrackingPagecopy1.dart';
 import 'package:flutter/material.dart';
-import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
-import 'package:driverbooking/Screens/BookingDetails/BookingDetails.dart';
-import 'package:driverbooking/Bloc/AppBloc_Events.dart';
-import 'package:driverbooking/Bloc/App_Bloc.dart';
-import 'package:driverbooking/Bloc/AppBloc_State.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
+import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
+import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 

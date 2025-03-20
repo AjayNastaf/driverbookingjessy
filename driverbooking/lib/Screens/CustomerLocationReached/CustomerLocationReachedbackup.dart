@@ -1,15 +1,15 @@
-import 'package:driverbooking/Screens/SignatureEndRide/SignatureEndRide.dart';
-import 'package:driverbooking/Screens/TripDetailsUpload/TripDetailsUpload.dart';
+import 'package:jessy_cabs/Screens/SignatureEndRide/SignatureEndRide.dart';
+import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'dart:math' as math;
 import 'package:dio/dio.dart';
-import 'package:driverbooking/GlobalVariable/global_variable.dart' as globals;
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/GlobalVariable/global_variable.dart' as globals;
+import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'dart:async';
 
 class Customerlocationreached extends StatefulWidget {

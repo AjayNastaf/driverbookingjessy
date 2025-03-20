@@ -1,8 +1,8 @@
-import 'package:driverbooking/Screens/PickupScreen/PickupScreen.dart';
-import 'package:driverbooking/Utils/AppTheme.dart';
+import 'package:jessy_cabs/Screens/PickupScreen/PickupScreen.dart';
+import 'package:jessy_cabs/Utils/AppTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:driverbooking/GlobalVariable/global_variable.dart' as globals;
-import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:jessy_cabs/GlobalVariable/global_variable.dart' as globals;
+import 'package:jessy_cabs/Networks/Api_Service.dart';
 
 class Bookingdetails extends StatefulWidget {
   final String userId;

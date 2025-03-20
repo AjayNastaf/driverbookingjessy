@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:driverbooking/Utils/AppConstants.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/Utils/AppConstants.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
 
 class ReferFriendScreen extends StatefulWidget {
   const ReferFriendScreen({super.key});

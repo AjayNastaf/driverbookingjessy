@@ -1,11 +1,12 @@
 import 'dart:convert';
 
-import 'package:driverbooking/Bloc/AppBloc_State.dart';
-import 'package:driverbooking/Bloc/App_Bloc.dart';
-import 'package:driverbooking/Bloc/AppBloc_Events.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
+import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/RideScreen/EditRideDetails/EditRideDetails.dart';
 import 'package:flutter/material.dart';
-import 'package:driverbooking/Utils/AllImports.dart';
-import 'package:driverbooking/Networks/Api_Service.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
+import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +14,8 @@ import 'package:intl/intl.dart';
 class Ridescreen extends StatefulWidget {
   final String userId ;
   final String username;
+
+  // final String trip;
 
   // const Ridescreen({super.key, required this.userId});
   const Ridescreen({Key? key, required this.userId, required this.username})
@@ -34,6 +37,7 @@ class _RidescreenState extends State<Ridescreen> {
     //   TripsheetStatusClosed(username: widget.username, userid: widget.userId),
     // );
     _loadUserData();
+    context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
 
   }
 
@@ -82,6 +86,7 @@ class _RidescreenState extends State<Ridescreen> {
         userId: widget.userId,
         // username: widget.username,
         drivername: userData?['drivername'] ?? 'Notttyu Found',
+
       );
       setState(() {
         tripSheetData = data;
@@ -120,86 +125,148 @@ class _RidescreenState extends State<Ridescreen> {
         ),
 
 
-        body: BlocBuilder<TripSheetClosedValuesBloc,TripSheetClosedValuesState>(builder: (context, state){
-          if(state is TripSheetStatusClosedLoading){
-            return CircularProgressIndicator();
-          } else if(state is TripsheetStatusClosedLoaded){
-            return state.tripSheetClosedData.isEmpty ?
-            const Center(
-              child: Text('No trip sheet data found.', style: TextStyle(color:Colors.green ),),
-            ):ListView.builder(
-              itemCount: state.tripSheetClosedData.length,
+        // body: BlocBuilder<TripSheetClosedValuesBloc,TripSheetClosedValuesState>(builder: (context, state){
+        //   if(state is TripSheetStatusClosedLoading){
+        //     return CircularProgressIndicator();
+        //   } else if(state is TripsheetStatusClosedLoaded){
+        //     return state.tripSheetClosedData.isEmpty ?
+        //     const Center(
+        //       child: Text('No trip sheet data found.', style: TextStyle(color:Colors.green ),),
+        //     ):ListView.builder(
+        //       itemCount: state.tripSheetClosedData.length,
+        //       itemBuilder: (context, index) {
+        //         final trip = state.tripSheetClosedData[index];
+        //         var tripId = trip['tripid'].toString();
+        //
+        //         return SingleChildScrollView(
+        //   child: Column(
+        //     // mainAxisAlignment: MainAxisAlignment.start,
+        //     children: [
+        //       GestureDetector(
+        //       onTap: () {
+        //             // Handle navigation or any other action
+        //             print("Card tapped: ${trip['tripid']}");
+        //             print("Card tapped: ${userData?['tripid']}");
+        //         Navigator.push(
+        //           context,
+        //           MaterialPageRoute(
+        //             builder: (context) => EditRideDetails(tripId: tripId),
+        //           ),
+        //         );
+        //       },
+        //         child:
+        //       CustomCard(
+        //         // name: '${trip['guestname']}',
+        //         name: '${trip['tripid']}',
+        //         // image: AppConstants.sample,
+        //         vehicle: '${trip['vehicleName']}',
+        //         status: '${trip['apps']}',
+        //
+        //         // dateTime: '${trip['tripsheetdate']}',
+        //         dateTime: setFormattedDate(trip['tripsheetdate']),
+        //         startAddress: '${trip['address1']}',
+        //         endAddress: '${trip['useage']}',
+        //       ),
+        //       )
+        //     ],
+        //   ),
+        // );
+        //
+        //     },
+        //   );
+        //
+        // } else {
+        // return const Center(child: Text('Something went wrong.'));
+        // }
+        // })
+
+      // body: BlocBuilder<TripClosedTodayBloc, TripClosedTodayState>(
+      //   builder: (context, state) {
+      //     if (state is TripClosedTodayLoading) {
+      //       return Center(child: CircularProgressIndicator());
+      //     } else if (state is TripClosedTodayLoaded) {
+      //       if (state.trips.isEmpty) {
+      //         return Center(child: Text('No closed trips found.'));
+      //       }
+      //       return ListView.builder(
+      //         itemCount: state.trips.length,
+      //         itemBuilder: (context, index) {
+      //           return ListTile(
+      //             title: Text(state.trips[index]['tripid'].toString() ?? 'Unnamed Trip'),
+      //             subtitle: Text(state.trips[index]['closedate'] ?? 'No Date'),
+      //           );
+      //         },
+      //       );
+      //     } else if (state is TripClosedTodayError) {
+      //       return Center(child: Text('Error: ${state.message}'));
+      //     }
+      //     return Center(child: Text('No Data Available'));
+      //   },
+      // ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
+      //   },
+      //   child: Icon(Icons.refresh),
+      // ),
+
+
+      body: BlocBuilder<TripClosedTodayBloc, TripClosedTodayState>(
+        builder: (context, state) {
+          if (state is TripClosedTodayLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is TripClosedTodayLoaded) {
+            if (state.trips.isEmpty) {
+              return const Center(
+                child: Text('No trip sheet data found.', style: TextStyle(color: Colors.green)),
+              );
+            }
+            return ListView.builder(
+              itemCount: state.trips.length,
+              padding: const EdgeInsets.all(8),
               itemBuilder: (context, index) {
-                final trip = state.tripSheetClosedData[index];
-                return SingleChildScrollView(
-          child: Column(
-            // mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              CustomCard(
-                name: '${trip['guestname']}',
-                // image: AppConstants.sample,
-                vehicle: '${trip['vehicleName']}',
-                status: '${trip['apps']}',
+                final trip = state.trips[index];
+                var tripId = trip['tripid'].toString();
 
-                // dateTime: '${trip['tripsheetdate']}',
-                dateTime: setFormattedDate(trip['tripsheetdate']),
-                startAddress: '${trip['address1']}',
-                endAddress: '${trip['useage']}',
-              ),
-              // CustomCard(
-              //   name: 'Rohit',
-              //   // image: AppConstants.sample,
-              //   vehicle: 'Mercedes',
-              //   price: '\$500.75',
-              //   dateTime: 'Wed 20 Nov, 2024 9:00 am',
-              //   startAddress: '12 MG Road, Bangalore',
-              //   endAddress: '24 Residency Road, Bangalore',
-              // ),
-            ],
-          ),
-        );
+                return GestureDetector(
+                  onTap: () {
+                    print("Card tapped: ${trip['tripid']}");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditRideDetails(tripId: tripId),
+                      ),
+                    );
+                  },
+                  child: CustomCard(
+                    name: trip['guestname'].toString() ?? 'Unknown Trip',
+                    // name: trip['tripid'].toString() ?? 'Unknown Trip',
+                    vehicle: trip['vehicleName'] ?? 'Unknown Vehicle',
+                    status: trip['apps'] ?? 'Unknown Status',
+                    dateTime: setFormattedDate(trip['tripsheetdate']),
+                    startAddress: trip['address1'] ?? 'No Address',
+                    endAddress: trip['useage'] ?? 'Unknown Usage',
+                  ),
+                );
+              },
+            );
+          } else if (state is TripClosedTodayError) {
+            return Center(child: Text('Error: ${state.message}'));
+          }
+          return const Center(child: Text('Something went wrong.'));
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
+        },
+        child: const Icon(Icons.refresh),
+      ),
 
-            },
-          );
-
-        } else {
-        return const Center(child: Text('Something went wrong.'));
-        }
-        })
-
-      // body:BlocBuilder<TripSheetClosedValuesBloc,TripSheetClosedValuesState>(builder: (context, state){
-      //   if(state is TripSheetStatusClosedLoading){
-      //     return CircularProgressIndicator();
-      //   } else if(state is TripsheetStatusClosedLoaded){
-      //     return state.tripSheetClosedData.isEmpty ?
-      //         const Center(
-      //       child: Text('No trip sheet data found.', style: TextStyle(color:Colors.green ),),
-      //     ):ListView.builder(
-      //       itemCount: state.tripSheetClosedData.length,
-      //       itemBuilder: (context, index) {
-      //         final trip = state.tripSheetClosedData[index];
-      //         return Column(
-      //           children: [
-      //             buildSection(
-      //               context,
-      //               title: '${trip['duty']}',
-      //               dateTime: ' ${trip['tripid']}',
-      //               buttonText: '${trip['apps']}',
-      //               onTap: () {
-      //
-      //               },
-      //             ),
-      //           ],
-      //         );
-      //       },
-      //     );
-      //
-      // } else {
-      //     return const Center(child: Text('Something went wrong.'));
-      //   }
-      // })
 
     );
+
+
 
   }
 }

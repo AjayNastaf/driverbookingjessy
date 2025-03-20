@@ -1,7 +1,7 @@
-// import 'package:driverbooking/Screens/MenuListScreens/Profile/profile.dart';
-// import 'package:driverbooking/Screens/MenuListScreens/Settings/ChangePassword/ChangePassword.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/Profile/profile.dart';
+// import 'package:jessy_cabs/Screens/MenuListScreens/Settings/ChangePassword/ChangePassword.dart';
 // import 'package:flutter/material.dart';
-// import 'package:driverbooking/Utils/AppTheme.dart';
+// import 'package:jessy_cabs/Utils/AppTheme.dart';
 //
 // class Settings extends StatelessWidget {
 //   final String userId, username, password, phonenumber, email;

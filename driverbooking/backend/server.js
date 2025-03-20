@@ -25,7 +25,9 @@ const transporter = nodemailer.createTransport({
 
 
 app.use('/profile_photos', express.static(path.join(__dirname, 'profile_photos')));
-app.use('/signature_photos', express.static(path.join(__dirname, 'Router/path_to_save_images')));
+//app.use('/signature_photos', express.static(path.join(__dirname, 'Router/path_to_save_images')));
+app.use('/signatures', express.static(path.join(__dirname, 'Router/path_to_save_images')));
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // app.use('/images', express.static(path.join(__dirname, 'path_to_save_images')));
 console.log(express.static(path.join(__dirname, 'profile_photos')),"ppp")
@@ -759,21 +761,48 @@ app.post("/forgotPasswordEmailVerification", (req, res) => {
 
 
 // Signature Photo API
+//app.get('/signature_photos', (req, res) => {
+//  const { tripid } = req.query;
+//  const selectQuery = 'SELECT signature_path FROM signatures WHERE tripid = ?';
+//
+//  db.query(selectQuery, [tripid], (err, results) => {
+//    if (err) return res.status(500).json({ message: 'Internal server error' });
+//    if (results.length === 0) return res.status(404).json({ message: 'Signature not found' });
+//
+//    const uploadedImagePath = results[0].signature_path;
+//    const cleanedPath = path.relative(path.join(__dirname, 'path_to_save_images'), uploadedImagePath)
+//                            .split(path.sep).filter(segment => segment !== '..').join(path.sep);
+//
+//    res.status(200).json({ uploadedImagePath: cleanedPath });
+//
+//  });
+//
+//});
+
+
 app.get('/signature_photos', (req, res) => {
   const { tripid } = req.query;
   const selectQuery = 'SELECT signature_path FROM signatures WHERE tripid = ?';
-  
+
   db.query(selectQuery, [tripid], (err, results) => {
     if (err) return res.status(500).json({ message: 'Internal server error' });
     if (results.length === 0) return res.status(404).json({ message: 'Signature not found' });
 
     const uploadedImagePath = results[0].signature_path;
-    const cleanedPath = path.relative(path.join(__dirname, 'path_to_save_images'), uploadedImagePath)
-                            .split(path.sep).filter(segment => segment !== '..').join(path.sep);
+    console.log(`Raw path from DB: ${uploadedImagePath}`);
 
-    res.status(200).json({ uploadedImagePath: cleanedPath });
+    // Extract the image filename from the full path
+    const imageName = path.basename(uploadedImagePath);
+    console.log(`Extracted image name: ${imageName}`);
+
+    // Return the correct URL
+    const fullImageUrl = `signatures/${imageName}`;
+    console.log(`Final Image URL: ${fullImageUrl}`);
+
+    res.status(200).json({ uploadedImagePath: fullImageUrl });
   });
 });
+
 
 // Uploads API
 app.get('/uploads', (req, res) => {
@@ -855,8 +884,8 @@ app.get('/getAllUploadsByTripId', (req, res) => {
 
 
 //local
-//app.listen(3001, () => {
-//  console.log("Server started on port 3000");
+//app.listen(3002, () => {
+//  console.log("Server started on port 3001");
 //});
 
 //aws

@@ -44,6 +44,34 @@ router.get('/tripsheetRides/:username', async (req, res) => {
 //end
 
 
+router.get('/closedtripsheetbasedDate/:username/:todaydate', async (req, res) => {
+    const username = req.params.username;
+    const todaydate = req.params.todaydate;
+
+    console.log(username,"userrrrr name")
+
+    try {
+      // const query = "SELECT * FROM tripsheet WHERE driverName = ? AND apps <> 'waiting' ";
+//      const query = "SELECT * FROM tripsheet WHERE driverName = ? AND apps  ('closed') and closedate = ?";
+const query = "SELECT * FROM tripsheet WHERE driverName = ? AND apps = 'closed' AND closedate = ?";
+
+      db.query(query, [username,todaydate], (err, results) => {
+        if (err) {
+          res.status(500).json({ message: 'Internal server error' });
+          return;
+        }
+        // console.log(results,"rrrrr")
+
+        res.status(200).json(results);
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+
+
+
 router.get('/tripsheets/:duty/:tripId', async (req, res) => {
   const { tripId, duty } = req.params;
   console.log('Received request with tripId:', tripId, 'and duty:', duty);  // Should log the request parameters

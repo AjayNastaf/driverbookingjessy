@@ -1,4 +1,4 @@
-import 'package:driverbooking/Utils/AllImports.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 
 class FAQScreen extends StatelessWidget {

@@ -1,4 +1,5 @@
-name: driverbooking
+#name: driverbooking
+name: jessy_cabs
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -66,19 +67,20 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
 
+#
+#dev_dependencies:
+#  flutter_test:
+#    sdk: flutter
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
-
-  flutter_launcher_icons: ^0.13.1  # Correct placement
+  flutter_launcher_icons: ^0.13.1  # Check latest version
 
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/image/logo.png"
-  adaptive_icon_foreground: "assets/image/logo.png"
-  adaptive_icon_background: "assets/image/icon_background.png"
+  image_path: "assets/image/navlogo.jpg"  # Path to your logo
+  adaptive_icon_foreground: "assets/image/navlogo.jpg" # For Android adaptive icons
+  adaptive_icon_background: "#ffffff" # Background color (adjust as needed)
 
 
 

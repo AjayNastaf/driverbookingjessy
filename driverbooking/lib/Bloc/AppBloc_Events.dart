@@ -781,5 +781,35 @@ class EndWayPointEvent extends TripTrackingDetailsEvent {
 
 
 
+abstract class TripClosedTodayEvent extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
+class FetchTripClosedToday extends TripClosedTodayEvent {
+  final String username;
+
+  FetchTripClosedToday(this.username);
+
+  @override
+  List<Object> get props => [username];
+}
 
 
+
+
+
+abstract class DocumentImagesEvent extends Equatable {
+  @override
+  List<Object> get props => [];
+}
+
+// Fetch both images
+class FetchBothDocumentImages extends DocumentImagesEvent {
+  final String tripId;
+
+  FetchBothDocumentImages({required this.tripId});
+
+  @override
+  List<Object> get props => [tripId];
+}
