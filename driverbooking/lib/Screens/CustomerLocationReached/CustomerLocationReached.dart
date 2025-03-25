@@ -51,6 +51,12 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         FetchTripTrackingDetails(widget.tripId));
   }
 
+Future<void> _refreshCustomerDestination() async {
+  _initializeCustomerLocationTracking();
+
+  context.read<TripTrackingDetailsBloc>().add(
+      FetchTripTrackingDetails(widget.tripId));
+}
 
   StreamSubscription<LocationData>? _locationSubscription; // Store the subscription
 
@@ -490,7 +496,9 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         appBar: AppBar(
           title: Text("Trip Started"),
         ),
-       body: Stack(
+       body: RefreshIndicator(onRefresh: _refreshCustomerDestination,
+
+      child:Stack(
         children: [
           if (_currentLatLng != null)
             GoogleMap(
@@ -505,7 +513,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                 Marker(
                   markerId: MarkerId('currentLocation'),
                   position: _currentLatLng!,
-                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+                  icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
 
                 ),
                 Marker(
@@ -518,7 +526,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                   Polyline(
                     polylineId: PolylineId('route'),
                     points: _routeCoordinates,
-                    color: Colors.blue,
+                    color: Colors.green,
                     width: 5,
                   ),
               },
@@ -804,6 +812,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
           ),
         ],
       ),
+
+       )
     )
     );
   }

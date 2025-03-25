@@ -126,7 +126,9 @@ class _BookingdetailsState extends State<Bookingdetails> {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body:
-      BlocBuilder<GettingTripSheetDetailsByUseridBloc, GettingTripSheetDetilsByUseridState>(builder: (context , state){
+      RefreshIndicator(
+          onRefresh: _initializeData,
+      child: BlocBuilder<GettingTripSheetDetailsByUseridBloc, GettingTripSheetDetilsByUseridState>(builder: (context , state){
         if (state is Getting_TripSheetDetails_ByUserid_Loading){
           return const Center(
             child: CircularProgressIndicator(),
@@ -323,7 +325,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
         }
       })
 
-
+    )
 
 
     );

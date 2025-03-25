@@ -52,6 +52,11 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
       fetchImages(); // Make sure fetchImages is being called
   }
 
+  Future<void> _refreshTripDetails() async {
+    // Re-fetch the trip details using BLoC
+    context.read<TripSheetDetailsTripIdBloc>().add(FetchTripDetailsByTripIdEventClass(tripId: widget.tripId));
+  }
+
   Future<void> _loadTripSheetDetailsByTripId() async {
     try {
       // Fetch trip details from the API
@@ -218,8 +223,13 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
       appBar: AppBar(
         title: const Text("Trip Preview"),
       ),
-      body:SingleChildScrollView(
-        child: Padding(
+      body:RefreshIndicator(
+          onRefresh: _refreshTripDetails, // Pull to refresh logic
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh works
+
+
+            child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
@@ -347,7 +357,7 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
             ],
           ),
         ),
-      ),
+      )),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0,),
         child: SizedBox(

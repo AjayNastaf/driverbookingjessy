@@ -72,6 +72,15 @@ class _EditRideDetailsState extends State<EditRideDetails> {
     fetchSignature();
   }
 
+  Future<void> _refreshEditRideScreen() async{
+    _loadTripDetails();
+    print('Received tripId in refresh: ${widget.tripId}'); // Print the tripId for debugging
+
+    fetchTripImages();
+    context.read<DocumentImagesBloc>().add(FetchBothDocumentImages(tripId: widget.tripId));
+    fetchSignature();
+  }
+
   String setFormattedDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "Not available"; // Handle null case
 
@@ -511,7 +520,9 @@ class _EditRideDetailsState extends State<EditRideDetails> {
         appBar: AppBar(
           title: const Text("Trip Details"),
         ),
-        body: SingleChildScrollView(
+        body: RefreshIndicator( onRefresh: _refreshEditRideScreen,
+       child: SingleChildScrollView(
+         physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -638,7 +649,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
               ),
             ],
           ),
-        ),
+        ),)
       ),
 
 

@@ -39,6 +39,19 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
     // _loadLoginDetailss();
   }
 
+  Future<void> _refreshDataTollParking() async {
+    setState(() {
+      tollController.clear();
+      parkingController.clear();
+      tollFile = null;
+      parkingFile = null;
+    });
+
+    // If you need to reload trip details or fetch updated data, do it here
+    print("Data refreshed!");
+  }
+
+
   Future<void> _pickFile(bool isToll) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
@@ -349,7 +362,9 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
       ),
       // appBar: AppBar(title: Text("Welcome, $username")),
 
-      body: SingleChildScrollView(
+      body: RefreshIndicator( onRefresh: _refreshDataTollParking,
+        child:  SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Column(
@@ -550,7 +565,7 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
             ],
           ),
         ),
-      ),
+      ),)
     ),
     );
   }

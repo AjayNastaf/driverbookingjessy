@@ -475,6 +475,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     fetchProfile(); // Fetch the API data when screen initializes
 
   }
+  Future<void> _refreshProfile() async {
+    await fetchProfile();
+
+  }
 
   Future<void> fetchProfile() async {
     try {
@@ -734,7 +738,137 @@ class _ProfileScreenState extends State<ProfileScreen> {
           backgroundColor: AppTheme.Navblue1,
           iconTheme: IconThemeData(color: AppTheme.white1), // Changes the back button color
         ),
-        body: BlocListener<ProfileBloc, ProfileState>(
+        // body: RefreshIndicator( onRefresh: _refreshProfile,
+        //
+        //   child:  BlocListener<ProfileBloc, ProfileState>(
+        //   listener: (context, state) {
+        //     if (state is ProfileLoading) {
+        //       setState(() {
+        //         isLoading = true;
+        //         errorMessage = null;
+        //       });
+        //     } else if (state is ProfileUpdated) {
+        //       setState(() {
+        //         isLoading = false;
+        //       });
+        //       // ScaffoldMessenger.of(context).showSnackBar(
+        //       //   const SnackBar(content: Text("Profile updated successfully!")),
+        //       // );
+        //       showSuccessSnackBar(context, "Profile updated successfully!");
+        //     } else if (state is ProfilePhotoUploaded) {
+        //       setState(() {
+        //         isLoading = false;
+        //       });
+        //       // ScaffoldMessenger.of(context).showSnackBar(
+        //       //   const SnackBar(content: Text("Profile photo uploaded successfully!")),
+        //       // );
+        //       showSuccessSnackBar(context, "Profile photo uploaded successfully!");
+        //     } else if (state is ProfilePhotoUploadError) {
+        //       setState(() {
+        //         isLoading = false;
+        //         errorMessage = state.message;
+        //       });
+        //       // ScaffoldMessenger.of(context).showSnackBar(
+        //       //   SnackBar(content: Text(state.message)),
+        //       // );
+        //       showFailureSnackBar(context, 'state.message');
+        //     } else if (state is ProfileError) {
+        //       setState(() {
+        //         isLoading = false;
+        //         errorMessage = state.message;
+        //       });
+        //       // ScaffoldMessenger.of(context).showSnackBar(
+        //       //   SnackBar(content: Text(state.message)),
+        //       // );
+        //       showFailureSnackBar(context, 'state.message');
+        //
+        //     }
+        //   },
+        //   child: isLoading
+        //       ? const Center(child: CircularProgressIndicator())
+        //       : errorMessage != null
+        //       ? Center(child: Text(errorMessage!, style: const TextStyle(color: Colors.red)))
+        //       : SingleChildScrollView(
+        //     padding: const EdgeInsets.all(16),
+        //     child: Column(
+        //       children: [
+        //         Center(
+        //           child: Stack(
+        //             children: [
+        //               CircleAvatar(
+        //                 radius: 50,
+        //                 backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
+        //                 child: _selectedImage == null ? const Icon(Icons.person, size: 50) : null,
+        //               ),
+        //               Positioned(
+        //                 bottom: 0,
+        //                 right: 0,
+        //                 child: IconButton(
+        //                   icon: const Icon(Icons.edit),
+        //                   onPressed: () {
+        //                     showModalBottomSheet(
+        //                       context: context,
+        //                       builder: (_) {
+        //                         return Wrap(
+        //                           children: [
+        //                             ListTile(
+        //                               leading: const Icon(Icons.camera),
+        //                               title: const Text("Camera"),
+        //                               onTap: () {
+        //                                 Navigator.pop(context);
+        //                                 pickImage(ImageSource.camera);
+        //                               },
+        //                             ),
+        //                             ListTile(
+        //                               leading: const Icon(Icons.photo_library),
+        //                               title: const Text("Gallery"),
+        //                               onTap: () {
+        //                                 Navigator.pop(context);
+        //                                 pickImage(ImageSource.gallery);
+        //                               },
+        //                             ),
+        //                           ],
+        //                         );
+        //                       },
+        //                     );
+        //                   },
+        //                 ),
+        //               ),
+        //             ],
+        //           ),
+        //         ),
+        //         const SizedBox(height: 20),
+        //         _buildTextField("Name", nameController, readOnly: true),
+        //         const SizedBox(height: 10),
+        //         _buildTextField("Phone", mobileController),
+        //         const SizedBox(height: 10),
+        //         _buildTextField("Password", passwordController, obscureText: true),
+        //         const SizedBox(height: 10),
+        //         _buildTextField("Email", emailController),
+        //         const SizedBox(height: 20),
+        //         SizedBox(
+        //           width: double.infinity,
+        //           child: ElevatedButton(
+        //             onPressed: handleUpdateProfileAndImage,
+        //             style: ElevatedButton.styleFrom(
+        //
+        //               backgroundColor: AppTheme.Navblue1,
+        //               padding: const EdgeInsets.symmetric(vertical: 16),
+        //
+        //               shape: RoundedRectangleBorder(
+        //                 borderRadius: BorderRadius.circular(8),
+        //               ),
+        //             ),
+        //             child: const Text("Save", style: TextStyle(color: AppTheme.white1, ),),
+        //           ),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // ),)
+        body: RefreshIndicator(
+        onRefresh: _refreshProfile,
+        child: BlocListener<ProfileBloc, ProfileState>(
           listener: (context, state) {
             if (state is ProfileLoading) {
               setState(() {
@@ -745,122 +879,107 @@ class _ProfileScreenState extends State<ProfileScreen> {
               setState(() {
                 isLoading = false;
               });
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   const SnackBar(content: Text("Profile updated successfully!")),
-              // );
               showSuccessSnackBar(context, "Profile updated successfully!");
             } else if (state is ProfilePhotoUploaded) {
               setState(() {
                 isLoading = false;
               });
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   const SnackBar(content: Text("Profile photo uploaded successfully!")),
-              // );
               showSuccessSnackBar(context, "Profile photo uploaded successfully!");
             } else if (state is ProfilePhotoUploadError) {
               setState(() {
                 isLoading = false;
                 errorMessage = state.message;
               });
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   SnackBar(content: Text(state.message)),
-              // );
-              showFailureSnackBar(context, 'state.message');
+              showFailureSnackBar(context, state.message);
             } else if (state is ProfileError) {
               setState(() {
                 isLoading = false;
                 errorMessage = state.message;
               });
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   SnackBar(content: Text(state.message)),
-              // );
-              showFailureSnackBar(context, 'state.message');
-
+              showFailureSnackBar(context, state.message);
             }
           },
           child: isLoading
               ? const Center(child: CircularProgressIndicator())
               : errorMessage != null
               ? Center(child: Text(errorMessage!, style: const TextStyle(color: Colors.red)))
-              : SingleChildScrollView(
+              : ListView( // <-- Wrap everything inside ListView
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Center(
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
-                        child: _selectedImage == null ? const Icon(Icons.person, size: 50) : null,
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            showModalBottomSheet(
-                              context: context,
-                              builder: (_) {
-                                return Wrap(
-                                  children: [
-                                    ListTile(
-                                      leading: const Icon(Icons.camera),
-                                      title: const Text("Camera"),
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        pickImage(ImageSource.camera);
-                                      },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.photo_library),
-                                      title: const Text("Gallery"),
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        pickImage(ImageSource.gallery);
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildTextField("Name", nameController, readOnly: true),
-                const SizedBox(height: 10),
-                _buildTextField("Phone", mobileController),
-                const SizedBox(height: 10),
-                _buildTextField("Password", passwordController, obscureText: true),
-                const SizedBox(height: 10),
-                _buildTextField("Email", emailController),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: handleUpdateProfileAndImage,
-                    style: ElevatedButton.styleFrom(
-
-                      backgroundColor: AppTheme.Navblue1,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+            children: [
+              Center(
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
+                      child: _selectedImage == null ? const Icon(Icons.person, size: 50) : null,
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (_) {
+                              return Wrap(
+                                children: [
+                                  ListTile(
+                                    leading: const Icon(Icons.camera),
+                                    title: const Text("Camera"),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      pickImage(ImageSource.camera);
+                                    },
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.photo_library),
+                                    title: const Text("Gallery"),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      pickImage(ImageSource.gallery);
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                       ),
                     ),
-                    child: const Text("Save", style: TextStyle(color: AppTheme.white1, ),),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+              _buildTextField("Name", nameController, readOnly: true),
+              const SizedBox(height: 10),
+              _buildTextField("Phone", mobileController),
+              const SizedBox(height: 10),
+              _buildTextField("Password", passwordController, obscureText: true),
+              const SizedBox(height: 10),
+              _buildTextField("Email", emailController),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: handleUpdateProfileAndImage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.Navblue1,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text("Save", style: TextStyle(color: AppTheme.white1)),
+                ),
+              ),
+            ],
           ),
         ),
       ),
+
+    ),
     );
   }
 

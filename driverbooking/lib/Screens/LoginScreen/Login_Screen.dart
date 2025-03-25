@@ -117,7 +117,7 @@ class _Login_ScreenState extends State<Login_Screen> {
               // );
               _saveLoginDetails(_usernameController.text, state.userId);
 
-              Navigator.push(
+              Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => Homescreen(userId: state.userId ,username: _usernameController.text,)),
               );

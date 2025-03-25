@@ -69,6 +69,40 @@ class _SignatureendrideState extends State<Signatureendride> {
     };
   }
 
+  Future<void> _refreshdignatureScreen() async {
+
+    // Trigger API call when drawing ends
+    _signatureController.onDrawEnd = () async {
+      if (_signatureController.isNotEmpty) {
+        final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+        // final String signTime = TimeOfDay.now().format(context);
+        final DateTime now = DateTime.now();
+        final String signTime = '${now.hour.toString().padLeft(2, '0')}:'
+            '${now.minute.toString().padLeft(2, '0')}:'
+            '${now.second.toString().padLeft(2, '0')}';
+
+        try {
+          await ApiService.sendSignatureDetails(
+            tripId: widget.tripId,
+            dateSignature: dateSignature,
+            signTime: signTime,
+            status: "OnSign",
+          );
+
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text("Signature data uploaded successfully")),
+          // );
+          showInfoSnackBar(context, "Signature Status uploading");
+        } catch (error) {
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text("Error uploading signature data: $error")),
+          // );
+          showFailureSnackBar(context, "Error uploading signature data: $error");
+        }
+      }
+    };
+  }
+
   @override
   void dispose() {
     _signatureController.dispose();
@@ -287,7 +321,11 @@ class _SignatureendrideState extends State<Signatureendride> {
       appBar: AppBar(
         title: Text("End Ride"),
       ),
-      body: Padding(
+      body:RefreshIndicator(
+        onRefresh: _refreshdignatureScreen,
+        child:SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -338,7 +376,7 @@ class _SignatureendrideState extends State<Signatureendride> {
             ),
           ],
         ),
-      ),
+      ),),)
     ),);
   }
 }

@@ -148,7 +148,12 @@ class _StartingKilometerState extends State<StartingKilometer> {
 
         elevation: 2,
       ),
-      body:SingleChildScrollView(
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _loadTripDetailsData();
+          setState(() {}); // Update UI after refreshing
+        },
+        child: SingleChildScrollView(
       child:
       Padding(
         padding: const EdgeInsets.all(20.0),
@@ -320,6 +325,7 @@ class _StartingKilometerState extends State<StartingKilometer> {
           ],
         ),
       ),),
+    )
     );
   }
 

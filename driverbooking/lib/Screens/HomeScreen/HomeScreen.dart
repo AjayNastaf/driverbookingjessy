@@ -362,6 +362,17 @@ class _HomescreenState extends State<Homescreen> {
     context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
 
   }
+  Future<void> _refreshData() async {
+    BlocProvider.of<TripSheetValuesBloc>(context).add(
+      FetchTripSheetValues(
+        userid: widget.userId,
+        drivername: userData?['drivername'] ?? 'Not Found',
+      ),
+    );
+    context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
+
+  }
+
 
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -972,7 +983,9 @@ class _HomescreenState extends State<Homescreen> {
         //
         //   ],
         // )
-
+      RefreshIndicator(
+        onRefresh: _refreshData, // 🔄 Pull-to-Refresh function
+        child:
       BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
         builder: (context, state) {
           if (state is FetchingTripSheetValuesLoading) {
@@ -1028,7 +1041,7 @@ class _HomescreenState extends State<Homescreen> {
         },
       ),
 
-
+    )
     );
   }
 }

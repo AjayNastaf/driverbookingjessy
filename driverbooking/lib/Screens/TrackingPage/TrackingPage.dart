@@ -68,6 +68,15 @@ class _TrackingPageState extends State<TrackingPage> {
         FetchTripTrackingDetails(widget.tripId!));
   }
 
+  Future<void> _refreshTrackingPage() async{
+    _initializeLocationTracking();
+
+    _getLatLngFromAddress(widget.address);
+    tripId = widget.tripId; // Assuming tripId is passed to the TrackingPage
+    context.read<TripTrackingDetailsBloc>().add(
+        FetchTripTrackingDetails(widget.tripId!));
+  }
+
   void performAnotherFunction() {
     print("Using trip details in another function:");
     print("Vehicle Number: $vehicleNumber");
@@ -617,8 +626,14 @@ class _TrackingPageState extends State<TrackingPage> {
             backgroundColor: AppTheme.Navblue1,
             iconTheme: const IconThemeData(color: Colors.white),
           ),
-          body: Stack(
-            children: [
+          body: RefreshIndicator(
+              // child: child,
+              onRefresh: _refreshTrackingPage,
+
+
+       child: Stack(
+
+         children: [
               if (_currentLatLng != null)
                 GoogleMap(
                   initialCameraPosition: CameraPosition(
@@ -727,7 +742,8 @@ class _TrackingPageState extends State<TrackingPage> {
                 ),
               ),
             ],
-          ),
+          )
+          )
         )
     );
   }

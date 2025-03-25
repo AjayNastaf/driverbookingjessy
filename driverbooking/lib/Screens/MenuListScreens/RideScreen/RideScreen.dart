@@ -41,6 +41,12 @@ class _RidescreenState extends State<Ridescreen> {
 
   }
 
+  Future<void> _refreshridescreen() async {
+    _loadUserData();
+    context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
+
+  }
+
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userDataString = prefs.getString('userData');
@@ -211,7 +217,10 @@ class _RidescreenState extends State<Ridescreen> {
       // ),
 
 
-      body: BlocBuilder<TripClosedTodayBloc, TripClosedTodayState>(
+      body:
+      RefreshIndicator(
+        onRefresh: _refreshridescreen, // This function is triggered on pull-to-refresh
+        child: BlocBuilder<TripClosedTodayBloc, TripClosedTodayState>(
         builder: (context, state) {
           if (state is TripClosedTodayLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -255,7 +264,7 @@ class _RidescreenState extends State<Ridescreen> {
           }
           return const Center(child: Text('Something went wrong.'));
         },
-      ),
+      ),),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));

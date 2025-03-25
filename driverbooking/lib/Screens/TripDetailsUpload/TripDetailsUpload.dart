@@ -650,6 +650,8 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
   }
 
+  // Future<void> _refresh
+
   // Function to choose an image for a specific button
   Future<void> _chooseOption(BuildContext context, int buttonId) async {
     showModalBottomSheet(
@@ -826,8 +828,12 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
               }
             },
             child:
-      SingleChildScrollView(
-        child: Padding(
+             RefreshIndicator(
+            onRefresh: _fetchTripDetails, // Calls the function to reload data
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(), // Enables scroll even when content is less
+
+              child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
@@ -1001,7 +1007,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
             ],
           ),
         ),
-      )),
+      ))),
     )
     );
   }
