@@ -813,3 +813,20 @@ class FetchBothDocumentImages extends DocumentImagesEvent {
   @override
   List<Object> get props => [tripId];
 }
+
+
+
+
+
+//getting dynamic closing kilometer Event start
+
+abstract class GettingClosingKilometerEvent {}
+
+class FetchClosingKilometer extends GettingClosingKilometerEvent {
+  final String tripId;
+
+  FetchClosingKilometer(this.tripId);
+}
+
+//getting dynamic closing kilometer Event completed
+

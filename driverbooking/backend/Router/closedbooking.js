@@ -122,22 +122,25 @@ router.put('/closekmupdatetripsheet', (req, res) => {
 console.log(tripId, closekm ,Hcl,duty , "checking received");
 console.log('ajay',typeof(tripId));
 console.log('ajay2',typeof(closekm));
-console.log('ajay3',typeof(Hcl));
+console.log('ajay3',typeof(Hcl),Hcl);
 console.log('ajay4',typeof(duty));
 
   let sql = "";
   let values = [];
 
-  if (Hcl === 1 && duty === "Outstation") {
+  if (Hcl === '1' && duty === "Outstation") {
     // First condition
+    console.log("firstttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
     sql = "UPDATE tripsheet SET  closekm = ? WHERE tripid = ?";
     values = [closekm,tripId];
-  } else if (Hcl === 1 && duty !== "Outstation") {
+  } else if (Hcl === '1' && duty !== "Outstation") {
     // Second condition
+        console.log("secondddddddddd")
     sql = "UPDATE tripsheet SET closekm = ?,vendorshedinkm = ? WHERE tripid = ?";
-    values = [ closekm,startkm, closekm,tripId];
+    values = [ closekm, closekm,tripId];
   } else {
     // Default case or other conditions
+        console.log("thirddddd")
     sql = "UPDATE tripsheet SET  closekm = ? WHERE tripid = ?";
     values = [ closekm,tripId];
   }

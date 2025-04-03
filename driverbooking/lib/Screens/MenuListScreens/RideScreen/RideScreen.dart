@@ -10,6 +10,10 @@ import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:jessy_cabs/Screens/NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import 'package:jessy_cabs/Screens/network_manager.dart';
+
 
 class Ridescreen extends StatefulWidget {
   final String userId ;
@@ -119,6 +123,8 @@ class _RidescreenState extends State<Ridescreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -218,9 +224,21 @@ class _RidescreenState extends State<Ridescreen> {
 
 
       body:
+
+          Stack(
+            children: [
+              Positioned(
+                top: 15,
+                left: 0,
+                right: 0,
+                child: NoInternetBanner(isConnected: isConnected),
+              ),
+
       RefreshIndicator(
         onRefresh: _refreshridescreen, // This function is triggered on pull-to-refresh
-        child: BlocBuilder<TripClosedTodayBloc, TripClosedTodayState>(
+        // Ensures pull-to-refresh always works
+
+        child:  BlocBuilder<TripClosedTodayBloc, TripClosedTodayState>(
         builder: (context, state) {
           if (state is TripClosedTodayLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -248,8 +266,8 @@ class _RidescreenState extends State<Ridescreen> {
                     );
                   },
                   child: CustomCard(
-                    name: trip['guestname'].toString() ?? 'Unknown Trip',
-                    // name: trip['tripid'].toString() ?? 'Unknown Trip',
+                    // name: trip['guestname'].toString() ?? 'Unknown Trip',
+                    name: trip['tripid'].toString() ?? 'Unknown Trip',
                     vehicle: trip['vehicleName'] ?? 'Unknown Vehicle',
                     status: trip['apps'] ?? 'Unknown Status',
                     dateTime: setFormattedDate(trip['tripsheetdate']),
@@ -265,12 +283,15 @@ class _RidescreenState extends State<Ridescreen> {
           return const Center(child: Text('Something went wrong.'));
         },
       ),),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
-        },
-        child: const Icon(Icons.refresh),
-      ),
+
+            ],
+          )
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
+      //   },
+      //   child: const Icon(Icons.refresh),
+      // ),
 
 
     );

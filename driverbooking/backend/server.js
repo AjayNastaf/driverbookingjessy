@@ -885,13 +885,10 @@ app.get('/getAllUploadsByTripId', (req, res) => {
 
 //local
 //app.listen(3001, () => {
-//  console.log("Server started on port 3001 1");
+//  console.log("Server started on port 3005");
 //});
 
-//aws
-//app.listen(7002, () => {
-//  console.log("Server started on port 7002");
-//});
+
 
 //jessycabs
 

@@ -1363,7 +1363,7 @@ Future<void> _onEndingWayPoint(
 
 
 
-
+//closed trip details Reached status for current date bloc starts
 
 class TripClosedTodayBloc extends Bloc<TripClosedTodayEvent, TripClosedTodayState> {
   final ApiService apiService;
@@ -1387,6 +1387,7 @@ class TripClosedTodayBloc extends Bloc<TripClosedTodayEvent, TripClosedTodayStat
   }
 }
 
+//closed trip details Reached status for current date bloc completed
 
 
 
@@ -1394,7 +1395,7 @@ class TripClosedTodayBloc extends Bloc<TripClosedTodayEvent, TripClosedTodayStat
 
 
 
-
+//getting uploaded images bloc starts
 class DocumentImagesBloc extends Bloc<DocumentImagesEvent, DocumentImagesState> {
   final ApiService apiService;
 
@@ -1407,13 +1408,19 @@ class DocumentImagesBloc extends Bloc<DocumentImagesEvent, DocumentImagesState> 
     try {
       final startKmImage = await apiService.fetchSingleDocumentImage(event.tripId, "StartingKm");
       final closingKmImage = await apiService.fetchSingleDocumentImage(event.tripId, "ClosingKm");
+      final TollImage = await apiService.fetchSingleDocumentImage(event.tripId, "Toll");
+      final ParkingImage = await apiService.fetchSingleDocumentImage(event.tripId, "Parking");
 
       print("🖼 Start KM Image URL: $startKmImage");
       print("🖼 Closing KM Image URL: $closingKmImage");
+      print("🖼 toll KM Image URL: $TollImage");
+      print("🖼 parking KM Image URL: $ParkingImage");
 
       emit(DocumentImagesLoaded(
         startKmImage: startKmImage != null ? "${AppConstants.baseUrl}/uploads/$startKmImage" : null,
         closingKmImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$closingKmImage" : null,
+        TollImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$TollImage" : null,
+        ParkingImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$ParkingImage" : null,
       ));
 
 
@@ -1424,3 +1431,32 @@ class DocumentImagesBloc extends Bloc<DocumentImagesEvent, DocumentImagesState> 
     }
   }
 }
+
+//getting uploaded images bloc completed
+
+
+
+//getting dynamic closing kilometer bloc start
+
+
+class GettingClosingKilometerBloc extends Bloc<GettingClosingKilometerEvent, GettingClosingKilometerState> {
+  final ApiService apiService;
+
+  GettingClosingKilometerBloc(this.apiService) : super(ClosingKilometerLoading()) {
+    on<FetchClosingKilometer>((event, emit) async {
+      emit(ClosingKilometerLoading());
+      try {
+        final response = await apiService.getKMForParticularTrip(event.tripId);
+        if (response.containsKey('error')) {
+          emit(ClosingKilometerError(response['error']));
+        } else {
+          emit(ClosingKilometerLoaded(response));
+        }
+      } catch (e) {
+        emit(ClosingKilometerError("Failed to fetch closing KM data"));
+      }
+    });
+  }
+}
+
+//getting dynamic closing kilometer bloc start

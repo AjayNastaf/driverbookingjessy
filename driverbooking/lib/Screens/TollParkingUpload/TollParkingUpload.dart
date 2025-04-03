@@ -10,7 +10,9 @@ import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
 
 
 
@@ -324,6 +326,8 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
     return  BlocListener<TollParkingDetailsBloc, TollParkingDetailsState>(
         listener: (context, state) {
       if (state is TollParkingUpdated) {
@@ -362,7 +366,15 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
       ),
       // appBar: AppBar(title: Text("Welcome, $username")),
 
-      body: RefreshIndicator( onRefresh: _refreshDataTollParking,
+      body:Stack(
+        children: [
+          Positioned(
+            top: 15,
+            left: 0,
+            right: 0,
+            child: NoInternetBanner(isConnected: isConnected),
+          ),
+      RefreshIndicator( onRefresh: _refreshDataTollParking,
         child:  SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
         child: Padding(
@@ -565,7 +577,9 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
             ],
           ),
         ),
-      ),)
+      ),),
+        ],
+      )
     ),
     );
   }

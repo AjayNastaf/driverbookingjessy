@@ -793,11 +793,14 @@ class DocumentImagesLoading extends DocumentImagesState {}
 class DocumentImagesLoaded extends DocumentImagesState {
   final String? startKmImage;
   final String? closingKmImage;
+  final String? TollImage;
+  final String? ParkingImage;
 
-  DocumentImagesLoaded({required this.startKmImage, required this.closingKmImage});
+
+  DocumentImagesLoaded({required this.startKmImage, required this.closingKmImage, required this.ParkingImage, required this.TollImage});
 
   @override
-  List<Object> get props => [startKmImage ?? '', closingKmImage ?? ''];
+  List<Object> get props => [startKmImage ?? '', closingKmImage ?? '', ParkingImage ?? '' ,TollImage ??'' ];
 }
 
 class DocumentImagesError extends DocumentImagesState {
@@ -808,3 +811,28 @@ class DocumentImagesError extends DocumentImagesState {
   @override
   List<Object> get props => [error];
 }
+
+
+
+
+
+//getting dynamic closing kilometer state start
+abstract class GettingClosingKilometerState {}
+
+class ClosingKilometerLoading extends GettingClosingKilometerState {
+
+
+
+}
+
+class ClosingKilometerLoaded extends GettingClosingKilometerState {
+  final Map<String, dynamic> kmData;
+  ClosingKilometerLoaded(this.kmData);
+}
+
+class ClosingKilometerError extends GettingClosingKilometerState {
+  final String error;
+  ClosingKilometerError(this.error);
+}
+
+//getting dynamic closing kilometer state completed

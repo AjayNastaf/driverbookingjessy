@@ -1,3 +1,4 @@
+import 'package:jessy_cabs/Screens/SignatureEndRide/SignatureEndRide.dart';
 import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,6 +11,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'dart:async';
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
 
 class Customerlocationreached extends StatefulWidget {
   final String tripId;
@@ -458,10 +462,74 @@ Future<void> _refreshCustomerDestination() async {
   }
 
 
+  void _showEndRideConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm End Ride"),
+          content: Text("Do you really want to end the ride?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+                _endRide(); // Call the function to handle ending the ride
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _endRide() {
+    print('for current ');
+    isEndRideClicked = true;
+
+    Future.delayed(Duration(seconds: 1), () {
+      isEndRideClicked = false;
+      print("🔄 End Ride button reset, can be clicked again.");
+    });
+
+    if (_currentLatLng != null) {
+      _handleEndRide(_currentLatLng!.latitude, _currentLatLng!.longitude);
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => TripDetailsUpload(tripId: widget.tripId),
+      //   ),
+      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Signatureendride(tripId: widget.tripId),
+        ),
+      );
+      print('for current location');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Location not available yet!")),
+      );
+      showWarningSnackBar(context, "Location not available yet!");
+    }
+  }
+
+
+
+
+
   @override
   Widget build(BuildContext context) {
     String dropLocation = globals.dropLocation; // Access the global variable
     double progress = (_milliseconds % 60000) / 60000; // Progress for circular animation
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
     return BlocListener<TripTrackingDetailsBloc, TripTrackingDetailsState>(
         listener: (context, state) {
@@ -760,39 +828,43 @@ Future<void> _refreshCustomerDestination() async {
                       SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
+                        // onPressed: () {
+                        //   print('for current ');
+                        //   isEndRideClicked = true; // Set flag to true when button is clicked
+                        //
+                        //   setState(() {
+                        //     // isEndRideClicked = true; // Set flag to true when button is clicked
+                        //     // Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
+                        //   });
+                        //   Future.delayed(Duration(seconds: 1), () {
+                        //     isEndRideClicked = false;
+                        //     print("🔄 End Ride button reset, can be clicked again.");
+                        //   });
+                        //   if (_currentLatLng != null) {
+                        //
+                        //     // _handleEndRide(double latitude, double longitude);
+                        //     _handleEndRide(_currentLatLng!.latitude, _currentLatLng!.longitude);
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //         builder: (context) => TripDetailsUpload(tripId: widget.tripId),
+                        //       ),
+                        //     );
+                        //     print('for current location');
+                        //
+                        //
+                        //     } else {
+                        //       ScaffoldMessenger.of(context).showSnackBar(
+                        //         SnackBar(content: Text("llLocation not available yet!")),
+                        //       );
+                        //       showWarningSnackBar(context, "Location not available yet!");
+                        //     }
+                        //
+                        // },
                         onPressed: () {
-                          print('for current ');
-                          isEndRideClicked = true; // Set flag to true when button is clicked
-
-                          setState(() {
-                            // isEndRideClicked = true; // Set flag to true when button is clicked
-                            // Statusvalue = "waypoint"; // Set Trip_Status to "waypoint"
-                          });
-                          Future.delayed(Duration(seconds: 1), () {
-                            isEndRideClicked = false;
-                            print("🔄 End Ride button reset, can be clicked again.");
-                          });
-                          if (_currentLatLng != null) {
-
-                            // _handleEndRide(double latitude, double longitude);
-                            _handleEndRide(_currentLatLng!.latitude, _currentLatLng!.longitude);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TripDetailsUpload(tripId: widget.tripId),
-                              ),
-                            );
-                            print('for current location');
-
-
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text("llLocation not available yet!")),
-                              );
-                              showWarningSnackBar(context, "Location not available yet!");
-                            }
-
-                        }, style: ElevatedButton.styleFrom(
+                          _showEndRideConfirmationDialog(context);
+                        },
+                        style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           padding: EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -809,6 +881,12 @@ Future<void> _refreshCustomerDestination() async {
                 ),
               ),
             ),
+          ),
+          Positioned(
+            top: 15,
+            left: 0,
+            right: 0,
+            child: NoInternetBanner(isConnected: isConnected),
           ),
         ],
       ),

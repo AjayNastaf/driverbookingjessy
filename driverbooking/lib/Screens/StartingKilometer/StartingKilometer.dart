@@ -1,10 +1,12 @@
 import 'dart:io';
-
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import '../PickupScreen/PickupScreen.dart';
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
 
 class StartingKilometer extends StatefulWidget {
   final String address;
@@ -17,7 +19,9 @@ class StartingKilometer extends StatefulWidget {
 }
 
 class _StartingKilometerState extends State<StartingKilometer> {
-  final TextEditingController _startKM = TextEditingController();
+  // final TextEditingController _startKM = TextEditingController();
+  TextEditingController _startKM = TextEditingController(text: "0");
+
   File? _selectedFile;
   final ImagePicker _picker = ImagePicker();
   String? duty;
@@ -117,29 +121,45 @@ class _StartingKilometerState extends State<StartingKilometer> {
   // }
 
   // // Navigate to next screen
-  // Future<void> _goToNextScreen() async {
-  //   if (_startKM.text.isEmpty){
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Please enter the Starting Kilometer")),
-  //     );
-  //     return;
-  //   }
-  //
-  //   if(_selectedFile == null){
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Please Select Starting Kilometer image")),
-  //     );
-  //     return;
-  //
-  //   }
-  //
-  //   _handleStartingKmImageSubmit();
-  //   _handleStartingKmTextSubmit();
-  //
-  // }
+  Future<void> _goToNextScreen() async {
+    print("object");
+
+    if (_selectedFile != null) {
+      context.read<StartKmBloc>().add(
+        UploadStartingKilometerImage(
+          tripId: widget.tripId,
+          startingKilometerImage: _selectedFile!,
+        ),
+      );
+    } else {
+      print("Error: No image selected");
+    }
+
+    context.read<StartKmBloc>().add(
+      SubmitStartingKilometerText(
+        tripId: widget.tripId,
+        startKm: _startKM.text,
+        hclValue: hclhybriddata.toString(),
+        dutyValue: duty ?? "",
+      ),
+    );
+
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Pickupscreen(
+          address: widget.address,
+          tripId: widget.tripId,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Upload Starting Kilometer", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, )),
@@ -148,7 +168,10 @@ class _StartingKilometerState extends State<StartingKilometer> {
 
         elevation: 2,
       ),
-      body: RefreshIndicator(
+      body: Stack(
+        children: [
+
+      RefreshIndicator(
         onRefresh: () async {
           await _loadTripDetailsData();
           setState(() {}); // Update UI after refreshing
@@ -160,11 +183,12 @@ class _StartingKilometerState extends State<StartingKilometer> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Text Field with better styling
+
+        // Text Field with better styling
             TextField(
               controller: _startKM,
               decoration: InputDecoration(
-                hintText: "Enter text here",
+                hintText: "Starting Kilometer",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -256,53 +280,50 @@ class _StartingKilometerState extends State<StartingKilometer> {
 
                 return  ElevatedButton(
 
-             // onPressed: _goToNextScreen,
-                  onPressed: () {
-                    if (_startKM.text.isEmpty){
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   const SnackBar(content: Text("Please enter the Starting Kilometer")),
-                      // );
-                      showWarningSnackBar(context, "Please enter the Starting Kilometer");
-                      return;
-                    }
-
-                    if(_selectedFile == null){
-                      // ScaffoldMessenger.of(context).showSnackBar(
-                      //   const SnackBar(content: Text("Please Select Starting Kilometer image")),
-                      // );
-                      showWarningSnackBar(context, "Please Select Starting Kilometer image");
-                      return;
-
-                    }
-
-
-                    if (_selectedFile != null && _startKM.text.isNotEmpty) {
-                      context.read<StartKmBloc>().add(
-                        UploadStartingKilometerImage(tripId: widget.tripId, startingKilometerImage: _selectedFile!),
-                      );
-
-                      context.read<StartKmBloc>().add(
-                        SubmitStartingKilometerText(
-                          tripId: widget.tripId,
-                          startKm: _startKM.text,
-                          hclValue: hclhybriddata.toString(),
-                          dutyValue: duty ?? "",
-                        ),
-                      );
-
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Pickupscreen(
-                            address: widget.address,
-                            tripId: widget.tripId,
-                          ),
-                        ),
-                      );
-
-                    }
-                  },
+             onPressed: _goToNextScreen,
+             //      onPressed: () {
+             //        // if (_startKM.text.isEmpty){
+             //        //
+             //        //   showWarningSnackBar(context, "Please enter the Starting Kilometer");
+             //        //   return;
+             //        // }
+             //        //
+             //        // if(_selectedFile == null){
+             //        //
+             //        //   showWarningSnackBar(context, "Please Select Starting Kilometer image");
+             //        //   return;
+             //        //
+             //        // }
+             //
+             //
+             //        // if (_selectedFile != null && _startKM.text.isNotEmpty) {
+             //        //   context.read<StartKmBloc>().add(
+             //        //     UploadStartingKilometerImage(tripId: widget.tripId, startingKilometerImage: _selectedFile!),
+             //        //   );
+             //        //
+             //        //   context.read<StartKmBloc>().add(
+             //        //     SubmitStartingKilometerText(
+             //        //       tripId: widget.tripId,
+             //        //       startKm: _startKM.text,
+             //        //       hclValue: hclhybriddata.toString(),
+             //        //       dutyValue: duty ?? "",
+             //        //     ),
+             //        //   );
+             //        //
+             //        //
+             //        //   Navigator.push(
+             //        //     context,
+             //        //     MaterialPageRoute(
+             //        //       builder: (context) => Pickupscreen(
+             //        //         address: widget.address,
+             //        //         tripId: widget.tripId,
+             //        //       ),
+             //        //     ),
+             //        //   );
+             //        //
+             //        // }
+             //
+             //      },
 
 
 
@@ -325,7 +346,17 @@ class _StartingKilometerState extends State<StartingKilometer> {
           ],
         ),
       ),),
-    )
+    ),
+
+          Positioned(
+            top: 15,
+            left: 0,
+            right: 0,
+            child: NoInternetBanner(isConnected: isConnected),
+          ),
+
+        ],
+      ),
     );
   }
 

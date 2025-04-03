@@ -12,6 +12,9 @@ import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
 
 class Bookingdetails extends StatefulWidget {
   final String userId;
@@ -115,10 +118,12 @@ class _BookingdetailsState extends State<Bookingdetails> {
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Booking Details",
+          "Trip Details",
           style:
               TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
         ),
@@ -126,6 +131,10 @@ class _BookingdetailsState extends State<Bookingdetails> {
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body:
+          Stack(
+            children: [
+
+
       RefreshIndicator(
           onRefresh: _initializeData,
       child: BlocBuilder<GettingTripSheetDetailsByUseridBloc, GettingTripSheetDetilsByUseridState>(builder: (context , state){
@@ -304,7 +313,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
                         child: state is UpdateTripStatusInTripsheetLoading
                             ? const CircularProgressIndicator(color: Colors.white)
                             : const Text(
-                          "Accept Booking",
+                          "Accept",
                           style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
                         ),
                       );
@@ -325,8 +334,15 @@ class _BookingdetailsState extends State<Bookingdetails> {
         }
       })
 
-    )
-
+    ),
+    Positioned(
+      top: 15,
+      left: 0,
+      right: 0,
+      child: NoInternetBanner(isConnected: isConnected),
+    ),
+            ],
+          ),
 
     );
   }

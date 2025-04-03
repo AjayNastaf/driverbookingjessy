@@ -12,7 +12,9 @@ import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
 
 
 class Signatureendride extends StatefulWidget {
@@ -200,6 +202,9 @@ class _SignatureendrideState extends State<Signatureendride> {
           ),
         );
       }
+      _handleNavNextpage();
+
+
     } else {
       showFailureSnackBar(context, "Please provide a signature.");
     }
@@ -222,6 +227,13 @@ class _SignatureendrideState extends State<Signatureendride> {
         builder: (context) => Homescreen(userId: storedUserId, username: storedUsername),
       ),
     );
+  }
+
+
+  void _handleNavNextpage(){
+    // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
+
   }
 
   void _handleSubmitModal() {
@@ -261,7 +273,7 @@ class _SignatureendrideState extends State<Signatureendride> {
                 backgroundColor: Colors.green,
               ),
               child: Text(
-                'Upload',
+                'Uploaddd',
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
@@ -271,10 +283,11 @@ class _SignatureendrideState extends State<Signatureendride> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
-      return BlocListener<TripSignatureBloc, TripSignatureState>(
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
+    return BlocListener<TripSignatureBloc, TripSignatureState>(
         listener: (context, state) {
       if (state is SaveSignatureSuccess) {
         final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
@@ -307,7 +320,8 @@ class _SignatureendrideState extends State<Signatureendride> {
           _isLoading = false;
         });
         _handleClear();
-        _handleSubmitModal();
+        // _handleSubmitModal();
+        _handleNavNextpage();
       } else if (state is TripSignatureFailure) {
         showFailureSnackBar(context, state.error);
         setState(() {
@@ -321,7 +335,10 @@ class _SignatureendrideState extends State<Signatureendride> {
       appBar: AppBar(
         title: Text("End Ride"),
       ),
-      body:RefreshIndicator(
+      body:Stack(
+        children: [
+
+      RefreshIndicator(
         onRefresh: _refreshdignatureScreen,
         child:SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -362,7 +379,7 @@ class _SignatureendrideState extends State<Signatureendride> {
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                   child: _isLoading
                       ? CircularProgressIndicator(color: Colors.white)
-                      : Text("Submit & End Ride", style: TextStyle(color: Colors.white, fontSize: 18.0)),
+                      : Text("Submit", style: TextStyle(color: Colors.white, fontSize: 18.0)),
                 ),
 
 
@@ -376,7 +393,16 @@ class _SignatureendrideState extends State<Signatureendride> {
             ),
           ],
         ),
-      ),),)
-    ),);
+      ),),),
+          Positioned(
+            top: 15,
+            left: 0,
+            right: 0,
+            child: NoInternetBanner(isConnected: isConnected),
+          ),
+        ],
+      )
+    ),
+    );
   }
 }

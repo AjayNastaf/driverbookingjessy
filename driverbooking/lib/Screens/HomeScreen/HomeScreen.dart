@@ -315,6 +315,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
 
 class Homescreen extends StatefulWidget {
   final String userId;
@@ -374,6 +379,8 @@ class _HomescreenState extends State<Homescreen> {
   }
 
 
+
+
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userDataString = prefs.getString('userData');
@@ -400,6 +407,7 @@ class _HomescreenState extends State<Homescreen> {
 
         // context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
       } catch (e) {
+        print("Error decoding userData: $e");
         print("Error decoding userData: $e");
       }
     } else {
@@ -592,6 +600,7 @@ class _HomescreenState extends State<Homescreen> {
   @override
   Widget build(BuildContext context) {
     print("Building UI with userData: $userData"); // Debugging
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -967,7 +976,10 @@ class _HomescreenState extends State<Homescreen> {
       appBar: AppBar(
         title: Text("Home Screen"),
       ),
-      body:
+      body:Stack(
+        children: [
+
+
         // Column(
         //   children: [
         //
@@ -983,65 +995,147 @@ class _HomescreenState extends State<Homescreen> {
         //
         //   ],
         // )
-      RefreshIndicator(
-        onRefresh: _refreshData, // 🔄 Pull-to-Refresh function
-        child:
-      BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
-        builder: (context, state) {
-          if (state is FetchingTripSheetValuesLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (state is FetchingTripSheetValuesLoaded) {
-            return state.tripSheetData.isEmpty
-                ? const Center(
-              child: Text('No trip sheet data found.'),
-            )
-                : ListView.builder(
-              itemCount: state.tripSheetData.length, // Use state.tripSheetData
-              itemBuilder: (context, index) {
-                final trip = state.tripSheetData[index]; // Use state.tripSheetData
-                return Column(
-                  children: [
-                    buildSection(
-                      context,
-                      title: '${trip['duty']}',
-                      dateTime: '${trip['tripid']}',
-                      buttonText: '${trip['apps']}',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Bookingdetails(
-                              username: widget.username,
-                              userId: widget.userId,
-                              tripId: trip['tripid'].toString(),
-                              duty: trip['duty'].toString(),
+    //   RefreshIndicator(
+    //     onRefresh: _refreshData, // 🔄 Pull-to-Refresh function
+    //     child:BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
+    //     builder: (context, state) {
+    //       if (state is FetchingTripSheetValuesLoading) {
+    //         return const Center(
+    //           child: CircularProgressIndicator(),
+    //         );
+    //       }
+    //
+    //       else if (state is FetchingTripSheetValuesLoaded) {
+    //         return state.tripSheetData.isEmpty
+    //             ? const Center(
+    //           child: Text('No trip sheet data found.'),
+    //         )
+    //             : ListView.builder(
+    //           itemCount: state.tripSheetData.length, // Use state.tripSheetData
+    //           itemBuilder: (context, index) {
+    //             final trip = state.tripSheetData[index]; // Use state.tripSheetData
+    //             return Column(
+    //               children: [
+    //                 buildSection(
+    //                   context,
+    //                   title: '${trip['duty']}',
+    //                   dateTime: '${trip['tripid']}',
+    //                   buttonText: '${trip['apps']}',
+    //                   onTap: () {
+    //                     Navigator.push(
+    //                       context,
+    //                       MaterialPageRoute(
+    //                         builder: (context) => Bookingdetails(
+    //                           username: widget.username,
+    //                           userId: widget.userId,
+    //                           tripId: trip['tripid'].toString(),
+    //                           duty: trip['duty'].toString(),
+    //                         ),
+    //                       ),
+    //                     );
+    //                   },
+    //                 ),
+    //               ],
+    //             );
+    //           },
+    //         );
+    //       }
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //
+    //       // Default case to handle any unexpected state
+    //       return Container();
+    //     },
+    //   ),
+    //
+    // ),
+          RefreshIndicator(
+            onRefresh: _refreshData, // 🔄 Pull-to-Refresh function
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh always works
+              child: BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
+                builder: (context, state) {
+                  if (state is FetchingTripSheetValuesLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (state is FetchingTripSheetValuesLoaded) {
+                    return state.tripSheetData.isEmpty
+                        ? const Center(
+                          child: Text('No trip sheet data found.'),
+                        )
+                        : ListView.builder(
+                      shrinkWrap: true, // Ensures ListView adapts inside SingleChildScrollView
+                      physics: const NeverScrollableScrollPhysics(), // Prevents nested scrolling issues
+                      itemCount: state.tripSheetData.length, // Use state.tripSheetData
+                      itemBuilder: (context, index) {
+                        final trip = state.tripSheetData[index]; // Use state.tripSheetData
+                        return Column(
+                          children: [
+                            buildSection(
+                              context,
+                              title: '${trip['duty']}',
+                              dateTime: '${trip['tripid']}',
+                              buttonText: '${trip['apps']}',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => Bookingdetails(
+                                      username: widget.username,
+                                      userId: widget.userId,
+                                      tripId: trip['tripid'].toString(),
+                                      duty: trip['duty'].toString(),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                          ),
+                          ],
                         );
                       },
-                    ),
-                  ],
-                );
-              },
-            );
-          }
-          // else if (state is FetchingTripSheetValuesFailure) {
-          //   return Center(
-          //     child: Text(
-          //       state.message,
-          //       style: TextStyle(color: Colors.red),
-          //     ),
-          //   );
-          // }
+                    );
+                  }
+                  // Default case to handle any unexpected state
+                  return Container();
+                },
+              ),
+            ),
+          ),
 
-          // Default case to handle any unexpected state
-          return Container();
-        },
+          Positioned(
+        top: 15,
+        left: 0,
+        right: 0,
+        child: NoInternetBanner(isConnected: isConnected),
       ),
 
-    )
+        ],
+      )
     );
   }
 }

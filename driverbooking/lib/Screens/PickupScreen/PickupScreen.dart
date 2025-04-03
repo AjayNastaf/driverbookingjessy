@@ -11,6 +11,9 @@ import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
 
 
 class Pickupscreen extends StatefulWidget {
@@ -36,7 +39,9 @@ class _PickupscreenState extends State<Pickupscreen> {
     }
     @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+      bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
+      return  Scaffold(
       appBar: AppBar(
         title: const Text(
           "Pick Up",
@@ -200,7 +205,12 @@ class _PickupscreenState extends State<Pickupscreen> {
               ),
             ),
           ),
-
+          Positioned(
+            top: 15,
+            left: 0,
+            right: 0,
+            child: NoInternetBanner(isConnected: isConnected),
+          ),
         ],
       ),
     );

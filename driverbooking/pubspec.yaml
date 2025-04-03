@@ -61,6 +61,8 @@ dependencies:
 #    path_provider: ^2.1.2
   open_file: ^3.3.2
   image_picker: ^1.0.7  # Ensure it's the latest version
+  connectivity_plus: ^5.0.2  # Use the latest version
+  lucide_icons: ^0.243.0  # Add this package
 
 
 

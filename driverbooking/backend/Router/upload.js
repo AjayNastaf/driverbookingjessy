@@ -3,6 +3,8 @@ const router = express.Router();
 const db = require('../db');
 const multer = require('multer');
 const path = require('path');
+const axios = require('axios');
+
 // const bodyParser=require('body-parser');
 // const app = express();
 // const router = express.Router();
@@ -108,6 +110,160 @@ router.post('/update_updatetrip', (req, res) => {
 });
 //end
 
+
+//closing kilometer fetching
+//router.get('/KMForParticularTrip', async (req, res) => {
+//    const { Trip_id } = req.query;
+//
+//    if (!Trip_id) {
+//        return res.status(400).json({ error: "Trip_id is required" });
+//    }
+//
+//    const Trip_Status = ["Started", "On_Going", "Reached"];
+//    const sqlQuery = `SELECT Latitude_loc, Longtitude_loc FROM VehicleAccessLocation
+//                      WHERE Trip_id = ? AND Trip_Status IN (?) ORDER BY Runing_Time ASC`;
+//
+//    const sqlTripsheetQuery = `SELECT startkm FROM tripsheet WHERE tripid = ?`;
+//
+//    db.query(sqlQuery, [Trip_id, Trip_Status], async (err, results) => {
+//        if (err) {
+//            console.error("Error fetching trip data:", err);
+//            return res.status(500).json({ error: "Internal Server Error" });
+//        }
+//
+//        if (results.length < 2) {
+//            return res.json({ message: "Not enough data points to calculate distance." });
+//        }
+//
+//        const origins = `${results[0].Latitude_loc},${results[0].Longtitude_loc}`;
+//        const destinations = `${results[results.length - 1].Latitude_loc},${results[results.length - 1].Longtitude_loc}`;
+//        const waypoints = results.slice(1, -1).map(point => `${point.Latitude_loc},${point.Longtitude_loc}`).join('|');
+//
+//        try {
+//            const response = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json`, {
+//                params: {
+//                    origins,
+//                    destinations,
+//                    waypoints,
+//                    key: GOOGLE_MAPS_API_KEY,
+//                    mode: 'driving'
+//                }
+//            });
+//
+//            let distance = response.data.rows[0].elements[0].distance.value / 1000; // Convert meters to KM
+//            distance = Math.round(distance); // Round up to the next whole number
+//            let distanceCheck = response.data.rows[0].elements[0].distance.value / 1000; // Convert meters to KM
+//
+//            console.log(`Total Distance for Trip ID ${Trip_id}: ${distance} KM`,distanceCheck);
+//
+//            // Fetch startkm from tripsheet
+//            db.query(sqlTripsheetQuery, [Trip_id], (err, tripResults) => {
+//                if (err) {
+//                    console.error("Error fetching trip sheet data:", err);
+//                    return res.status(500).json({ error: "Internal Server Error" });
+//                }
+//
+//                if (tripResults.length === 0) {
+//                    return res.status(404).json({ error: "Trip sheet data not found" });
+//                }
+//
+//                const startkm = tripResults[0].startkm.toString(); // Ensure startkm is a string
+//                const totalKM = (parseFloat(startkm) + distance).toFixed(0); // Add and round to whole number
+//console.log(Trip_id, startkm, distance, totalKM,"finallllllllllllllllllllllllllll");
+//
+//                res.json({ Trip_id, startkm, totalDistance: distance, finalKM: totalKM });
+//            });
+//
+//        } catch (apiError) {
+//            console.log("Error fetching data from Google API:", apiError);
+//            res.status(500).json({ error: "Error fetching distance from Google API" });
+//        }
+//    });
+//});
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCn47dR5-NLfhq0EqxlgaFw8IEaZO5LnRE'; // Replace with your API key
+router.get('/KMForParticularTrip', async (req, res) => {
+    const { Trip_id } = req.query;
+
+    if (!Trip_id) {
+        console.log("❌ Missing Trip_id in request");
+        return res.status(400).json({ error: "Trip_id is required" });
+    }
+
+    console.log(`📌 Received request for Trip ID: ${Trip_id}`);
+
+    const Trip_Status = ["Started", "On_Going", "Reached"];
+    const sqlQuery = `SELECT Latitude_loc, Longtitude_loc FROM VehicleAccessLocation
+                      WHERE Trip_id = ? AND Trip_Status IN (?) ORDER BY Runing_Time ASC`;
+
+    const sqlTripsheetQuery = `SELECT startkm FROM tripsheet WHERE tripid = ?`;
+
+    db.query(sqlQuery, [Trip_id, Trip_Status], async (err, results) => {
+        if (err) {
+            console.error("❌ Database Error:", err);
+            return res.status(500).json({ error: "Database Error", details: err.message });
+        }
+
+        console.log(`✅ Fetched ${results.length} location records for Trip ID: ${Trip_id}`);
+
+        if (results.length < 2) {
+            return res.json({ message: "Not enough data points to calculate distance." });
+        }
+
+        const origins = `${results[0].Latitude_loc},${results[0].Longtitude_loc}`;
+        const destinations = `${results[results.length - 1].Latitude_loc},${results[results.length - 1].Longtitude_loc}`;
+        const waypoints = results.slice(1, -1).map(point => `${point.Latitude_loc},${point.Longtitude_loc}`).join('|');
+
+        try {
+            console.log(`🔍 Fetching distance from Google API: origins=${origins}, destinations=${destinations}`);
+
+            const response = await axios.get(`https://maps.googleapis.com/maps/api/distancematrix/json`, {
+                params: {
+                    origins,
+                    destinations,
+                    waypoints,
+                    key: GOOGLE_MAPS_API_KEY,
+                    mode: 'driving'
+                }
+            });
+
+            if (response.data.status !== "OK") {
+                console.error("❌ Google API Error:", response.data);
+                return res.status(500).json({ error: "Google API Error", details: response.data });
+            }
+
+            let distance = response.data.rows[0].elements[0].distance.value / 1000;
+            distance = Math.round(distance);
+
+            console.log(`📏 Calculated Distance: ${distance} KM`);
+
+            db.query(sqlTripsheetQuery, [Trip_id], (err, tripResults) => {
+                if (err) {
+                    console.error("❌ Error fetching trip sheet data:", err);
+                    return res.status(500).json({ error: "Database Error", details: err.message });
+                }
+
+                if (tripResults.length === 0) {
+                    console.log("⚠️ No trip sheet data found for Trip ID:", Trip_id);
+                    return res.status(404).json({ error: "Trip sheet data not found" });
+                }
+
+                const startkm = tripResults[0].startkm.toString();
+                const totalKM = (parseFloat(startkm) + distance).toFixed(0);
+
+                console.log(`✅ Final Distance for Trip ID ${Trip_id}: Start KM: ${startkm}, Total KM: ${totalKM}`);
+
+                res.json({ Trip_id, startkm, totalDistance: distance, finalKM: totalKM });
+            });
+
+        } catch (apiError) {
+            console.error("❌ Google API Request Error:", apiError.message);
+            res.status(500).json({ error: "Google API Request Failed", details: apiError.message });
+        }
+    });
+});
+
+
+//closing kilometer fetching end
 
 
 

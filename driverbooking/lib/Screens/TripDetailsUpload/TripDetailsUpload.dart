@@ -549,6 +549,7 @@
 
 
 import 'dart:io';
+import 'package:jessy_cabs/Screens/TripDetailsPreview/TripDetailsPreview.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'package:flutter/material.dart';
@@ -613,6 +614,8 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
 
   Future<void> _fetchTripDetails() async {
+    BlocProvider.of<GettingClosingKilometerBloc>(context).add(FetchClosingKilometer(widget.tripId));
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String? tripDetailsJson = prefs.getString('tripDetails');
@@ -647,6 +650,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     _fetchTripDetails();
 
     _tripUploadBloc = TripUploadBloc();
+    BlocProvider.of<GettingClosingKilometerBloc>(context).add(FetchClosingKilometer(widget.tripId));
 
   }
 
@@ -804,284 +808,421 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
 
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (context) => _tripUploadBloc,
-        child:
-      Scaffold(
-      appBar: AppBar(
-        title: const Text("Trip Details Upload"),
-      ),
-        body: BlocListener<TripUploadBloc, TripUploadState>(
-            listener: (context, state) {
-              if (state is TripUploadSuccess) {
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(content: Text(state.message)),
-                // );
-                showSuccessSnackBar(context, state.message);
-              } else if (state is TripUploadFailure) {
-                // ScaffoldMessenger.of(context).showSnackBar(
-                //   SnackBar(content: Text(state.error)),
-                // );
-                showFailureSnackBar(context, state.error);
-              }
-            },
-            child:
-             RefreshIndicator(
-            onRefresh: _fetchTripDetails, // Calls the function to reload data
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(), // Enables scroll even when content is less
-
-              child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Trip ID
-
-              TextField(
-                controller: tripIdController,
-                enabled: false,
-                decoration: const InputDecoration(
-                  // labelText: "Trip ID",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Guest Name
-              TextField(
-                controller: guestNameController,
-                enabled: false,
-                decoration: const InputDecoration(
-                  labelText: "Guest Name",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Guest Mobile Number
-              TextField(
-                controller: guestMobileController,
-                enabled: false,
-                decoration: const InputDecoration(
-                  labelText: "Guest Mobile Number",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Vehicle Type
-              TextField(
-                controller: vehicleTypeController,
-                enabled: false,
-                decoration: const InputDecoration(
-                  labelText: "Vehicle Type",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Starting Date
-              TextField(
-                readOnly: true,
-                enabled: false,
-                controller: startDateController,
-                decoration: const InputDecoration(
-                  labelText: "Starting Date",
-                  border: OutlineInputBorder(),
-                ),
-
-              ),
-              const SizedBox(height: 16),
-
-              // Closing Date
-              TextField(
-                readOnly: true,
-                enabled: false,
-                controller: closeDateController,
-                decoration: const InputDecoration(
-                  labelText: "Closing Date",
-                  border: OutlineInputBorder(),
-                ),
 
 
-              ),
-              const SizedBox(height: 16),
 
-              // Closing Kilometer
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: closeKmController,
-                      enabled: isCloseKmEnabled,
-                      decoration: const InputDecoration(
-                        labelText: "Closing Kilometer",
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onPressed: () => _chooseOption(context, 2),
-                    child: const Text("Upload Image"),
-                  ),
-                ],
-              ),
-              _selectedImage2 != null
-                  ? Image.file(
-                _selectedImage2!,
-                width: 200,
-                height: 200,
-                fit: BoxFit.cover,
-              )
-                  : const Text("No image selected for Button 2"),
-              const SizedBox(height: 16),
-
-
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    // onPressed: () async {
-                    //   // Validate the Starting Kilometer and Closing Kilometer fields and images
-                    //
-                    //
-                    //   // if (closeKmController.text.isEmpty) {
-                    //   //   ScaffoldMessenger.of(context).showSnackBar(
-                    //   //     const SnackBar(content: Text("Please enter the Closing Kilometer")),
-                    //   //   );
-                    //   //   return;
-                    //   // }
-                    //   //
-                    //   // if (_selectedImage2 == null) {
-                    //   //   ScaffoldMessenger.of(context).showSnackBar(
-                    //   //     const SnackBar(content: Text("Please upload an image for Closing Kilometer")),
-                    //   //   );
-                    //   //   return;
-                    //   // }
-                    //
-                    //
-                    //   _handleClosingKmTextSubmit();
-                    //   _handleClosingKmSubmit();
-                    //   _handleSignatureStatus();
-                    //
-                    //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId,)));
-                    //
-                    // },
-                    onPressed: () {
-                      if (closeKmController.text.isEmpty || _selectedImage2 == null) {
-                        // ScaffoldMessenger.of(context).showSnackBar(
-                        //   const SnackBar(content: Text("Please fill all fields")),
-                        // );
-                        showWarningSnackBar(context, 'Please upload closing kilometer and image');
-                        return;
-                      }
-
-                      _tripUploadBloc.add(UploadClosingKmText(tripId: widget.tripId));
-                      _tripUploadBloc.add(UploadClosingKmImage(tripId: widget.tripId, image: _selectedImage2!));
-                      final dutyValue = duty ?? ""; // Use the fetched duty value (default to "Local" if null)
-                      final hclValue = hcl ?? 0; //
-                      _tripUploadBloc.add(UpdateSignatureStatus(
-                        tripId: widget.tripId,
-                        closeKm: closeKmController.text,
-                        duty: dutyValue,
-                        hcl: hclValue,
-                      ));
-
-                         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId,)));
-
-
-                    },
-                    child: Text("Upload Toll and Parking Data"),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ))),
-    )
-    );
-  }
-  // Future<void> _chooseOption(BuildContext context) async {
-  //   final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-  //   if (image != null) {
-  //     setState(() {
-  //       _selectedImage2 = File(image.path);
-  //     });
-  //   }
-  // }
   // @override
   // Widget build(BuildContext context) {
   //   return BlocProvider(
-  //     create: (context) => _tripUploadBloc,
-  //     child: Scaffold(
-  //       appBar: AppBar(title: const Text("Trip Details Upload")),
+  //       create: (context) => _tripUploadBloc,
+  //       child:
+  //     Scaffold(
+  //     appBar: AppBar(
+  //       title: const Text("Trip Details Upload"),
+  //     ),
   //       body: BlocListener<TripUploadBloc, TripUploadState>(
-  //         listener: (context, state) {
-  //           if (state is TripUploadSuccess) {
-  //             ScaffoldMessenger.of(context).showSnackBar(
-  //               SnackBar(content: Text(state.message)),
-  //             );
-  //           } else if (state is TripUploadFailure) {
-  //             ScaffoldMessenger.of(context).showSnackBar(
-  //               SnackBar(content: Text(state.error)),
-  //             );
-  //           }
-  //         },
-  //         child: Padding(
-  //           padding: const EdgeInsets.all(16.0),
-  //           child: Column(
-  //             children: [
-  //               TextField(
-  //                 controller: closeKmController,
-  //                 decoration: const InputDecoration(
-  //                   labelText: "Closing Kilometer",
-  //                   border: OutlineInputBorder(),
+  //           listener: (context, state) {
+  //             if (state is TripUploadSuccess) {
+  //
+  //               showSuccessSnackBar(context, state.message);
+  //             } else if (state is TripUploadFailure) {
+  //
+  //               showFailureSnackBar(context, state.error);
+  //             }
+  //           },
+  //           child:
+  //            RefreshIndicator(
+  //           onRefresh: _fetchTripDetails, // Calls the function to reload data
+  //           child: SingleChildScrollView(
+  //             physics: const AlwaysScrollableScrollPhysics(), // Enables scroll even when content is less
+  //
+  //             child: Padding(
+  //         padding: const EdgeInsets.all(16.0),
+  //         child: Column(
+  //           children: [
+  //             // Trip ID
+  //
+  //             TextField(
+  //               controller: tripIdController,
+  //               enabled: false,
+  //               decoration: const InputDecoration(
+  //                 // labelText: "Trip ID",
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //             ),
+  //             const SizedBox(height: 16),
+  //
+  //             // Guest Name
+  //             TextField(
+  //               controller: guestNameController,
+  //               enabled: false,
+  //               decoration: const InputDecoration(
+  //                 labelText: "Guest Name",
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //             ),
+  //             const SizedBox(height: 16),
+  //
+  //             // Guest Mobile Number
+  //             TextField(
+  //               controller: guestMobileController,
+  //               enabled: false,
+  //               decoration: const InputDecoration(
+  //                 labelText: "Guest Mobile Number",
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //             ),
+  //             const SizedBox(height: 16),
+  //
+  //             // Vehicle Type
+  //             TextField(
+  //               controller: vehicleTypeController,
+  //               enabled: false,
+  //               decoration: const InputDecoration(
+  //                 labelText: "Vehicle Type",
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //             ),
+  //             const SizedBox(height: 16),
+  //
+  //             // Starting Date
+  //             TextField(
+  //               readOnly: true,
+  //               enabled: false,
+  //               controller: startDateController,
+  //               decoration: const InputDecoration(
+  //                 labelText: "Starting Date",
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //
+  //             ),
+  //             const SizedBox(height: 16),
+  //
+  //             // Closing Date
+  //             TextField(
+  //               readOnly: true,
+  //               enabled: false,
+  //               controller: closeDateController,
+  //               decoration: const InputDecoration(
+  //                 labelText: "Closing Date",
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //
+  //
+  //             ),
+  //             const SizedBox(height: 16),
+  //
+  //             // Closing Kilometer
+  //             Row(
+  //               children: [
+  //                 Expanded(
+  //                   child: TextField(
+  //                     controller: closeKmController,
+  //                     enabled: isCloseKmEnabled,
+  //                     decoration: const InputDecoration(
+  //                       labelText: "Closing Kilometer",
+  //                       border: OutlineInputBorder(),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(width: 8),
+  //                 ElevatedButton(
+  //                   style: ElevatedButton.styleFrom(
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(8),
+  //                     ),
+  //                   ),
+  //                   onPressed: () => _chooseOption(context, 2),
+  //                   child: const Text("Upload Image"),
+  //                 ),
+  //               ],
+  //             ),
+  //             _selectedImage2 != null
+  //                 ? Image.file(
+  //               _selectedImage2!,
+  //               width: 200,
+  //               height: 200,
+  //               fit: BoxFit.cover,
+  //             )
+  //                 : const Text("No image selected for Button 2"),
+  //             const SizedBox(height: 16),
+  //
+  //
+  //             Padding(
+  //               padding: const EdgeInsets.only(top: 16.0),
+  //               child: SizedBox(
+  //                 width: double.infinity,
+  //                 child: ElevatedButton(
+  //                   // onPressed: () async {
+  //                   //   // Validate the Starting Kilometer and Closing Kilometer fields and images
+  //                   //
+  //                   //
+  //                   //   // if (closeKmController.text.isEmpty) {
+  //                   //   //   ScaffoldMessenger.of(context).showSnackBar(
+  //                   //   //     const SnackBar(content: Text("Please enter the Closing Kilometer")),
+  //                   //   //   );
+  //                   //   //   return;
+  //                   //   // }
+  //                   //   //
+  //                   //   // if (_selectedImage2 == null) {
+  //                   //   //   ScaffoldMessenger.of(context).showSnackBar(
+  //                   //   //     const SnackBar(content: Text("Please upload an image for Closing Kilometer")),
+  //                   //   //   );
+  //                   //   //   return;
+  //                   //   // }
+  //                   //
+  //                   //
+  //                   //   _handleClosingKmTextSubmit();
+  //                   //   _handleClosingKmSubmit();
+  //                   //   _handleSignatureStatus();
+  //                   //
+  //                   //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId,)));
+  //                   //
+  //                   // },
+  //                   onPressed: () {
+  //                     // if (closeKmController.text.isEmpty || _selectedImage2 == null) {
+  //                     //
+  //                     //   showWarningSnackBar(context, 'Please upload closing kilometer and image');
+  //                     //   return;
+  //                     // }
+  //                     //
+  //                     // _tripUploadBloc.add(UploadClosingKmText(tripId: widget.tripId));
+  //                     // _tripUploadBloc.add(UploadClosingKmImage(tripId: widget.tripId, image: _selectedImage2!));
+  //                     // final dutyValue = duty ?? ""; // Use the fetched duty value (default to "Local" if null)
+  //                     // final hclValue = hcl ?? 0; //
+  //                     // _tripUploadBloc.add(UpdateSignatureStatus(
+  //                     //   tripId: widget.tripId,
+  //                     //   closeKm: closeKmController.text,
+  //                     //   duty: dutyValue,
+  //                     //   hcl: hclValue,
+  //                     // ));
+  //
+  //
+  //                     _tripUploadBloc.add(UploadClosingKmText(tripId: widget.tripId));
+  //
+  //                                               if (_selectedImage2 != null) {
+  //                                                 _tripUploadBloc.add(UploadClosingKmImage(tripId: widget.tripId, image: _selectedImage2!));
+  //                                               }
+  //
+  //                                               final dutyValue = duty ?? "";
+  //                                               final hclValue = hcl ?? 0;
+  //
+  //                                               _tripUploadBloc.add(UpdateSignatureStatus(
+  //                                                 tripId: widget.tripId,
+  //                                                 closeKm: closeKmController.text,
+  //                                                 duty: dutyValue,
+  //                                                 hcl: hclValue,
+  //                                               ));
+  //
+  //                        Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
+  //
+  //
+  //                   },
+  //                   child: Text("Upload Toll and Parking Data"),
   //                 ),
   //               ),
-  //               ElevatedButton(
-  //                 onPressed: () => _chooseOption(context),
-  //                 child: const Text("Upload Image"),
-  //               ),
-  //               _selectedImage2 != null
-  //                   ? Image.file(_selectedImage2!, width: 200, height: 200, fit: BoxFit.cover)
-  //                   : const Text("No image selected"),
-  //               const SizedBox(height: 16),
-  //               ElevatedButton(
-  //                 onPressed: () {
-  //                   if (closeKmController.text.isEmpty || _selectedImage2 == null) {
-  //                     ScaffoldMessenger.of(context).showSnackBar(
-  //                       const SnackBar(content: Text("Please fill all fields")),
-  //                     );
-  //                     return;
-  //                   }
-  //
-  //                   _tripUploadBloc.add(UploadClosingKmText(tripId: widget.tripId));
-  //                   _tripUploadBloc.add(UploadClosingKmImage(tripId: widget.tripId, image: _selectedImage2!));
-  //                   _tripUploadBloc.add(UpdateSignatureStatus(
-  //                     tripId: widget.tripId,
-  //                     closeKm: closeKmController.text,
-  //                     duty: "Local",
-  //                     hcl: 0,
-  //                   ));
-  //                 },
-  //                 child: const Text("Upload Data"),
-  //               ),
-  //             ],
-  //           ),
+  //             ),
+  //           ],
   //         ),
   //       ),
-  //     ),
+  //     ))),
+  //   )
   //   );
   // }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => _tripUploadBloc,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("Trip Details Upload"),
+        ),
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<TripUploadBloc, TripUploadState>(
+              listener: (context, state) {
+                if (state is TripUploadSuccess) {
+                  showSuccessSnackBar(context, state.message);
+                } else if (state is TripUploadFailure) {
+                  showFailureSnackBar(context, state.error);
+                }
+              },
+            ),
+            BlocListener<GettingClosingKilometerBloc, GettingClosingKilometerState>(
+              listener: (context, state) {
+                if (state is ClosingKilometerLoaded) {
+                  print("Closing Kilometer Data: ${state.kmData}");
+                  // Extracting finalKM from the response
+                  String finalKM = state.kmData['finalKM'].toString();
+
+                  // Updating the controller
+                  closeKmController.text = finalKM;
+
+                  print("Extracted Final KM: $finalKM");
+                } else if (state is ClosingKilometerError) {
+                  print("Error fetching closing kilometerrrs: ${state.error}");
+                }
+              },
+            ),
+          ],
+          child: RefreshIndicator(
+            onRefresh: _fetchTripDetails, // Calls the function to reload data
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: tripIdController,
+                      enabled: false,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: guestNameController,
+                      enabled: false,
+                      decoration: const InputDecoration(
+                        labelText: "Guest Name",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: guestMobileController,
+                      enabled: false,
+                      decoration: const InputDecoration(
+                        labelText: "Guest Mobile Number",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: vehicleTypeController,
+                      enabled: false,
+                      decoration: const InputDecoration(
+                        labelText: "Vehicle Type",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      readOnly: true,
+                      enabled: false,
+                      controller: startDateController,
+                      decoration: const InputDecoration(
+                        labelText: "Starting Date",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      readOnly: true,
+                      enabled: false,
+                      controller: closeDateController,
+                      decoration: const InputDecoration(
+                        labelText: "Closing Date",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: closeKmController,
+                            enabled: isCloseKmEnabled,
+                            decoration: const InputDecoration(
+                              labelText: "Closing Kilometer",
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () => _chooseOption(context, 2),
+                          child: const Text("Upload Image"),
+                        ),
+                      ],
+                    ),
+                    _selectedImage2 != null
+                        ? Image.file(
+                      _selectedImage2!,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    )
+                        : const Text("No image selected for Button 2"),
+                    const SizedBox(height: 16),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+
+                            // if (closeKmController.text.isEmpty || _selectedImage2 == null) {
+                            //
+                            //   showWarningSnackBar(context, 'Please upload closing kilometer and image');
+                            //   return;
+                            // }
+                            // _tripUploadBloc.add(UploadClosingKmText(tripId: widget.tripId));
+                            // _tripUploadBloc.add(UploadClosingKmImage(tripId: widget.tripId, image: _selectedImage2!));
+                            // final dutyValue = duty ?? "";
+                            // final hclValue = hcl ?? 0;
+                            // _tripUploadBloc.add(UpdateSignatureStatus(
+                            //   tripId: widget.tripId,
+                            //   closeKm: closeKmController.text,
+                            //   duty: dutyValue,
+                            //   hcl: hclValue,
+                            // ));
+
+                            _tripUploadBloc.add(UploadClosingKmText(tripId: widget.tripId));
+
+                            if (_selectedImage2 != null) {
+                              _tripUploadBloc.add(UploadClosingKmImage(tripId: widget.tripId, image: _selectedImage2!));
+                            }
+
+                            final dutyValue = duty ?? "";
+                            final hclValue = hcl ?? 0;
+
+                            _tripUploadBloc.add(UpdateSignatureStatus(
+                              tripId: widget.tripId,
+                              closeKm: closeKmController.text,
+                              duty: dutyValue,
+                              hcl: hclValue,
+                            ));
+
+                          // ✅ Always navigate, no matter what
+
+
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => TripDetailsPreview(tripId: widget.tripId)),
+                            );
+                          },
+                          child: Text("Upload Toll and Parking Data"),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
 
 }

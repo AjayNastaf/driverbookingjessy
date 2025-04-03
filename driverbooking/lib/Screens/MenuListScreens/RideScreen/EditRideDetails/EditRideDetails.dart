@@ -15,6 +15,9 @@ import '../../../../Bloc/AppBloc_Events.dart';
 import '../../../../Bloc/AppBloc_State.dart';
 import '../../../../Bloc/App_Bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:jessy_cabs/Screens/NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import 'package:jessy_cabs/Screens/network_manager.dart';
 
 
 
@@ -496,6 +499,8 @@ class _EditRideDetailsState extends State<EditRideDetails> {
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
     return BlocListener<TollParkingDetailsBloc, TollParkingDetailsState>(
       listener: (context, state) {
         if (state is TollParkingUpdated) {
@@ -520,7 +525,16 @@ class _EditRideDetailsState extends State<EditRideDetails> {
         appBar: AppBar(
           title: const Text("Trip Details"),
         ),
-        body: RefreshIndicator( onRefresh: _refreshEditRideScreen,
+        body:
+        Stack(children: [
+          Positioned(
+            top: 15,
+            left: 0,
+            right: 0,
+            child: NoInternetBanner(isConnected: isConnected),
+          ),
+
+        RefreshIndicator( onRefresh: _refreshEditRideScreen,
        child: SingleChildScrollView(
          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16.0),
@@ -567,7 +581,8 @@ class _EditRideDetailsState extends State<EditRideDetails> {
                   } else if (state is DocumentImagesLoaded) {
                     print("📸 Start KM Image in UI: ${state.startKmImage}");
                     print("📸 Closing KM Image in UI: ${state.closingKmImage}");
-
+                    print("📸 toll KM Image in UI: ${state.TollImage}");
+                    print("📸 parking KM Image in UI: ${state.ParkingImage}");
                     return Column(
                       children: [
                         // Start KM Image
@@ -597,6 +612,33 @@ class _EditRideDetailsState extends State<EditRideDetails> {
                             ],
                           ),
                         ),
+
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              buildSectionTitle("Toll image"),
+                              state.TollImage != null
+                                  ? Image.network(state.TollImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
+                                  : Text("No toll image found", style: TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                        // Parking Image
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              buildSectionTitle("Parking image"),
+                              state.ParkingImage != null
+                                  ? Image.network(state.ParkingImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
+                                  : Text("No Parking Image found", style: TextStyle(color: Colors.grey)),
+
+
+                            ],
+                          ),
+                        ),
+
                       ],
                     );
                   } else if (state is DocumentImagesError) {
@@ -649,7 +691,8 @@ class _EditRideDetailsState extends State<EditRideDetails> {
               ),
             ],
           ),
-        ),)
+        ),),
+        ],)
       ),
 
 

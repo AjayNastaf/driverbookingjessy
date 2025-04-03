@@ -11,6 +11,10 @@ import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
+import '../HomeScreen/HomeScreen.dart';
 
 
 class TripDetailsPreview extends StatefulWidget {
@@ -195,8 +199,82 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
   // }
 
 
+//local storage of username
+  void _loadLoginDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    String storedUsername = prefs.getString('username') ?? "Guest";
+    String storedUserId = prefs.getString('userId') ?? "N/A";
+
+    // Debugging print statements
+    print("Local Storage - username: $storedUsername");
+    print("Local Storage - userId: $storedUserId");
+
+    // Navigate to Homescreen with stored values
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Homescreen(userId: storedUserId, username: storedUsername),
+      ),
+    );
+  }
+
+
+
+
+  void _handleSubmitModal() {
+    // Show the popup dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            'End Ride',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Are you  want to Upload toll and parking?',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Navigator.of(context).pop(); // Close the dialog
+                _loadLoginDetails();              },
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.red, fontSize: 16),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                // _handleUpload();
+                // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload(tripId:widget.tripId ,)));
+
+                // Navigator.of(context).pop(); // Close the dialog
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+              ),
+              child: Text(
+                'Upload',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
     return BlocListener<TripSheetDetailsTripIdBloc, TripSheetDetailsTripIdState>(listener: (context, state){
       if(state is TripDetailsByTripIdLoaded){
         setState(() {
@@ -223,7 +301,12 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
       appBar: AppBar(
         title: const Text("Trip Preview"),
       ),
-      body:RefreshIndicator(
+      body: Stack(
+        children: [
+
+
+
+      RefreshIndicator(
           onRefresh: _refreshTripDetails, // Pull to refresh logic
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh works
@@ -358,6 +441,14 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
           ),
         ),
       )),
+          Positioned(
+            top: 15,
+            left: 0,
+            right: 0,
+            child: NoInternetBanner(isConnected: isConnected),
+          ),
+        ],
+      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0,),
         child: SizedBox(
@@ -372,7 +463,7 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
             ),
             onPressed: () {
               // Add your logic for toll and parking upload
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TollParkingUpload(tripId:widget.tripId ,)));
+              _handleSubmitModal();
               // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Signatureendride()));
             },
             child: const Text(

@@ -13,6 +13,9 @@ import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import '../network_manager.dart';
 
 class SharedPrefs {
   static Future<void> setBool(String key, bool value) async {
@@ -588,6 +591,8 @@ class _TrackingPageState extends State<TrackingPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
     return BlocListener<TripTrackingDetailsBloc, TripTrackingDetailsState>(
         listener: (context, state) {
           if (state is TripTrackingDetailsLoaded) {
@@ -616,7 +621,8 @@ class _TrackingPageState extends State<TrackingPage> {
             showFailureSnackBar(context, state.errorMessage);
           }
         },
-        child: Scaffold(
+
+    child: Scaffold(
           appBar: AppBar(
             title: const Text(
               "Tracking Page",
@@ -741,7 +747,13 @@ class _TrackingPageState extends State<TrackingPage> {
                   ),
                 ),
               ),
-            ],
+           Positioned(
+             top: 15,
+             left: 0,
+             right: 0,
+             child: NoInternetBanner(isConnected: isConnected),
+           ),
+    ],
           )
           )
         )

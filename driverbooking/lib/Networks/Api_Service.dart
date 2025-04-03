@@ -1941,8 +1941,23 @@ class ApiService {
 
 
 
+//getting close kilometer dynamically starts
+  Future<Map<String, dynamic>> getKMForParticularTrip(String tripId) async {
+    final String url = '${AppConstants.baseUrl}/KMForParticularTrip?Trip_id=$tripId';
 
+    try {
+      final response = await http.get(Uri.parse(url));
 
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        return {'error': 'Failed to fetch data. Status Code: ${response.statusCode}'};
+      }
+    } catch (e) {
+      return {'error': 'An error occurred: $e'};
+    }
+  }
+//getting close kilometer dynamically completed
 
 
 

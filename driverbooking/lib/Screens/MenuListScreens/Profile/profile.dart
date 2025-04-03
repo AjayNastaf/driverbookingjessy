@@ -442,6 +442,12 @@ import '../../../Bloc/AppBloc_Events.dart';
 import '../../../Bloc/AppBloc_State.dart';
 import '../../../Bloc/App_Bloc.dart';
 
+import 'package:jessy_cabs/Screens/NoInternetBanner/NoInternetBanner.dart';
+import 'package:provider/provider.dart';
+import 'package:jessy_cabs/Screens/network_manager.dart';
+
+
+
 class ProfileScreen extends StatefulWidget {
   final String username;
 
@@ -731,6 +737,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+
     return BlocProvider(
       create: (context) => ProfileBloc(),
       child: Scaffold(
@@ -866,7 +874,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         //     ),
         //   ),
         // ),)
-        body: RefreshIndicator(
+        body:
+            Stack(children: [
+              Positioned(
+                top: 15,
+                left: 0,
+                right: 0,
+                child: NoInternetBanner(isConnected: isConnected),
+              ),
+
+        RefreshIndicator(
         onRefresh: _refreshProfile,
         child: BlocListener<ProfileBloc, ProfileState>(
           listener: (context, state) {
@@ -978,7 +995,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-
+            ],)
     ),
     );
   }

@@ -79,13 +79,17 @@ import 'package:jessy_cabs/Screens/Home.dart';
 import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';// Import your Bloc file
-import 'package:jessy_cabs/Utils/AppConstants.dart';// Import your Bloc file
+import 'package:jessy_cabs/Utils/AppConstants.dart';
+import 'package:provider/provider.dart';
+import 'Screens/network_manager.dart';// Import your Bloc file
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
-    MultiBlocProvider(
+    ChangeNotifierProvider(
+      create: (context) => NetworkManager(),
+      child:MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (context) => TripSheetValuesBloc(), // No event added yet
@@ -126,16 +130,20 @@ void main() {
         BlocProvider(create: (context) => FetchFilteredRidesBloc()),
         BlocProvider(create: (context) => ProfileBloc()),
         BlocProvider(create: (context) => TripTrackingDetailsBloc()),
+        BlocProvider(create: (context) => GettingClosingKilometerBloc(apiService)),
         BlocProvider(create: (context) => TripClosedTodayBloc(apiService)),
 
         BlocProvider(create: (context) => DocumentImagesBloc(
             apiService: ApiService(apiUrl: "${AppConstants.baseUrl}"))),
 
-
+        // BlocProvider<GettingClosingKilometerBloc>(
+        //   create: (context) => GettingClosingKilometerBloc(),
+        // ),
 
       ],
       child: const MyApp(),
     ),
+  ),
   );
 }
 
