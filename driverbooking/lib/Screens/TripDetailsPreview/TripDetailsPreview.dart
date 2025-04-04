@@ -244,7 +244,7 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
                 // Navigator.of(context).pop(); // Close the dialog
                 _loadLoginDetails();              },
               child: Text(
-                'Cancel',
+                'No',
                 style: TextStyle(color: Colors.red, fontSize: 16),
               ),
             ),
@@ -260,7 +260,7 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
                 backgroundColor: Colors.green,
               ),
               child: Text(
-                'Upload',
+                'Yes',
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),

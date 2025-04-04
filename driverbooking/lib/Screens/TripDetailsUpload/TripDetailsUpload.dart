@@ -563,6 +563,7 @@ import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:jessy_cabs/GlobalVariable/global_variable.dart' as globals;
 
 
 class TripDetailsUpload extends StatefulWidget {
@@ -579,7 +580,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   bool isCloseKmEnabled = true;
 
   final TextEditingController startKmController = TextEditingController();
-  final TextEditingController closeKmController = TextEditingController();
+  // final TextEditingController closeKmController = TextEditingController();
 
   TextEditingController guestNameController = TextEditingController();
   TextEditingController tripIdController = TextEditingController();
@@ -587,7 +588,9 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   TextEditingController vehicleTypeController = TextEditingController();
   TextEditingController startDateController = TextEditingController();
   TextEditingController closeDateController = TextEditingController();
+  TextEditingController closeKmController = TextEditingController();
 
+  // late TextEditingController closeKmController;
 
   // File? _selectedImage1;
   File? _selectedImage2;
@@ -598,6 +601,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   int? hcl;
   late TripUploadBloc _tripUploadBloc;
 
+  String? startkmvalue;
 
 
   String setFormattedDate(String? dateStr) {
@@ -610,12 +614,28 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       return "Invalid date"; // Handle errors
     }
   }
+  @override
+  void initState() {
+    super.initState();
+    _fetchTripDetails();
+    closeKmController = TextEditingController();
 
+    _tripUploadBloc = TripUploadBloc();
+    BlocProvider.of<GettingClosingKilometerBloc>(context).add(FetchClosingKilometer(widget.tripId));
+    _loadTripSheetDetailsByTripId();
+
+
+
+
+
+
+  }
 
 
   Future<void> _fetchTripDetails() async {
     BlocProvider.of<GettingClosingKilometerBloc>(context).add(FetchClosingKilometer(widget.tripId));
-
+    _loadTripSheetDetailsByTripId();
+    _StartCloseKm();
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     String? tripDetailsJson = prefs.getString('tripDetails');
@@ -643,15 +663,66 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   }
 
 
-  @override
-  void initState() {
-    super.initState();
-    // _loadTripDetails();
-    _fetchTripDetails();
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _StartCloseKm();
+  //   _fetchTripDetails();
+  //   closeKmController = TextEditingController();
+  //
+  //   _tripUploadBloc = TripUploadBloc();
+  //   BlocProvider.of<GettingClosingKilometerBloc>(context).add(FetchClosingKilometer(widget.tripId));
+  //   _loadTripSheetDetailsByTripId();
+  //   _StartCloseKm();
+  //
+  // }
 
-    _tripUploadBloc = TripUploadBloc();
-    BlocProvider.of<GettingClosingKilometerBloc>(context).add(FetchClosingKilometer(widget.tripId));
+  Future<void> _loadTripSheetDetailsByTripId() async {
+    try {
+      // Fetch trip details from the API
+      final tripDetails = await ApiService.fetchTripDetails(widget.tripId);
+      print('Trip details fetchedd: $tripDetails');
+      if (tripDetails != null) {
 
+
+        var fetchedStartkmvalue = tripDetails['startkm'].toString();
+
+        print('Fetched startkmvalue: $fetchedStartkmvalue');
+        setState(() {
+           startkmvalue = fetchedStartkmvalue;
+          // Populate the form fields with the fetched data
+
+          // startKmController.text = startkmvalue ?? '';
+
+        });
+        _StartCloseKm();
+
+
+      } else {
+        print('No trip details found.');
+      }
+    } catch (e) {
+      print('Error loading trip details: $e');
+    }
+  }
+
+  Future<void> _StartCloseKm() async {
+    int roundedDistance = globals.savedTripDistance.round();
+    print('Rounded Trip Distance: $roundedDistance');
+
+    if (startkmvalue != null) {
+      // Use startkmvalue as needed
+      print('Using startkmvalue in another function: $startkmvalue');
+
+      int startKmInt = int.parse(startkmvalue!); // Convert string to int
+      int totalDistance = startKmInt + roundedDistance;
+      print('Total Distance (start + rounded): $totalDistance');
+      closeKmController.text = totalDistance.toString();
+
+      // closeKmController = TextEditingController(text: totalDistance.toString());
+    } else {
+      print('startkmvalue is not available.');
+    }
   }
 
   // Future<void> _refresh
@@ -772,6 +843,13 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     }
   }
 
+
+  @override
+  void dispose() {
+    // Dispose the controller when the widget is disposed
+    closeKmController.dispose();
+    super.dispose();
+  }
 
     // Future<void> _handleSubmitStartClose() async {
   //   bool result = await ApiService.updateTripDetailsStartandClosekm(
@@ -1052,14 +1130,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
             BlocListener<GettingClosingKilometerBloc, GettingClosingKilometerState>(
               listener: (context, state) {
                 if (state is ClosingKilometerLoaded) {
-                  print("Closing Kilometer Data: ${state.kmData}");
-                  // Extracting finalKM from the response
-                  String finalKM = state.kmData['finalKM'].toString();
 
-                  // Updating the controller
-                  closeKmController.text = finalKM;
-
-                  print("Extracted Final KM: $finalKM");
                 } else if (state is ClosingKilometerError) {
                   print("Error fetching closing kilometerrrs: ${state.error}");
                 }
@@ -1128,7 +1199,18 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                         border: OutlineInputBorder(),
                       ),
                     ),
+                     Text(
+                      "Stored Distance: ${globals.savedTripDistance.toStringAsFixed(2)} km",
+                      style: TextStyle(fontSize: 18),
+                    ),
                     const SizedBox(height: 16),
+
+                    Text(
+                      "Rounded Distance : ${globals.savedTripDistance.round()} km",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 16),
+
                     Row(
                       children: [
                         Expanded(
@@ -1214,6 +1296,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                         ),
                       ),
                     ),
+
                   ],
                 ),
               ),

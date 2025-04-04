@@ -26,18 +26,31 @@ class Pickupscreen extends StatefulWidget {
 }
 
 class _PickupscreenState extends State<Pickupscreen> {
+  bool _isMapLoading = true; // Add this variable to track loading state
 
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
     final LatLng _initialPosition = LatLng(13.082680, 80.270721); // Replace with desired coordinates (e.g., Bengaluru, India)
     void initState() {
       super.initState();
+      _checkMapLoading();
 
       // Print the values to debug
       print("Addressss: ${widget.address}");
       print("Trip ID: ${widget.tripId}");
     }
-    @override
+
+  void _checkMapLoading() {
+    Future.delayed(Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isMapLoading = false; // Ensure loader disappears
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
       bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
@@ -53,9 +66,17 @@ class _PickupscreenState extends State<Pickupscreen> {
       body: Stack(
         children: [
           // Google Map
+          if(!_isMapLoading)
           GoogleMap(
             onMapCreated: (controller) {
               // You can save the controller for further use if needed
+              Future.delayed(Duration(milliseconds: 500), () {
+                if (mounted) {
+                  setState(() {
+                    _isMapLoading = false; // Hide loader after small delay
+                  });
+                }
+              });
             },
             initialCameraPosition: CameraPosition(
               target: _initialPosition, // Fixed location
@@ -64,6 +85,15 @@ class _PickupscreenState extends State<Pickupscreen> {
             myLocationEnabled: false, // Disable 'my location' marker
             myLocationButtonEnabled: false, // Disable 'my location' button
           ),
+          if (_isMapLoading)
+            Positioned.fill(
+              child: Container(
+                color: Colors.white.withOpacity(0.9), // Optional: add slight overlay
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
           // Bottom Section
           Positioned(
             bottom: 0,
@@ -180,7 +210,7 @@ class _PickupscreenState extends State<Pickupscreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         // Add your button action here
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => TrackingPage(address: widget.address, tripId: widget.tripId,)));
+                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => TrackingPage(address: widget.address, tripId: widget.tripId,)), (route) => false,);
 
 
                       },

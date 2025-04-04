@@ -232,7 +232,7 @@ class _SignatureendrideState extends State<Signatureendride> {
 
   void _handleNavNextpage(){
     // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
 
   }
 
@@ -321,7 +321,7 @@ class _SignatureendrideState extends State<Signatureendride> {
         });
         _handleClear();
         // _handleSubmitModal();
-        _handleNavNextpage();
+        // _handleNavNextpage();
       } else if (state is TripSignatureFailure) {
         showFailureSnackBar(context, state.error);
         setState(() {

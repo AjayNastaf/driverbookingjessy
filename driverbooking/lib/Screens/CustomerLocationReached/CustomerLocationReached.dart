@@ -10,10 +10,16 @@ import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
+
+import 'package:geolocator/geolocator.dart';
+import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
+import 'package:geolocator/geolocator.dart' as geo;
+import 'package:location/location.dart' as loc;
 
 class Customerlocationreached extends StatefulWidget {
   final String tripId;
@@ -45,6 +51,15 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
   Timer? _timer;
   int _milliseconds = 0;
   bool _isRunning = false;
+  bool _isMapLoading = true; // Add this variable to track loading state
+  double _totalDistance = 0.0;
+
+  LatLng? _lastLocation;        // Store last recorded location
+  StreamSubscription<geo.Position>? _positionStreamSubscription;
+
+
+
+
 
   @override
   void initState() {
@@ -53,7 +68,50 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId));
+    _checkMapLoading();
+    _startTracking();
+
   }
+
+  void _startTracking() {
+    final locationSettings = geo.LocationSettings(
+      accuracy: geo.LocationAccuracy.high, // Use `geo.` prefix
+      distanceFilter: 10,
+    );
+
+
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position position) {
+          LatLng newLocation = LatLng(position.latitude, position.longitude);
+
+          // If we have a previous location, calculate distance
+          if (_lastLocation != null) {
+            double distanceInMeters = Geolocator.distanceBetween(
+              _lastLocation!.latitude,
+              _lastLocation!.longitude,
+              newLocation.latitude,
+              newLocation.longitude,
+            );
+
+            setState(() {
+              _totalDistance += distanceInMeters / 1000; // Convert meters to km
+            });
+          }
+
+          _lastLocation = newLocation; // Update last known location
+        });
+  }
+  void _checkMapLoading() {
+    Future.delayed(Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isMapLoading = false; // Ensure loader disappears
+        });
+      }
+    });
+  }
+
 
 Future<void> _refreshCustomerDestination() async {
   _initializeCustomerLocationTracking();
@@ -458,6 +516,7 @@ Future<void> _refreshCustomerDestination() async {
     _locationSubscription = null;// Remove reference
 
     _timer?.cancel(); // Cancel timer when widget is removed
+    _positionStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -506,12 +565,14 @@ Future<void> _refreshCustomerDestination() async {
       //     builder: (context) => TripDetailsUpload(tripId: widget.tripId),
       //   ),
       // );
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (context) => Signatureendride(tripId: widget.tripId),
-        ),
+        ),(route)=>false
       );
+
+
       print('for current location');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -530,6 +591,7 @@ Future<void> _refreshCustomerDestination() async {
     String dropLocation = globals.dropLocation; // Access the global variable
     double progress = (_milliseconds % 60000) / 60000; // Progress for circular animation
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+    globals.savedTripDistance = _totalDistance;
 
     return BlocListener<TripTrackingDetailsBloc, TripTrackingDetailsState>(
         listener: (context, state) {
@@ -568,7 +630,7 @@ Future<void> _refreshCustomerDestination() async {
 
       child:Stack(
         children: [
-          if (_currentLatLng != null)
+          if (!_isMapLoading && _currentLatLng != null)
             GoogleMap(
               initialCameraPosition: CameraPosition(
                 target: _currentLatLng!,
@@ -576,6 +638,13 @@ Future<void> _refreshCustomerDestination() async {
               ),
               onMapCreated: (controller) {
                 _mapController = controller;
+                Future.delayed(Duration(milliseconds: 500), () {
+                  if (mounted) {
+                    setState(() {
+                      _isMapLoading = false; // Hide loader after small delay
+                    });
+                  }
+                });
               },
               markers: {
                 Marker(
@@ -601,6 +670,33 @@ Future<void> _refreshCustomerDestination() async {
               myLocationEnabled: true,
               myLocationButtonEnabled: false,
             ),
+          if (_isMapLoading)
+          Positioned.fill(
+              child: Container(
+                color: Colors.white.withOpacity(0.9), // Optional: add slight overlay
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+
+          Positioned(
+            top: 50,
+            left: 10,
+            child: Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+              ),
+              child: Text(
+                "Distance Traveled: ${_totalDistance.toStringAsFixed(2)} km",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+
           Positioned(
             bottom: 0, // Aligns the bottom section
             left: 0,
@@ -660,6 +756,11 @@ Future<void> _refreshCustomerDestination() async {
                                         fontSize: 20.0,
                                       ),
                                     ),
+                                    Text(
+                                      "📦 Stored Distance: ${globals.savedTripDistance.toStringAsFixed(2)} km",
+                                      style: TextStyle(fontSize: 16, color: Colors.black),
+                                    ),
+
                                   ],
                                 ),
                               ),

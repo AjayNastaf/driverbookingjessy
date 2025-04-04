@@ -17,6 +17,12 @@ import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
 
+import 'package:geolocator/geolocator.dart';
+import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
+import 'package:geolocator/geolocator.dart' as geo;
+import 'package:location/location.dart' as loc;
+
+
 class SharedPrefs {
   static Future<void> setBool(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -57,6 +63,13 @@ class _TrackingPageState extends State<TrackingPage> {
   String? Statusvalue;
   String vehicleNumber = "";
   String tripStatus = "";
+  bool _isMapLoading = true; // Add this variable to track loading state
+
+
+
+  double _totalDistance = 0.0;  // Total distance traveled in kilometers
+  LatLng? _lastLocation;        // Store last recorded location
+  StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
   void initState() {
@@ -69,6 +82,20 @@ class _TrackingPageState extends State<TrackingPage> {
     // _loadTripDetails();
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId!));
+    _checkMapLoading();
+    _startTracking();
+
+  }
+
+
+  void _checkMapLoading() {
+    Future.delayed(Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isMapLoading = false; // Ensure loader disappears
+        });
+      }
+    });
   }
 
   Future<void> _refreshTrackingPage() async{
@@ -394,17 +421,18 @@ class _TrackingPageState extends State<TrackingPage> {
     );
 
     if (success) {
-      Navigator.push(
+      showInfoSnackBar(context, "Trip started  Successfully!");
+
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (context) => Customerlocationreached(tripId: tripId!),
-        ),
+        ),(route)=> false
       );
     }
 
 
 
-    showInfoSnackBar(context, "Trip started status updated!");
   }
 
 
@@ -508,6 +536,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
     _locationSubscription!.cancel();
     _locationSubscription = null; // Remove reference
+    _positionStreamSubscription?.cancel();
 
     super.dispose();
   }
@@ -589,6 +618,39 @@ class _TrackingPageState extends State<TrackingPage> {
   }
 
 
+  void _startTracking() {
+    final locationSettings = geo.LocationSettings(
+      accuracy: geo.LocationAccuracy.high, // Use `geo.` prefix
+      distanceFilter: 10,
+    );
+
+
+    _positionStreamSubscription =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position position) {
+          LatLng newLocation = LatLng(position.latitude, position.longitude);
+
+          // If we have a previous location, calculate distance
+          if (_lastLocation != null) {
+            double distanceInMeters = Geolocator.distanceBetween(
+              _lastLocation!.latitude,
+              _lastLocation!.longitude,
+              newLocation.latitude,
+              newLocation.longitude,
+            );
+
+            setState(() {
+              _totalDistance += distanceInMeters / 1000; // Convert meters to km
+            });
+          }
+
+          _lastLocation = newLocation; // Update last known location
+        });
+  }
+
+
+
+
   @override
   Widget build(BuildContext context) {
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
@@ -640,7 +702,7 @@ class _TrackingPageState extends State<TrackingPage> {
        child: Stack(
 
          children: [
-              if (_currentLatLng != null)
+              if (!_isMapLoading && _currentLatLng != null)
                 GoogleMap(
                   initialCameraPosition: CameraPosition(
                     target: _currentLatLng!,
@@ -648,6 +710,13 @@ class _TrackingPageState extends State<TrackingPage> {
                   ),
                   onMapCreated: (controller) {
                     _mapController = controller;
+                    Future.delayed(Duration(milliseconds: 500), () {
+                      if (mounted) {
+                        setState(() {
+                          _isMapLoading = false; // Hide loader after small delay
+                        });
+                      }
+                    });
                   },
                   markers: {
                     Marker(
@@ -674,7 +743,35 @@ class _TrackingPageState extends State<TrackingPage> {
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
                 ),
-              Positioned(
+           // Show CircularProgressIndicator while map is loading
+           // Show loader until Google Map loads
+           if (_isMapLoading)
+             Positioned.fill(
+               child: Container(
+                 color: Colors.white.withOpacity(0.9), // Optional: add slight overlay
+                 child: Center(
+                   child: CircularProgressIndicator(),
+                 ),
+               ),
+             ),
+           Positioned(
+             top: 50,
+             left: 10,
+             child: Container(
+               padding: EdgeInsets.all(10),
+               decoration: BoxDecoration(
+                 color: Colors.white,
+                 borderRadius: BorderRadius.circular(8),
+                 boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+               ),
+               child: Text(
+                 "Distance Traveled: ${_totalDistance.toStringAsFixed(2)} km",
+                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+               ),
+             ),
+           ),
+
+           Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
