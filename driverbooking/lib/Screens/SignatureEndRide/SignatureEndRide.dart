@@ -202,7 +202,7 @@ class _SignatureendrideState extends State<Signatureendride> {
           ),
         );
       }
-      _handleNavNextpage();
+      // _handleNavNextpage();
 
 
     } else {
@@ -314,6 +314,7 @@ class _SignatureendrideState extends State<Signatureendride> {
             apps: "Closed",
           ),
         );
+        showSuccessSnackBar(context, 'Trip Closed Successfully');
       } else if (state is UpdateTripStatusSuccess) {
         showSuccessSnackBar(context, "Signature and ride data uploaded successfully!");
         setState(() {
@@ -321,7 +322,7 @@ class _SignatureendrideState extends State<Signatureendride> {
         });
         _handleClear();
         // _handleSubmitModal();
-        // _handleNavNextpage();
+        _handleNavNextpage();
       } else if (state is TripSignatureFailure) {
         showFailureSnackBar(context, state.error);
         setState(() {

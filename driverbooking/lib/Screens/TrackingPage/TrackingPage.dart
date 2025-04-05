@@ -67,8 +67,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
 
 
-  double _totalDistance = 0.0;  // Total distance traveled in kilometers
-  LatLng? _lastLocation;        // Store last recorded location
+
   StreamSubscription<Position>? _positionStreamSubscription;
 
   @override
@@ -83,7 +82,6 @@ class _TrackingPageState extends State<TrackingPage> {
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId!));
     _checkMapLoading();
-    _startTracking();
 
   }
 
@@ -618,35 +616,6 @@ class _TrackingPageState extends State<TrackingPage> {
   }
 
 
-  void _startTracking() {
-    final locationSettings = geo.LocationSettings(
-      accuracy: geo.LocationAccuracy.high, // Use `geo.` prefix
-      distanceFilter: 10,
-    );
-
-
-    _positionStreamSubscription =
-        Geolocator.getPositionStream(locationSettings: locationSettings)
-            .listen((Position position) {
-          LatLng newLocation = LatLng(position.latitude, position.longitude);
-
-          // If we have a previous location, calculate distance
-          if (_lastLocation != null) {
-            double distanceInMeters = Geolocator.distanceBetween(
-              _lastLocation!.latitude,
-              _lastLocation!.longitude,
-              newLocation.latitude,
-              newLocation.longitude,
-            );
-
-            setState(() {
-              _totalDistance += distanceInMeters / 1000; // Convert meters to km
-            });
-          }
-
-          _lastLocation = newLocation; // Update last known location
-        });
-  }
 
 
 
@@ -736,7 +705,7 @@ class _TrackingPageState extends State<TrackingPage> {
                       Polyline(
                         polylineId: PolylineId('route'),
                         points: _routeCoordinates,
-                        color: Colors.blue,
+                        color: Colors.green,
                         width: 5,
                       ),
                   },
@@ -754,22 +723,7 @@ class _TrackingPageState extends State<TrackingPage> {
                  ),
                ),
              ),
-           Positioned(
-             top: 50,
-             left: 10,
-             child: Container(
-               padding: EdgeInsets.all(10),
-               decoration: BoxDecoration(
-                 color: Colors.white,
-                 borderRadius: BorderRadius.circular(8),
-                 boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
-               ),
-               child: Text(
-                 "Distance Traveled: ${_totalDistance.toStringAsFixed(2)} km",
-                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-               ),
-             ),
-           ),
+
 
            Positioned(
                 bottom: 0,

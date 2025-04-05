@@ -201,24 +201,27 @@ class _StartingKilometerState extends State<StartingKilometer> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton.icon(
-                  onPressed: () => _pickFile(ImageSource.camera),
-                  icon: Icon(Icons.camera_alt),
-                  label: Text("Open Camera"),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => _pickFile(ImageSource.camera),
+                    icon: Icon(Icons.camera_alt),
+                    label: Text("Open Camera"),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
+                    ),
                   ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () => _pickFile(ImageSource.gallery),
-                  icon: Icon(Icons.upload_file),
-                  label: Text("Upload File"),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
+                // ElevatedButton.icon(
+                //   onPressed: () => _pickFile(ImageSource.gallery),
+                //   icon: Icon(Icons.upload_file),
+                //   label: Text("Upload File"),
+                //   style: ElevatedButton.styleFrom(
+                //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                //   ),
+                // ),
               ],
             ),
             SizedBox(height: 24),

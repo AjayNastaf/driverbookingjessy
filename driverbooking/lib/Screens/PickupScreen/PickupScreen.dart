@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
 import 'package:jessy_cabs/Screens/TrackingPage/TrackingPage.dart';
 // import 'package:jessy_cabs/Screens/TrackingPage/TrackingPagecopy1.dart';
@@ -26,9 +30,15 @@ class Pickupscreen extends StatefulWidget {
 }
 
 class _PickupscreenState extends State<Pickupscreen> {
-  bool _isMapLoading = true; // Add this variable to track loading state
+  bool _isMapLoading = true;
+  GoogleMapController? _mapController;
+  LatLng? _currentLatLng;
+  LatLng _destination = LatLng( 13.028159, 80.243306); // Chennai Central Railway Station
+  List<LatLng> _routeCoordinates = [];
+  StreamSubscription<Position>? _positionStreamSubscription;
 
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
     final LatLng _initialPosition = LatLng(13.082680, 80.270721); // Replace with desired coordinates (e.g., Bengaluru, India)
     void initState() {
@@ -38,6 +48,8 @@ class _PickupscreenState extends State<Pickupscreen> {
       // Print the values to debug
       print("Addressss: ${widget.address}");
       print("Trip ID: ${widget.tripId}");
+
+      _initializeLocationTracking();
     }
 
   void _checkMapLoading() {
@@ -49,6 +61,137 @@ class _PickupscreenState extends State<Pickupscreen> {
       }
     });
   }
+
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> polylineCoordinates = [];
+    int index = 0,
+        len = encoded.length;
+    int lat = 0,
+        lng = 0;
+
+    while (index < len) {
+      int b,
+          shift = 0,
+          result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lng += dlng;
+
+      final point = LatLng(lat / 1e5, lng / 1e5);
+      polylineCoordinates.add(point);
+    }
+
+    return polylineCoordinates;
+  }
+
+
+  Future<void> _fetchRoute() async {
+    if (_currentLatLng == null) return;
+
+    const String apiKey = AppConstants.ApiKey;
+    final String url =
+        'https://maps.googleapis.com/maps/api/directions/json?origin=${_currentLatLng!
+        .latitude},${_currentLatLng!.longitude}&destination=${_destination
+        .latitude},${_destination.longitude}&key=$apiKey';
+
+    try {
+      final response = await Dio().get(url);
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final routes = data['routes'] as List;
+        if (routes.isNotEmpty) {
+          final polyline = routes[0]['overview_polyline']['points'] as String;
+          setState(() {
+            _routeCoordinates = _decodePolyline(polyline);
+          });
+        } else {
+          print('No routes found in API response.');
+        }
+      } else {
+        print('API response error: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching route: $e');
+    }
+  }
+
+
+  void _updateCameraPosition() {
+    if (_currentLatLng != null) {
+      _mapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: _currentLatLng!,
+            zoom: 15,
+          ),
+        ),
+      );
+    }
+  }
+
+  void _updateCurrentLocation(LocationData locationData) {
+    double? latitude = locationData.latitude;
+    double? longitude = locationData.longitude;
+
+    if (latitude != null && longitude != null) {
+      print("Received Location: $latitude, $longitude");
+
+      final newLatLng = LatLng(latitude, longitude);
+
+      setState(() {
+        _currentLatLng = newLatLng;
+      });
+
+      _fetchRoute();
+      _updateCameraPosition();
+
+    } else {
+      print("⚠ Location data is null, skipping update");
+    }
+  }
+
+  StreamSubscription<
+      LocationData>? _locationSubscription; // Store the subscription
+  Future<void> _initializeLocationTracking() async {
+    Location location = Location();
+
+    bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) return;
+    }
+
+    PermissionStatus permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) return;
+    }
+
+    final initialLocation = await location.getLocation();
+    _updateCurrentLocation(initialLocation);
+
+
+    _locationSubscription = location.onLocationChanged.listen((newLocation) {
+      print("New location received: $newLocation");
+      _updateCurrentLocation(newLocation);
+    });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -66,25 +209,68 @@ class _PickupscreenState extends State<Pickupscreen> {
       body: Stack(
         children: [
           // Google Map
-          if(!_isMapLoading)
-          GoogleMap(
-            onMapCreated: (controller) {
-              // You can save the controller for further use if needed
-              Future.delayed(Duration(milliseconds: 500), () {
-                if (mounted) {
-                  setState(() {
-                    _isMapLoading = false; // Hide loader after small delay
-                  });
-                }
-              });
-            },
-            initialCameraPosition: CameraPosition(
-              target: _initialPosition, // Fixed location
-              zoom: 15, // Adjust zoom level as required
+          if (!_isMapLoading && _currentLatLng != null)
+          // GoogleMap(
+          //   onMapCreated: (controller) {
+          //     // You can save the controller for further use if needed
+          //     Future.delayed(Duration(milliseconds: 500), () {
+          //       if (mounted) {
+          //         setState(() {
+          //           _isMapLoading = false; // Hide loader after small delay
+          //         });
+          //       }
+          //     });
+          //   },
+          //   initialCameraPosition: CameraPosition(
+          //     target: _initialPosition, // Fixed location
+          //     zoom: 15, // Adjust zoom level as required
+          //   ),
+          //   myLocationEnabled: false, // Disable 'my location' marker
+          //   myLocationButtonEnabled: false, // Disable 'my location' button
+          // ),
+
+            GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: _currentLatLng!,
+                zoom: 15,
+              ),
+              onMapCreated: (controller) {
+                _mapController = controller;
+                Future.delayed(Duration(milliseconds: 500), () {
+                  if (mounted) {
+                    setState(() {
+                      _isMapLoading = false; // Hide loader after small delay
+                    });
+                  }
+                });
+              },
+              markers: {
+                Marker(
+                  markerId: MarkerId('currentLocation'),
+                  position: _currentLatLng!,
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                    // BitmapDescriptor.hueBlue),
+                      BitmapDescriptor.hueGreen),
+                ),
+                Marker(
+                  markerId: MarkerId('destination'),
+                  position: _destination,
+                ),
+              },
+              polylines: {
+                if (_routeCoordinates.isNotEmpty)
+                  Polyline(
+                    polylineId: PolylineId('route'),
+                    points: _routeCoordinates,
+                    color: Colors.green,
+                    width: 5,
+                  ),
+              },
+              myLocationEnabled: true,
+              myLocationButtonEnabled: false,
             ),
-            myLocationEnabled: false, // Disable 'my location' marker
-            myLocationButtonEnabled: false, // Disable 'my location' button
-          ),
+
+
           if (_isMapLoading)
             Positioned.fill(
               child: Container(
@@ -116,58 +302,7 @@ class _PickupscreenState extends State<Pickupscreen> {
                   ),
                 ],
               ),
-              // child: Column(
-              //   mainAxisAlignment: MainAxisAlignment.start,
-              //   crossAxisAlignment: CrossAxisAlignment.start,
-              //
-              //   children: [
-              //     // Wrap the Column with Flexible
-              //
-              //
-              //     SizedBox(height: 10.0), // Add some space between the Column and Button
-              //
-              //     Row(
-              //       children: [
-              //         Icon(Icons.person, size: 26.0, color: Colors.grey), // User icon
-              //         SizedBox(width: 8.0), // Space between icon and text
-              //         Text(
-              //           'Ajay',
-              //           style: TextStyle(fontSize: 26.0, fontWeight: FontWeight.w500),
-              //         ),
-              //       ],
-              //     ),
-              //
-              //     Row(
-              //       children: [
-              //         Icon(Icons.person_pin_circle, size: 20.0, color: Colors.red), // User icon
-              //         SizedBox(width: 8.0), // Space between icon and text
-              //         Text(
-              //           'Thiruvalluvar Puram, West Tambaram, Chennai',
-              //           style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400),
-              //           overflow: TextOverflow.ellipsis, // Prevent overflow
-              //           maxLines: 1, // Limit to one line
-              //         ),
-              //       ],
-              //     ),
-              //
-              //
-              //     SizedBox(height: 10.0), // Add some space between the Column and Button
-              //     Center(
-              //       child: ElevatedButton(
-              //         onPressed: () {
-              //           // Add your button action here
-              //           Navigator.push(context,
-              //               MaterialPageRoute(builder: (context)=>TrackingPage()));
-              //         },
-              //         child: Text('Go to the Location',style: TextStyle(fontSize: 18.0),),
-              //         style: ElevatedButton.styleFrom(
-              //           padding: EdgeInsets.symmetric(horizontal: 60.0, vertical: 12.0),
-              //         ),
-              //
-              //       ),
-              //     ),
-              //   ],
-              // ),
+
               child: Column(
                 children: [
                   SizedBox(height: 10.0,),

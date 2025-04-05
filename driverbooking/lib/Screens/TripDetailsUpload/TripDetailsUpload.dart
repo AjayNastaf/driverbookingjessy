@@ -756,26 +756,26 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                   }
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text("Upload File"),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  final XFile? image =
-                  await _picker.pickImage(source: ImageSource.gallery);
-                  if (image != null) {
-                    setState(() {
-                      _lastSelectedButton = buttonId;
-                      // if (buttonId == 1) {
-                      //   _selectedImage1 = File(image.path);
-                      // } else
-                      if (buttonId == 2) {
-                        _selectedImage2 = File(image.path);
-                      }
-                    });
-                  }
-                },
-              ),
+              // ListTile(
+              //   leading: const Icon(Icons.photo_library),
+              //   title: const Text("Upload File"),
+              //   onTap: () async {
+              //     Navigator.of(context).pop();
+              //     final XFile? image =
+              //     await _picker.pickImage(source: ImageSource.gallery);
+              //     if (image != null) {
+              //       setState(() {
+              //         _lastSelectedButton = buttonId;
+              //         // if (buttonId == 1) {
+              //         //   _selectedImage1 = File(image.path);
+              //         // } else
+              //         if (buttonId == 2) {
+              //           _selectedImage2 = File(image.path);
+              //         }
+              //       });
+              //     }
+              //   },
+              // ),
             ],
           ),
         );

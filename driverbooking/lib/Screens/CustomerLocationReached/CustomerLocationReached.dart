@@ -756,10 +756,10 @@ Future<void> _refreshCustomerDestination() async {
                                         fontSize: 20.0,
                                       ),
                                     ),
-                                    Text(
-                                      "📦 Stored Distance: ${globals.savedTripDistance.toStringAsFixed(2)} km",
-                                      style: TextStyle(fontSize: 16, color: Colors.black),
-                                    ),
+                                    // Text(
+                                    //   "📦 Stored Distance: ${globals.savedTripDistance.toStringAsFixed(2)} km",
+                                    //   style: TextStyle(fontSize: 16, color: Colors.black),
+                                    // ),
 
                                   ],
                                 ),

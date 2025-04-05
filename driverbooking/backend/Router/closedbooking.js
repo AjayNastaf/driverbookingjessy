@@ -73,18 +73,18 @@ console.log('ajay4',typeof(duty));
 
   let sql = "";
   let values = [];
-  
+  let hclStartKm = 0;
   if (Hcl === 1 && duty === "Outstation") {
-  console.log('hcl1');
+  console.log('hcl1',Hcl);
     // First condition
     sql = "UPDATE tripsheet SET startkm = ? WHERE tripid = ?";
     values = [startkm, tripId];
   } else if (Hcl === 1 && duty !== "Outstation") {
-    console.log('hcl2');
+    console.log('hcl2',Hcl);
 
     // Second condition
     sql = "UPDATE tripsheet SET startkm = ?, vendorshedoutkm = ? WHERE tripid = ?";
-    values = [startkm,startkm, tripId];
+    values = [hclStartKm,hclStartKm, tripId];
   } else {
     console.log('hcl3');
 
