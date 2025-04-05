@@ -3,14 +3,36 @@ const router = express.Router();
 const db = require('../db');
 
 //get duty type based on login driver name when the apps waiting
-router.get('/tripsheet/:username', async (req, res) => {
+//router.get('/tripsheet/:username', async (req, res) => {
+//  const username = req.params.username;
+//  console.log(username, "ajay90")
+//  try {
+////    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "waiting" ';
+//    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept")';
+//
+//    db.query(query, [username], (err, results) => {
+//      if (err) {
+//        res.status(500).json({ message: 'Internal server error' });
+//        return;
+//      }
+//console.log(results,"aaaaaaa")
+//      res.status(200).json(results);
+//    });
+//  } catch (err) {
+//    res.status(500).json({ message: 'Internal server error' });
+//  }
+//});
+
+router.get('/tripsheet/:username/:startdate', async (req, res) => {
   const username = req.params.username;
+  const startdate = req.params.startdate;
+
   console.log(username, "ajay90")
   try {
 //    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "waiting" ';
-    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept")';
+    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept") and startdate = ? order by tripid desc' ;
 
-    db.query(query, [username], (err, results) => {
+    db.query(query, [username,startdate], (err, results) => {
       if (err) {
         res.status(500).json({ message: 'Internal server error' });
         return;

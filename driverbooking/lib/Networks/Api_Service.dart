@@ -459,27 +459,64 @@ class ApiService {
 
 
 
+  // static Future<List<Map<String, dynamic>>> fetchTripSheet({
+  //   required String userId,
+  //   required String drivername,
+  // }) async {
+  //   try {
+  //     // Print the inputs to ensure they are passed correctly
+  //     print('Fetching trip sheet for userId: $userId, username: $drivername');
+  //
+  //     final response = await http.get(
+  //       Uri.parse('${AppConstants.baseUrl}/tripsheet/$drivername'), // Pass username in the URL
+  //       headers: {
+  //         'userId': userId,
+  //       },
+  //     );
+  //
+  //     print('Response statusssss: ${response.statusCode}');
+  //     print('Response bodyyy: ${response.body}');
+  //
+  //     if (response.statusCode == 200) {
+  //       // Parse the response and return a list of maps
+  //       List<Map<String, dynamic>> trips = List<Map<String, dynamic>>.from(json.decode(response.body));
+  //       print('Fetched tripsheet data: $trips');
+  //       return trips;
+  //     } else {
+  //       throw Exception('Failed to fetch trip sheet: ${response.reasonPhrase}');
+  //     }
+  //   } catch (e) {
+  //     print('Error in fetchTripSheet: $e');
+  //     rethrow; // Re-throw the error to handle it in the calling function
+  //   }
+  // }
+
   static Future<List<Map<String, dynamic>>> fetchTripSheet({
     required String userId,
     required String drivername,
   }) async {
     try {
-      // Print the inputs to ensure they are passed correctly
-      print('Fetching trip sheet for userId: $userId, username: $drivername');
+      // Generate today's date in yyyy-MM-dd format
+      String startDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      print('Fetching trip sheet for userId: $userId, drivername: $drivername, startDate: $startDate');
+
+      // Construct URL with drivername and startDate
+      final url = Uri.parse('${AppConstants.baseUrl}/tripsheet/$drivername/$startDate');
 
       final response = await http.get(
-        Uri.parse('${AppConstants.baseUrl}/tripsheet/$drivername'), // Pass username in the URL
+        url,
         headers: {
           'userId': userId,
         },
       );
 
-      print('Response statusssss: ${response.statusCode}');
-      print('Response bodyyy: ${response.body}');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        // Parse the response and return a list of maps
-        List<Map<String, dynamic>> trips = List<Map<String, dynamic>>.from(json.decode(response.body));
+        List<Map<String, dynamic>> trips =
+        List<Map<String, dynamic>>.from(json.decode(response.body));
         print('Fetched tripsheet data: $trips');
         return trips;
       } else {
@@ -487,11 +524,9 @@ class ApiService {
       }
     } catch (e) {
       print('Error in fetchTripSheet: $e');
-      rethrow; // Re-throw the error to handle it in the calling function
+      rethrow;
     }
   }
-
-
 
 
   static Future<List<Map<String, dynamic>>> fetchTripSheetbytripid({
