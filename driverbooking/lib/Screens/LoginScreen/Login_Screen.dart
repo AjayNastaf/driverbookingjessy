@@ -116,6 +116,7 @@ class _Login_ScreenState extends State<Login_Screen> {
               //   SnackBar(content: Text("Login Successful! User ID: ${state.userId}")),
               // );
               _saveLoginDetails(_usernameController.text, state.userId);
+              context.read<AuthenticationBloc>().add(LoggedIn());
 
               Navigator.pushReplacement(
                   context,

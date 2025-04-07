@@ -336,6 +336,7 @@ class _HomescreenState extends State<Homescreen> {
   bool isLoading = true;
   List<Map<String, dynamic>> tripSheetData = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool isOnDuty = false;
 
   String? username;
   String? password;
@@ -582,6 +583,8 @@ class _HomescreenState extends State<Homescreen> {
             ),
             TextButton(
               onPressed: () {
+                context.read<AuthenticationBloc>().add(LoggedOut());
+
                 Navigator.of(context).pop(); // Close the popup
                 Navigator.pushReplacement(
                   context,
@@ -975,6 +978,7 @@ class _HomescreenState extends State<Homescreen> {
 
       appBar: AppBar(
         title: Text("Home Screen"),
+
       ),
       body:Stack(
         children: [

@@ -180,40 +180,100 @@ router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
 //})
 
 
+//router.post('/insertStartData', (req, res) => {
+//    console.log("📢 Received request at /insertStartData");
+//    console.log("📝 Request Body:", req.body);
+//    const sqlStartCheckQuery = `Select * FROM VehicleAccessLocation WHERE Trip_Status = ? AND Trip_id = ?`;
+//    const Trip_idCheck = req.body.Trip_id;
+//    db.query(sqlStartCheckQuery ,Trip_idCheck,(error,Startresult) =>{
+//    if(Startresult.length == 0){
+//
+//    }
+//    })
+//    const insertUserSql = `
+//        INSERT INTO VehicleAccessLocation
+//        (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at)
+//        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+//    `;
+//
+//    const values = [
+//        req.body.Vehicle_No,
+//        req.body.Trip_id,
+//        req.body.Latitude_loc,
+//        req.body.Longtitude_loc,
+//        req.body.Runing_Date,
+//        req.body.Runing_Time,
+//        req.body.Trip_Status,
+//        req.body.Tripstarttime,
+//        req.body.TripEndTime,
+//        new Date().toISOString() // Auto-generate created_at timestamp
+//    ];
+//
+//    console.log("📌insert Query to be executed:", insertUserSql);
+//    console.log("📊 Query Values:", values);
+//
+//    db.query(insertUserSql, values, (error, result) => {
+//        if (error) {
+//            console.error("❌ Database Error:", error);
+//            return res.status(500).send({ message: "Database error", error: error });
+//        }
+//
+//        console.log("✅ Data inserted successfully:", result);
+//        res.status(200).send({ message: "Start Vehicle registered successfully." });
+//    });
+//});
+
 router.post('/insertStartData', (req, res) => {
     console.log("📢 Received request at /insertStartData");
     console.log("📝 Request Body:", req.body);
 
-    const insertUserSql = `
-        INSERT INTO VehicleAccessLocation
-        (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    const sqlStartCheckQuery = `SELECT * FROM VehicleAccessLocation WHERE Trip_Status = ? AND Trip_id = ?`;
+    const TripStatusCheck = req.body.Trip_Status;
+    const TripIdCheck = req.body.Trip_id;
 
-    const values = [
-        req.body.Vehicle_No,
-        req.body.Trip_id,
-        req.body.Latitude_loc,
-        req.body.Longtitude_loc,
-        req.body.Runing_Date,
-        req.body.Runing_Time,
-        req.body.Trip_Status,
-        req.body.Tripstarttime,
-        req.body.TripEndTime,
-        new Date().toISOString() // Auto-generate created_at timestamp
-    ];
-
-    console.log("📌 Query to be executed:", insertUserSql);
-    console.log("📊 Query Values:", values);
-
-    db.query(insertUserSql, values, (error, result) => {
+    db.query(sqlStartCheckQuery, [TripStatusCheck, TripIdCheck], (error, Startresult) => {
         if (error) {
-            console.error("❌ Database Error:", error);
+            console.error("❌ Error while checking existing trip:", error);
             return res.status(500).send({ message: "Database error", error: error });
         }
 
-        console.log("✅ Data inserted successfully:", result);
-        res.status(200).send({ message: "Start Vehicle registered successfully." });
+        if (Startresult.length === 0) {
+            const insertUserSql = `
+                INSERT INTO VehicleAccessLocation
+                (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            const values = [
+                req.body.Vehicle_No,
+                req.body.Trip_id,
+                req.body.Latitude_loc,
+                req.body.Longtitude_loc,
+                req.body.Runing_Date,
+                req.body.Runing_Time,
+                req.body.Trip_Status,
+                req.body.Tripstarttime,
+                req.body.TripEndTime,
+                new Date().toISOString()
+            ];
+
+            console.log("📌 Insert query to be executed:", insertUserSql);
+            console.log("📊 Query Values:", values);
+
+            db.query(insertUserSql, values, (error, result) => {
+                if (error) {
+                    console.error("❌ Insert Error:", error);
+                    return res.status(500).send({ message: "Insert error", error: error });
+                }
+
+                console.log("✅ Data inserted successfully:", result);
+                res.status(200).send({ message: "Start Vehicle registered successfully." });
+            });
+
+        } else {
+            console.log("🚫 Trip already exists with same Trip_Status and Trip_id.");
+            res.status(409).send({ message: "Trip already started or data already exists." });
+        }
     });
 });
 

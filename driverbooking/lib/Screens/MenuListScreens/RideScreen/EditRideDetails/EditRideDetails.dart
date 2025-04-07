@@ -108,7 +108,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
         var tripdatevalue = setFormattedDate(tripDetails['tripsheetdate']).toString();
         var reporttimevalue = tripDetails['reporttime'].toString();;
         var dutyvalue = tripDetails['duty'].toString();
-        var vectypeValue = tripDetails['vehType'].toString();
+        var vectypeValue = tripDetails['vehicleName2'].toString();
         var guestnamevalue = tripDetails['guestname'].toString();
         var guestmobilenovalue = tripDetails['guestmobileno'].toString();
         var pickupvalue = tripDetails['address1'].toString();

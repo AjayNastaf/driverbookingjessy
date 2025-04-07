@@ -512,7 +512,8 @@ Future<void> _refreshCustomerDestination() async {
 
   @override
   void dispose() {
-    _locationSubscription!.cancel();
+    // _locationSubscription!.cancel();
+    _locationSubscription?.cancel();
     _locationSubscription = null;// Remove reference
 
     _timer?.cancel(); // Cancel timer when widget is removed

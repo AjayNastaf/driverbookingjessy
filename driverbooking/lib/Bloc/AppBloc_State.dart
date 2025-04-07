@@ -20,6 +20,17 @@ class LoginFailure extends LoginState {
 }
 
 
+
+
+abstract class AuthenticationState {}
+
+class AuthInitial extends AuthenticationState {}
+
+class Authenticated extends AuthenticationState {}
+
+class Unauthenticated extends AuthenticationState {}
+
+
 //
 // abstract class RegisterState{}
 //

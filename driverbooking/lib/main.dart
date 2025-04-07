@@ -81,6 +81,7 @@ import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';// Import your Bloc file
 import 'package:jessy_cabs/Utils/AppConstants.dart';
 import 'package:provider/provider.dart';
+import 'Screens/AuthWrapper.dart';
 import 'Screens/network_manager.dart';// Import your Bloc file
 
 void main() {
@@ -140,6 +141,9 @@ void main() {
         //   create: (context) => GettingClosingKilometerBloc(),
         // ),
 
+        BlocProvider(create: (_) => AuthenticationBloc()..add(AppStarted())), // 👈 Add this
+
+
       ],
       child: const MyApp(),
     ),
@@ -162,9 +166,13 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         title: "Vehicle Booking App",
         theme: ThemeData(primarySwatch: Colors.blue),
-        home: const SplashScreen(),
+        // home: const SplashScreen(),
+        home: const AuthWrapper(), // 👈 replace SplashScreen
+
         routes: {
+
           'home': (context) => const Home(),
+          // 'home': (context) => const SplashScreen(),
           'login': (context) => const Login_Screen(),
         },
       );

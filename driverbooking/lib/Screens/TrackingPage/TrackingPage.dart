@@ -591,12 +591,15 @@ class _TrackingPageState extends State<TrackingPage> {
     // );
     if (_currentLatLng != null) {
       _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (context) => Customerlocationreached(tripId:tripId!),
-      //   ),
-      // );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Customerlocationreached(tripId: tripId!),
+          ),(route)=> false
+      );
+
+
+
       showInfoSnackBar(context, 'Trip started');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

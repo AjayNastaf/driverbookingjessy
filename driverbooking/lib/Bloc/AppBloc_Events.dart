@@ -17,6 +17,20 @@ class LoginAtempt extends LoginEvent {
   LoginAtempt({required this.username, required this.password});
 }
 
+
+
+
+abstract class AuthenticationEvent {}
+
+class AppStarted extends AuthenticationEvent {}
+
+class LoggedIn extends AuthenticationEvent {}
+
+
+class LoggedOut extends AuthenticationEvent {}
+
+
+
 // abstract class RegisterEvent {}
 //
 // class RequestOtpAndRegister extends RegisterEvent {

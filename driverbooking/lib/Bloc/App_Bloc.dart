@@ -64,6 +64,62 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
 }
 
 
+
+
+
+// At the bottom of App_Bloc.dart for user login in no logout
+
+
+
+
+
+class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
+  AuthenticationBloc() : super(AuthInitial()) {
+    on<AppStarted>(_onAppStarted);
+    on<LoggedIn>(_onLoggedIn);
+    on<LoggedOut>(_onLoggedOut);
+  }
+
+  Future<void> _onAppStarted(AppStarted event, Emitter<AuthenticationState> emit) async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+    if (isLoggedIn) {
+      emit(Authenticated());
+    } else {
+      emit(Unauthenticated());
+    }
+  }
+
+  Future<void> _onLoggedIn(LoggedIn event, Emitter<AuthenticationState> emit) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true); // ✅ just set true
+    emit(Authenticated());
+  }
+
+  Future<void> _onLoggedOut(LoggedOut event, Emitter<AuthenticationState> emit) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    emit(Unauthenticated());
+  }
+}
+
+
+
+
+// At the bottom of App_Bloc.dart for user login in no logout
+
+
+
+
+
+
+
+
+
+
+
+
 class CustomerOtpVerifyBloc extends Bloc<CustomerOtpVerifyEvent , CustomerOtpVerifyState>{
   CustomerOtpVerifyBloc():super(OtpVerifyStarts()){
     on<OtpVerifyAttempt>(_onOtpVerifyAttempt);
