@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
+import 'package:jessy_cabs/Screens/StartingKilometer/StartingKilometer.dart';
 import 'package:jessy_cabs/Screens/TrackingPage/TrackingPage.dart';
 // import 'package:jessy_cabs/Screens/TrackingPage/TrackingPagecopy1.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,9 @@ import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
 
+import 'package:geocoding/geocoding.dart' as geocoding;
+import 'package:location/location.dart' as loc;
+
 
 class Pickupscreen extends StatefulWidget {
   final String address;
@@ -33,7 +38,9 @@ class _PickupscreenState extends State<Pickupscreen> {
   bool _isMapLoading = true;
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
-  LatLng _destination = LatLng( 13.028159, 80.243306); // Chennai Central Railway Station
+  // LatLng _destination = LatLng( 13.028159, 80.243306);
+  late final loc.Location location;
+  LatLng? _destination;
   List<LatLng> _routeCoordinates = [];
   StreamSubscription<Position>? _positionStreamSubscription;
 
@@ -49,8 +56,25 @@ class _PickupscreenState extends State<Pickupscreen> {
       print("Addressss: ${widget.address}");
       print("Trip ID: ${widget.tripId}");
 
+      location = loc.Location();
+      _setDestinationFromAddress(widget.address);
+
       _initializeLocationTracking();
     }
+
+
+  Future<void> _setDestinationFromAddress(String address) async {
+    try {
+      List<geocoding.Location> locations = await geocoding.locationFromAddress(address);
+      if (locations.isNotEmpty) {
+        setState(() {
+          _destination = LatLng(locations.first.latitude, locations.first.longitude);
+        });
+      }
+    } catch (e) {
+      print('Error converting address to coordinates: $e');
+    }
+  }
 
   void _checkMapLoading() {
     Future.delayed(Duration(seconds: 2), () {
@@ -102,11 +126,12 @@ class _PickupscreenState extends State<Pickupscreen> {
   Future<void> _fetchRoute() async {
     if (_currentLatLng == null) return;
 
+
     const String apiKey = AppConstants.ApiKey;
     final String url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=${_currentLatLng!
-        .latitude},${_currentLatLng!.longitude}&destination=${_destination
-        .latitude},${_destination.longitude}&key=$apiKey';
+        .latitude},${_currentLatLng!.longitude}&destination=${_destination!
+        .latitude},${_destination!.longitude}&key=$apiKey';
 
     try {
       final response = await Dio().get(url);
@@ -167,7 +192,8 @@ class _PickupscreenState extends State<Pickupscreen> {
   StreamSubscription<
       LocationData>? _locationSubscription; // Store the subscription
   Future<void> _initializeLocationTracking() async {
-    Location location = Location();
+    // Location location = Location();
+    List<geocoding.Location> locations = await geocoding.locationFromAddress(widget.address);
 
     bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
@@ -209,7 +235,7 @@ class _PickupscreenState extends State<Pickupscreen> {
       body: Stack(
         children: [
           // Google Map
-          if (!_isMapLoading && _currentLatLng != null)
+          if (!_isMapLoading && _currentLatLng != null && _destination != null )
           // GoogleMap(
           //   onMapCreated: (controller) {
           //     // You can save the controller for further use if needed
@@ -252,9 +278,10 @@ class _PickupscreenState extends State<Pickupscreen> {
                     // BitmapDescriptor.hueBlue),
                       BitmapDescriptor.hueGreen),
                 ),
-                Marker(
+                if (_destination != null)
+                  Marker(
                   markerId: MarkerId('destination'),
-                  position: _destination,
+                  position: _destination!,
                 ),
               },
               polylines: {
@@ -344,13 +371,14 @@ class _PickupscreenState extends State<Pickupscreen> {
                   Center(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Add your button action here
-                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => TrackingPage(address: widget.address, tripId: widget.tripId,)), (route) => false,);
+                        // Add your button action here StartingKilometer
+                        // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => TrackingPage(address: widget.address, tripId: widget.tripId,)), (route) => false,);
+                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => StartingKilometer(tripId: widget.tripId, address: widget.address)), (route) => false,);
 
 
                       },
                       child: Text(
-                        'Go to the Location',
+                        'Reached',
                         style: TextStyle(
                           fontSize: 18.0,
                           color: Colors.white, // Text color

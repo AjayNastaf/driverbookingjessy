@@ -4,6 +4,7 @@ import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
 import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 class AuthWrapper extends StatelessWidget {
+
   const AuthWrapper({super.key});
 
   @override
@@ -11,7 +12,7 @@ class AuthWrapper extends StatelessWidget {
     return BlocBuilder<AuthenticationBloc, AuthenticationState>(
       builder: (context, state) {
         if (state is Authenticated) {
-          return const Homescreen(userId: '', username: '');
+          return Homescreen(userId: state.userId, username: state.username);
         } else if (state is Unauthenticated) {
           return const Login_Screen();
         } else {

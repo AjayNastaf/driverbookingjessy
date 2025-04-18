@@ -24,10 +24,16 @@ abstract class AuthenticationEvent {}
 
 class AppStarted extends AuthenticationEvent {}
 
-class LoggedIn extends AuthenticationEvent {}
+class LoggedIn extends AuthenticationEvent {
+  final String userId;
+  final String username;
+
+  LoggedIn({required this.userId, required this.username});
+}
 
 
 class LoggedOut extends AuthenticationEvent {}
+
 
 
 

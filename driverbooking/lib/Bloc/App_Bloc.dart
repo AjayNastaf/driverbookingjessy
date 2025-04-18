@@ -12,6 +12,9 @@ import 'package:http/http.dart' as http;
 import 'package:jessy_cabs/Utils/AppConstants.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import '../Screens/CustomerLocationReached/CustomerLocationReached.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(LoginInitial()) {
@@ -74,28 +77,38 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
 
 
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
   AuthenticationBloc() : super(AuthInitial()) {
     on<AppStarted>(_onAppStarted);
     on<LoggedIn>(_onLoggedIn);
     on<LoggedOut>(_onLoggedOut);
   }
 
-  Future<void> _onAppStarted(AppStarted event, Emitter<AuthenticationState> emit) async {
-    final prefs = await SharedPreferences.getInstance();
-    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  void _onAppStarted(AppStarted event, Emitter<AuthenticationState> emit) async {
+    final userId = await _storage.read(key: 'userId');
+    final username = await _storage.read(key: 'username');
 
-    if (isLoggedIn) {
-      emit(Authenticated());
+    if (userId != null && username != null) {
+      emit(Authenticated(userId: userId, username: username));
     } else {
       emit(Unauthenticated());
     }
   }
 
+
+
   Future<void> _onLoggedIn(LoggedIn event, Emitter<AuthenticationState> emit) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', true); // ✅ just set true
-    emit(Authenticated());
+    await prefs.setBool('isLoggedIn', true);
+
+    // Save userId and username securely
+    await _storage.write(key: 'userId', value: event.userId);
+    await _storage.write(key: 'username', value: event.username);
+
+    emit(Authenticated(userId: event.userId, username: event.username));
   }
+
 
   Future<void> _onLoggedOut(LoggedOut event, Emitter<AuthenticationState> emit) async {
     final prefs = await SharedPreferences.getInstance();

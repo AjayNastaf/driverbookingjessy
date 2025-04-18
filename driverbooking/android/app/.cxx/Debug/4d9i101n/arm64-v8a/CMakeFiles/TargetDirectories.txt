@@ -1,0 +1,2 @@
+C:/appjessybackgroundtest2/driverappgit/NASTAF-Driver-Application/driverbooking/android/app/.cxx/Debug/4d9i101n/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/appjessybackgroundtest2/driverappgit/NASTAF-Driver-Application/driverbooking/android/app/.cxx/Debug/4d9i101n/arm64-v8a/CMakeFiles/rebuild_cache.dir

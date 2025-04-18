@@ -73,6 +73,7 @@ import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:sizer/sizer.dart';
 import 'package:jessy_cabs/Screens/SplashScreen.dart';
 import 'package:jessy_cabs/Screens/Home.dart';
@@ -83,6 +84,8 @@ import 'package:jessy_cabs/Utils/AppConstants.dart';
 import 'package:provider/provider.dart';
 import 'Screens/AuthWrapper.dart';
 import 'Screens/network_manager.dart';// Import your Bloc file
+import 'package:flutter/services.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -160,6 +163,15 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+       requestPermissions(); // Request permissions before starting the service
+      BackgroundServiceHelper.startBackgroundService();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Sizer(builder: (context, orientation, deviceType) {
       return MaterialApp(
@@ -177,5 +189,29 @@ class _MyAppState extends State<MyApp> {
         },
       );
     });
+  }
+}
+
+
+
+void requestPermissions() async {
+  var status = await Permission.location.request();
+  if (status.isGranted) {
+    // Permissions granted, proceed with location tracking
+  } else {
+    // Handle the case when permissions are not granted
+  }
+}
+
+class BackgroundServiceHelper {
+  static const MethodChannel _channel = MethodChannel("com.example.jessy_cabs/background");
+
+  static Future<void> startBackgroundService() async {
+    try {
+      final result = await _channel.invokeMethod("startService");
+      print("Background service result: $result");
+    } on PlatformException catch (e) {
+      print("Error starting background service: ${e.message}");
+    }
   }
 }

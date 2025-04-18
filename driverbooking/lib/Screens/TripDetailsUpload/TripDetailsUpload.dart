@@ -650,7 +650,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         guestMobileController.text = tripDetails['guestmobileno'] ?? 'Not available';
         guestNameController.text = tripDetails['guestname'] ?? 'Not available';
         tripIdController.text = tripDetails['tripid'].toString()  ?? 'Not available';
-        vehicleTypeController.text = tripDetails['vehType'] ?? 'Not available';
+        vehicleTypeController.text = tripDetails['vehicleName'] ?? 'Not available';
         // startDateController.text = tripDetails['startdate'] ?? 'Not available';
         startDateController.text = setFormattedDate(tripDetails['startdate']); // Assuming 'startdate' is from the database;
         // closeDateController.text = tripDetails['closeDate'] ?? 'Not available';
@@ -1108,13 +1108,23 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   //   );
   // }
 
+  // Function to pick image from camera or gallery
+  Future<void> _pickFile(ImageSource source) async {
+    final XFile? file = await _picker.pickImage(source: source);
+    if (file != null) {
+      setState(() {
+        _selectedImage2 = File(file.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => _tripUploadBloc,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Trip Details Upload"),
+          title: const Text("Uploading Closing Kilometer"),
         ),
         body: MultiBlocListener(
           listeners: [
@@ -1175,7 +1185,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                       controller: vehicleTypeController,
                       enabled: false,
                       decoration: const InputDecoration(
-                        labelText: "Vehicle Type",
+                        labelText: "Vehicle Name",
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -1230,25 +1240,69 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () => _chooseOption(context, 2),
+                          // onPressed: () => _chooseOption(context, 2),
+                          onPressed: () => _pickFile(ImageSource.camera),
+
                           child: const Text("Upload Image"),
                         ),
                       ],
                     ),
-                    _selectedImage2 != null
-                        ? Image.file(
-                      _selectedImage2!,
-                      width: 200,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    )
-                        : const Text("No image selected for Button 2"),
+                    // _selectedImage2 != null
+                    //     ? Image.file(
+                    //   _selectedImage2!,
+                    //   width: 200,
+                    //   height: 200,
+                    //   fit: BoxFit.cover,
+                    // )
+                    //     : const Text("No image selected for Button 2"),
+
+                    if (_selectedImage2 != null)
+                      Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  _selectedImage2!,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text(
+                                "Selected Image",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      Center(
+                        child: Text(
+                          "No file selected",
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      ),
                     const SizedBox(height: 16),
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),
                       child: SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.Navblue1, // Navy blue
+                            foregroundColor: Colors.white, // Text color
+                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                           onPressed: () {
 
                             // if (closeKmController.text.isEmpty || _selectedImage2 == null) {
@@ -1292,7 +1346,8 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                               MaterialPageRoute(builder: (context) => TripDetailsPreview(tripId: widget.tripId)),
                             );
                           },
-                          child: Text("Upload Toll and Parking Data"),
+                          // child: Text("Upload Toll and Parking Data"),
+                          child: Text("Next"),
                         ),
                       ),
                     ),

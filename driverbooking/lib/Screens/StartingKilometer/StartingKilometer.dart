@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:jessy_cabs/Screens/TrackingPage/TrackingPage.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +8,7 @@ import '../PickupScreen/PickupScreen.dart';
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
+import 'package:flutter/services.dart';
 
 class StartingKilometer extends StatefulWidget {
   final String address;
@@ -145,13 +147,20 @@ class _StartingKilometerState extends State<StartingKilometer> {
     );
 
 
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => Pickupscreen(
+    //       address: widget.address,
+    //       tripId: widget.tripId,
+    //     ),
+    //   ),
+    // );
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Pickupscreen(
-          address: widget.address,
-          tripId: widget.tripId,
-        ),
+        builder: (context) => TrackingPage(address: widget.address,tripId:widget.tripId),
       ),
     );
   }
@@ -187,6 +196,10 @@ class _StartingKilometerState extends State<StartingKilometer> {
         // Text Field with better styling
             TextField(
               controller: _startKM,
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly, // ✅ allows only digits (0-9)
+              ],
               decoration: InputDecoration(
                 hintText: "Starting Kilometer",
                 border: OutlineInputBorder(
@@ -205,7 +218,8 @@ class _StartingKilometerState extends State<StartingKilometer> {
                   child: ElevatedButton.icon(
                     onPressed: () => _pickFile(ImageSource.camera),
                     icon: Icon(Icons.camera_alt),
-                    label: Text("Open Camera"),
+                    // label: Text("Open Camera"),
+                    label: Text("Upload File"),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.driverbooking"
+    namespace = "com.example.jessy_cabs"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.2.12479018" // Add this line
 

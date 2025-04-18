@@ -69,7 +69,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
       setState(() {
         tripSheetData = data;  // Store the list of trip data
         address = data.isNotEmpty ? data[0]['address1'] ?? '' : '';  // Access the first item in the list
-        Dropaddress = data.isNotEmpty ? data[0]['address1'] ?? '' : '';  // Same here
+        Dropaddress = data.isNotEmpty ? data[0]['useage'] ?? '' : '';  // Same here
         globals.dropLocation = Dropaddress;
 
       });
@@ -275,10 +275,16 @@ class _BookingdetailsState extends State<Bookingdetails> {
                   BlocConsumer<UpdateTripStatusInTripsheetBloc, UpdateTripStatusInTripsheetState>(
                     listener: (context, state) {
                       if (state is UpdateTripStatusInTripsheetSuccess) {
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => StartingKilometer(address: tripDetails['address1'], tripId: widget.tripId),
+                        //   ),
+                        // );
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => StartingKilometer(address: tripDetails['address1'], tripId: widget.tripId),
+                            builder: (context) => Pickupscreen(address: tripDetails['address1'], tripId: widget.tripId),
                           ),
                         );
 

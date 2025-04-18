@@ -299,6 +299,7 @@ import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
 import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
 import 'package:jessy_cabs/Screens/MenuListScreens/Contacts/ContactScreen.dart';
 import 'package:jessy_cabs/Screens/MenuListScreens/Faq/FaqScreen.dart';
@@ -980,166 +981,269 @@ class _HomescreenState extends State<Homescreen> {
         title: Text("Home Screen"),
 
       ),
-      body:Stack(
-        children: [
-
-
-        // Column(
-        //   children: [
-        //
-        //
-        //     Text("Message: ${userData?['message'] ?? 'Not Found'}"),
-        //     Text("User ID: ${userData?['user']?[0]?['id'] ?? 'Not Found'}"),
-        //     Text("Driver ID: ${userData?['user']?[0]?['driverid'] ?? 'Not Found'}"),
-        //     Text("Driver Name: ${userData?['user']?[0]?['drivername'] ?? 'Not Found'}"),
-        //     Text("Username: ${userData?['user']?[0]?['username'] ?? 'Not Found'}"),
-        //     Text("Stations: ${userData?['user']?[0]?['stations'] ?? 'Not Found'}"),
-        //     Text("Mobile No: ${userData?['user']?[0]?['Mobileno'] ?? 'Not Found'}"),
-        //     Text("Email: ${userData?['user']?[0]?['Email'] ?? 'Not Found'}"),
-        //
-        //   ],
-        // )
-    //   RefreshIndicator(
-    //     onRefresh: _refreshData, // 🔄 Pull-to-Refresh function
-    //     child:BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
-    //     builder: (context, state) {
-    //       if (state is FetchingTripSheetValuesLoading) {
-    //         return const Center(
-    //           child: CircularProgressIndicator(),
-    //         );
-    //       }
+    //   body:Stack(
+    //     children: [
     //
-    //       else if (state is FetchingTripSheetValuesLoaded) {
-    //         return state.tripSheetData.isEmpty
-    //             ? const Center(
-    //           child: Text('No trip sheet data found.'),
-    //         )
-    //             : ListView.builder(
-    //           itemCount: state.tripSheetData.length, // Use state.tripSheetData
-    //           itemBuilder: (context, index) {
-    //             final trip = state.tripSheetData[index]; // Use state.tripSheetData
-    //             return Column(
-    //               children: [
-    //                 buildSection(
+    //
+    //     // Column(
+    //     //   children: [
+    //     //
+    //     //
+    //     //     Text("Message: ${userData?['message'] ?? 'Not Found'}"),
+    //     //     Text("User ID: ${userData?['user']?[0]?['id'] ?? 'Not Found'}"),
+    //     //     Text("Driver ID: ${userData?['user']?[0]?['driverid'] ?? 'Not Found'}"),
+    //     //     Text("Driver Name: ${userData?['user']?[0]?['drivername'] ?? 'Not Found'}"),
+    //     //     Text("Username: ${userData?['user']?[0]?['username'] ?? 'Not Found'}"),
+    //     //     Text("Stations: ${userData?['user']?[0]?['stations'] ?? 'Not Found'}"),
+    //     //     Text("Mobile No: ${userData?['user']?[0]?['Mobileno'] ?? 'Not Found'}"),
+    //     //     Text("Email: ${userData?['user']?[0]?['Email'] ?? 'Not Found'}"),
+    //     //
+    //     //   ],
+    //     // )
+    // //   RefreshIndicator(
+    // //     onRefresh: _refreshData, // 🔄 Pull-to-Refresh function
+    // //     child:BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
+    // //     builder: (context, state) {
+    // //       if (state is FetchingTripSheetValuesLoading) {
+    // //         return const Center(
+    // //           child: CircularProgressIndicator(),
+    // //         );
+    // //       }
+    // //
+    // //       else if (state is FetchingTripSheetValuesLoaded) {
+    // //         return state.tripSheetData.isEmpty
+    // //             ? const Center(
+    // //           child: Text('No trip sheet data found.'),
+    // //         )
+    // //             : ListView.builder(
+    // //           itemCount: state.tripSheetData.length, // Use state.tripSheetData
+    // //           itemBuilder: (context, index) {
+    // //             final trip = state.tripSheetData[index]; // Use state.tripSheetData
+    // //             return Column(
+    // //               children: [
+    // //                 buildSection(
+    // //                   context,
+    // //                   title: '${trip['duty']}',
+    // //                   dateTime: '${trip['tripid']}',
+    // //                   buttonText: '${trip['apps']}',
+    // //                   onTap: () {
+    // //                     Navigator.push(
+    // //                       context,
+    // //                       MaterialPageRoute(
+    // //                         builder: (context) => Bookingdetails(
+    // //                           username: widget.username,
+    // //                           userId: widget.userId,
+    // //                           tripId: trip['tripid'].toString(),
+    // //                           duty: trip['duty'].toString(),
+    // //                         ),
+    // //                       ),
+    // //                     );
+    // //                   },
+    // //                 ),
+    // //               ],
+    // //             );
+    // //           },
+    // //         );
+    // //       }
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //
+    // //       // Default case to handle any unexpected state
+    // //       return Container();
+    // //     },
+    // //   ),
+    // //
+    // // ),
+    //       RefreshIndicator(
+    //         onRefresh: _refreshData, // 🔄 Pull-to-Refresh function
+    //         child: SingleChildScrollView(
+    //           physics: const AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh always works
+    //           child: BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
+    //             builder: (context, state) {
+    //               if (state is FetchingTripSheetValuesLoading) {
+    //                 return const Center(
+    //                   child: CircularProgressIndicator(),
+    //                 );
+    //               } else if (state is FetchingTripSheetValuesLoaded) {
+    //                 // return state.tripSheetData.isEmpty
+    //                 //     ? const Center(
+    //                 //       child: Text('No trip sheet data found.'),
+    //                 //     )
+    //                 //     :
+    //
+    //
+    //
+    // if (state.tripSheetData.isEmpty) {
+    //   return ListView(
+    //   physics: const AlwaysScrollableScrollPhysics(), // required to trigger pull even when empty
+    //     children: const [
+    //      SizedBox(height: 300), // push content down to make pull-to-refresh visible
+    //       Center(child: Text('No trip sheet data found.')),
+    //     ],
+    //   );
+    // } else {
+    //   return
+    //     ListView.builder(
+    //       physics: const AlwaysScrollableScrollPhysics(),
+    //
+    //       shrinkWrap: true,
+    //
+    //       // Prevents nested scrolling issues
+    //       itemCount: state.tripSheetData.length,
+    //       // Use state.tripSheetData
+    //       itemBuilder: (context, index) {
+    //         final trip = state.tripSheetData[index]; // Use state.tripSheetData
+    //         return Column(
+    //           children: [
+    //             buildSection(
+    //               context,
+    //               title: '${trip['duty']}',
+    //               dateTime: '${trip['tripid']}',
+    //               buttonText: '${trip['apps']}',
+    //               onTap: () {
+    //                 Navigator.push(
     //                   context,
-    //                   title: '${trip['duty']}',
-    //                   dateTime: '${trip['tripid']}',
-    //                   buttonText: '${trip['apps']}',
-    //                   onTap: () {
-    //                     Navigator.push(
-    //                       context,
-    //                       MaterialPageRoute(
-    //                         builder: (context) => Bookingdetails(
+    //                   MaterialPageRoute(
+    //                     builder: (context) =>
+    //                         Bookingdetails(
     //                           username: widget.username,
     //                           userId: widget.userId,
     //                           tripId: trip['tripid'].toString(),
     //                           duty: trip['duty'].toString(),
     //                         ),
-    //                       ),
-    //                     );
-    //                   },
-    //                 ),
-    //               ],
-    //             );
-    //           },
+    //                   ),
+    //                 );
+    //               },
+    //             ),
+    //           ],
     //         );
-    //       }
+    //       },
+    //     );
+    // };
+    //               }
+    //               // Default case to handle any unexpected state
+    //               return Container();
+    //             },
+    //           ),
+    //         ),
+    //       ),
     //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //
-    //       // Default case to handle any unexpected state
-    //       return Container();
-    //     },
+    //       Positioned(
+    //     top: 15,
+    //     left: 0,
+    //     right: 0,
+    //     child: NoInternetBanner(isConnected: isConnected),
     //   ),
     //
-    // ),
-          RefreshIndicator(
-            onRefresh: _refreshData, // 🔄 Pull-to-Refresh function
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(), // Ensures pull-to-refresh always works
-              child: BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
-                builder: (context, state) {
-                  if (state is FetchingTripSheetValuesLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (state is FetchingTripSheetValuesLoaded) {
-                    return state.tripSheetData.isEmpty
-                        ? const Center(
-                          child: Text('No trip sheet data found.'),
-                        )
-                        : ListView.builder(
-                      shrinkWrap: true, // Ensures ListView adapts inside SingleChildScrollView
-                      physics: const NeverScrollableScrollPhysics(), // Prevents nested scrolling issues
-                      itemCount: state.tripSheetData.length, // Use state.tripSheetData
-                      itemBuilder: (context, index) {
-                        final trip = state.tripSheetData[index]; // Use state.tripSheetData
-                        return Column(
-                          children: [
-                            buildSection(
-                              context,
-                              title: '${trip['duty']}',
-                              dateTime: '${trip['tripid']}',
-                              buttonText: '${trip['apps']}',
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => Bookingdetails(
-                                      username: widget.username,
-                                      userId: widget.userId,
-                                      tripId: trip['tripid'].toString(),
-                                      duty: trip['duty'].toString(),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+    //     ],
+    //   )
+      body: Stack(
+    children: [
+    RefreshIndicator(
+    onRefresh: _refreshData,
+      child: BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
+        builder: (context, state) {
+          if (state is FetchingTripSheetValuesLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is FetchingTripSheetValuesLoaded) {
+            if (state.tripSheetData.isEmpty) {
+              return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: const [
+                  SizedBox(height: 300),
+                  Center(child: Text('No trip sheet data found.')),
+                ],
+              );
+            } else {
+              return ListView.builder(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: state.tripSheetData.length,
+                itemBuilder: (context, index) {
+                  final trip = state.tripSheetData[index];
+                  return buildSection(
+                    context,
+                    title: '${trip['duty']}',
+                    dateTime: '${trip['tripid']}',
+                    buttonText: '${trip['apps']}',
+                    // onTap: () {
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => Bookingdetails(
+                    //         username: widget.username,
+                    //         userId: widget.userId,
+                    //         tripId: trip['tripid'].toString(),
+                    //         duty: trip['duty'].toString(),
+                    //       ),
+                    //     ),
+                    //   );
+                    // },
+                    onTap: () {
+                      if (trip['apps'] == 'On_Going') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Customerlocationreached(tripId: trip['tripid'].toString()),
+                          ),
                         );
-                      },
-                    );
-                  }
-                  // Default case to handle any unexpected state
-                  return Container();
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Bookingdetails(
+                              username: widget.username,
+                              userId: widget.userId,
+                              tripId: trip['tripid'].toString(),
+                              duty: trip['duty'].toString(),
+                            ),
+                          ),
+                        );
+                      }
+                    },
+
+                  );
                 },
-              ),
-            ),
-          ),
-
-          Positioned(
-        top: 15,
-        left: 0,
-        right: 0,
-        child: NoInternetBanner(isConnected: isConnected),
+              );
+            }
+          }
+          return const SizedBox(); // Fallback empty widget
+        },
       ),
+    ),
 
-        ],
-      )
+    Positioned(
+    top: 15,
+    left: 0,
+    right: 0,
+    child: NoInternetBanner(isConnected: isConnected),
+    ),
+    ],
+    ),
+
     );
   }
 }

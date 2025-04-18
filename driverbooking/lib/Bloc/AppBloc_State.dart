@@ -26,8 +26,13 @@ abstract class AuthenticationState {}
 
 class AuthInitial extends AuthenticationState {}
 
-class Authenticated extends AuthenticationState {}
+// Assuming Authenticated looks like this:
+class Authenticated extends AuthenticationState {
+  final String userId;
+  final String username;
 
+  Authenticated({required this.userId, required this.username});
+}
 class Unauthenticated extends AuthenticationState {}
 
 

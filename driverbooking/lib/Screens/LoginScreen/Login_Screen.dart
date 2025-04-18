@@ -116,7 +116,10 @@ class _Login_ScreenState extends State<Login_Screen> {
               //   SnackBar(content: Text("Login Successful! User ID: ${state.userId}")),
               // );
               _saveLoginDetails(_usernameController.text, state.userId);
-              context.read<AuthenticationBloc>().add(LoggedIn());
+              // context.read<AuthenticationBloc>().add(LoggedIn());
+              context.read<AuthenticationBloc>().add(
+                LoggedIn(userId: state.userId, username: _usernameController.text),
+              );
 
               Navigator.pushReplacement(
                   context,
@@ -161,6 +164,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
+                    height: 350.0,
                     color: Colors.white.withOpacity(
                         0.8), // Set your desired background color with opacity
                     // color: AppTheme.white1, // Set your desired background color with opacity
@@ -173,13 +177,13 @@ class _Login_ScreenState extends State<Login_Screen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              "Welcome to jessy Cabs ..",
-                              style: TextStyle(
-                                  fontSize: 28.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.Navblue1),
-                            ),
+                            // Text(
+                            //   "Welcome to jessy Cabs ..",
+                            //   style: TextStyle(
+                            //       fontSize: 28.0,
+                            //       fontWeight: FontWeight.bold,
+                            //       color: AppTheme.Navblue1),
+                            // ),
                             SizedBox(
                               height: 10.0,
                             ),
@@ -275,7 +279,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                                 return null;
                               },
                             ),
-                            SizedBox(height: 24.0),
+                            SizedBox(height: 54.0),
 
                             // Login Button
                             ElevatedButton(
@@ -338,34 +342,34 @@ class _Login_ScreenState extends State<Login_Screen> {
                             SizedBox(
                               height: 20.0,
                             ),
-                            Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Don't Have the Account? ",
-                                    style: TextStyle(fontSize: 15.0),
-                                  ),
-                                  GestureDetector(
-                                    child: Text(
-                                      " Register!",
-                                      style: TextStyle(
-                                          fontSize: 15.0,
-                                          color: AppTheme.Navblue1,
-                                          decoration: TextDecoration.underline),
-                                    ),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Register()),
-                                      );
-                                    },
-                                  )
-                                ],
-                              ),
-                              // child: Text("Don't Have the Account"),
-                            )
+                            // Center(
+                            //   child: Row(
+                            //     mainAxisAlignment: MainAxisAlignment.center,
+                            //     children: [
+                            //       Text(
+                            //         "Don't Have the Account? ",
+                            //         style: TextStyle(fontSize: 15.0),
+                            //       ),
+                            //       GestureDetector(
+                            //         child: Text(
+                            //           " Register!",
+                            //           style: TextStyle(
+                            //               fontSize: 15.0,
+                            //               color: AppTheme.Navblue1,
+                            //               decoration: TextDecoration.underline),
+                            //         ),
+                            //         onTap: () {
+                            //           Navigator.push(
+                            //             context,
+                            //             MaterialPageRoute(
+                            //                 builder: (context) => Register()),
+                            //           );
+                            //         },
+                            //       )
+                            //     ],
+                            //   ),
+                            //   // child: Text("Don't Have the Account"),
+                            // )
                           ],
                         ),
                       ),

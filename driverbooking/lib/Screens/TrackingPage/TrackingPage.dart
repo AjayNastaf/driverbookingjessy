@@ -23,6 +23,7 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:location/location.dart' as loc;
 
 
+
 class SharedPrefs {
   static Future<void> setBool(String key, bool value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -37,9 +38,9 @@ class SharedPrefs {
 
 class TrackingPage extends StatefulWidget {
   final String address;
-  final String? tripId; // Add this field
+  final String tripId; // Add this field
 
-  const TrackingPage({Key? key, required this.address ,  this.tripId}) : super(key: key);
+  const TrackingPage({Key? key, required this.address ,  required this.tripId}) : super(key: key);
 
   @override
   _TrackingPageState createState() => _TrackingPageState();
@@ -82,6 +83,8 @@ class _TrackingPageState extends State<TrackingPage> {
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId!));
     _checkMapLoading();
+
+
 
   }
 
@@ -623,6 +626,9 @@ class _TrackingPageState extends State<TrackingPage> {
 
 
 
+
+
+
   @override
   Widget build(BuildContext context) {
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
@@ -647,7 +653,7 @@ class _TrackingPageState extends State<TrackingPage> {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text("Location saved successfully!")),
             // );
-            // showSuccessSnackBar(context, "Location saved successfully!");
+            showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
           } else if (state is SaveLocationFailure) {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text(state.errorMessage)),
@@ -743,7 +749,9 @@ class _TrackingPageState extends State<TrackingPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
 
-                        SizedBox(height: 40),
+                        // SizedBox(height: 40),
+                        Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0),),
+                        // SizedBox(height: 40),
                         SizedBox(
                           width: double.infinity,
                           child:
