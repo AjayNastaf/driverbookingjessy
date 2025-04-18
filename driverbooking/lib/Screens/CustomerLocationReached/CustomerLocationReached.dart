@@ -1580,7 +1580,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
               print("Trip details are still empty after setting state.");
             }
           } else if (state is SaveLocationSuccess) {
-
+            showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
             print("inside the success function");
           } else if (state is SaveLocationFailure) {
 
