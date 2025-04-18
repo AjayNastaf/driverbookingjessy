@@ -561,6 +561,14 @@ class _TrackingPageState extends State<TrackingPage> {
       if (response.statusCode == 200) {
         print('Status updated successfully ongoing');
 
+
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Customerlocationreached(tripId: tripId!),
+            ),(route)=> false
+        );
+
         // Navigator.push(
         //   context,
         //   MaterialPageRoute(
@@ -575,6 +583,7 @@ class _TrackingPageState extends State<TrackingPage> {
         //   SnackBar(content: Text('Failed to update status')),
         // );
         showFailureSnackBar(context, 'Failed to update status');
+
       }
     } catch (e) {
       print('Error occurred: $e');
@@ -594,12 +603,12 @@ class _TrackingPageState extends State<TrackingPage> {
     // );
     if (_currentLatLng != null) {
       _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Customerlocationreached(tripId: tripId!),
-          ),(route)=> false
-      );
+      // Navigator.pushAndRemoveUntil(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => Customerlocationreached(tripId: tripId!),
+      //     ),(route)=> false
+      // );
 
 
 
