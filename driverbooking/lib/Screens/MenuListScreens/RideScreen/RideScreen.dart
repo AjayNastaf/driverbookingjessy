@@ -41,13 +41,13 @@ class _RidescreenState extends State<Ridescreen> {
     //   TripsheetStatusClosed(username: widget.username, userid: widget.userId),
     // );
     _loadUserData();
-    context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
+    // context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
 
   }
 
   Future<void> _refreshridescreen() async {
     _loadUserData();
-    context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
+    // context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(widget.username));
 
   }
 
@@ -68,13 +68,18 @@ class _RidescreenState extends State<Ridescreen> {
         print("After setState, userDatam: $userData");
 
         // 🚀 Move the event dispatch here, after userData is loaded
+        String driverName = decodedData['drivername']; // Change key if needed
+        context.read<TripClosedTodayBloc>().add(FetchTripClosedToday(driverName));
 
 
-        BlocProvider.of<TripSheetClosedValuesBloc>(context).add(
-          TripsheetStatusClosed(
-              drivername: userData?['drivername'] ?? 'Notttyu Found',
-              userid: widget.userId),
-        );
+
+
+
+        // BlocProvider.of<TripSheetClosedValuesBloc>(context).add(
+        //   TripsheetStatusClosed(
+        //       drivername: userData?['drivername'] ?? 'Notttyu Found',
+        //       userid: widget.userId),
+        // );
 
         // context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
       } catch (e) {

@@ -27,6 +27,8 @@ class TollParkingUpload extends StatefulWidget {
 }
 
 class _TollParkingUploadState extends State<TollParkingUpload> {
+
+
   final TextEditingController tollController = TextEditingController();
   final TextEditingController parkingController = TextEditingController();
 
@@ -39,6 +41,8 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
   void initState() {
     super.initState();
     // _loadLoginDetailss();
+    saveScreenData();
+
   }
 
   Future<void> _refreshDataTollParking() async {
@@ -48,9 +52,32 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
       tollFile = null;
       parkingFile = null;
     });
-
+    saveScreenData();
     // If you need to reload trip details or fetch updated data, do it here
     print("Data refreshed!");
+  }
+
+
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'TollParkingUpload');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+
+
+
+
+    print('Saved screen data:');
+
+    print('last_screen: TollParkingUpload');
+
+    print('trip_id: ${widget.tripId}');
+
+
+
   }
 
 

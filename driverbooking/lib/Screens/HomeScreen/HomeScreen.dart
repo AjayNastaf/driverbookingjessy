@@ -353,7 +353,7 @@ class _HomescreenState extends State<Homescreen> {
     // _getUserDetails();
     // _getUserDetailsDriver();
     /// Dispatch the event when the screen loads
-
+    saveScreenData();
 
     print('Userhone: ${widget.userId}, Usernameddd: ${widget.username}');
     _loadUserData();
@@ -369,6 +369,7 @@ class _HomescreenState extends State<Homescreen> {
     context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
 
   }
+
   Future<void> _refreshData() async {
     BlocProvider.of<TripSheetValuesBloc>(context).add(
       FetchTripSheetValues(
@@ -377,6 +378,28 @@ class _HomescreenState extends State<Homescreen> {
       ),
     );
     context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
+
+  }
+
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'FirstHomeScreen');
+
+    // await prefs.setString('trip_id', widget.tripId);
+
+
+
+
+
+    print('Saved screen data:');
+
+    print('last_screen: FirstHomeScreen');
+
+    // print('trip_id: ${widget.tripId}');
+
+
 
   }
 
@@ -887,6 +910,15 @@ class _HomescreenState extends State<Homescreen> {
               Navigator.push(context, MaterialPageRoute(builder: (context)=>Ridescreen(userId: widget.userId,username: widget.username,)));
             },
           ),
+            ListTile(
+              leading: Icon(Icons.info),
+              title: Text('Info'),
+              onTap: () {
+                // Navigator.push(context, ()=>)
+                // Navigator.push(context, MaterialPageRoute(builder: (context)=>Ridescreen(userId: widget.userId,username: widget.username,)));
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>Walletscreen()));
+              },
+            ),
           // ListTile(
           //   leading: Icon(Icons.account_balance_wallet),
           //   title: Text('Wallet'),

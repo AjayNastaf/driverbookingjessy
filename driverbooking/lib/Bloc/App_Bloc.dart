@@ -110,9 +110,20 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
   }
 
 
+  // Future<void> _onLoggedOut(LoggedOut event, Emitter<AuthenticationState> emit) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.clear();
+  //   emit(Unauthenticated());
+  // }
+
   Future<void> _onLoggedOut(LoggedOut event, Emitter<AuthenticationState> emit) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+
+    // Clear secure storage too
+    await _storage.delete(key: 'userId');
+    await _storage.delete(key: 'username');
+
     emit(Unauthenticated());
   }
 }
@@ -1220,6 +1231,7 @@ print('yess');
       "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
       "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
       "Trip_Status": event.tripStatus,
+      // "Trip_Status": 'On_Going',
       "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
       "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
       "created_at": DateTime.now().toIso8601String(),
@@ -1270,7 +1282,7 @@ Future<void> _onEndRide(
     "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
     "Trip_Status": "Reached",
     "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
-    "TripEndTime": DateTime.now().toIso8601String(),
+    "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
     "created_at": DateTime.now().toIso8601String(),
 
 

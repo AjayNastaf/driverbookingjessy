@@ -17,6 +17,7 @@ import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
@@ -34,7 +35,9 @@ class Pickupscreen extends StatefulWidget {
   State<Pickupscreen> createState() => _PickupscreenState();
 }
 
-class _PickupscreenState extends State<Pickupscreen> {
+class _PickupscreenState extends State<Pickupscreen>{
+
+
   bool _isMapLoading = true;
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
@@ -51,7 +54,7 @@ class _PickupscreenState extends State<Pickupscreen> {
     void initState() {
       super.initState();
       _checkMapLoading();
-
+      saveScreenData();
       // Print the values to debug
       print("Addressss: ${widget.address}");
       print("Trip ID: ${widget.tripId}");
@@ -63,13 +66,43 @@ class _PickupscreenState extends State<Pickupscreen> {
     }
 
 
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'Pickupscreen');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+    await prefs.setString('address', widget.address);
+
+
+
+
+
+    print('Saved screen data:');
+
+    print('last_screen: Pickupscreen');
+
+    print('trip_id: ${widget.tripId}');
+
+    print('address: ${widget.address}');
+
+
+
+  }
+
+
   Future<void> _setDestinationFromAddress(String address) async {
     try {
       List<geocoding.Location> locations = await geocoding.locationFromAddress(address);
       if (locations.isNotEmpty) {
+        if (mounted) {
         setState(() {
-          _destination = LatLng(locations.first.latitude, locations.first.longitude);
+          _destination =
+              LatLng(locations.first.latitude, locations.first.longitude);
         });
+      }
       }
     } catch (e) {
       print('Error converting address to coordinates: $e');
@@ -140,9 +173,10 @@ class _PickupscreenState extends State<Pickupscreen> {
         final routes = data['routes'] as List;
         if (routes.isNotEmpty) {
           final polyline = routes[0]['overview_polyline']['points'] as String;
+          if (mounted) {
           setState(() {
             _routeCoordinates = _decodePolyline(polyline);
-          });
+          });}
         } else {
           print('No routes found in API response.');
         }
@@ -176,11 +210,11 @@ class _PickupscreenState extends State<Pickupscreen> {
       print("Received Location: $latitude, $longitude");
 
       final newLatLng = LatLng(latitude, longitude);
-
-      setState(() {
-        _currentLatLng = newLatLng;
-      });
-
+      if (mounted) {
+        setState(() {
+          _currentLatLng = newLatLng;
+        });
+      }
       _fetchRoute();
       _updateCameraPosition();
 
@@ -217,6 +251,22 @@ class _PickupscreenState extends State<Pickupscreen> {
     });
   }
 
+
+  @override
+
+  void dispose() {
+
+    _locationSubscription?.cancel();
+
+    _locationSubscription = null;// Remove reference
+
+
+
+    _positionStreamSubscription?.cancel();
+
+    super.dispose();
+
+  }
 
 
   @override

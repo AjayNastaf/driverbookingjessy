@@ -34,7 +34,10 @@ class Bookingdetails extends StatefulWidget {
   State<Bookingdetails> createState() => _BookingdetailsState();
 }
 
-class _BookingdetailsState extends State<Bookingdetails> {
+class _BookingdetailsState extends State<Bookingdetails>  {
+
+
+
   bool isLoading = true;
   List<Map<String, dynamic>> tripSheetData = [];
 
@@ -45,6 +48,18 @@ class _BookingdetailsState extends State<Bookingdetails> {
     super.initState();
     globals.dropLocation = Dropaddress; // Set the global variable
     BlocProvider.of<GettingTripSheetDetailsByUseridBloc>(context).add(Getting_TripSheet_Details_By_Userid(userId: widget.userId, username: widget.username, tripId: widget.tripId, duty: widget.duty));
+    saveScreenData();
+  }
+
+  Future<void> saveScreenData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('last_screen', 'Bookingdetails');
+    await prefs.setString('trip_id', widget.tripId);
+    await prefs.setString('duty', widget.duty);
+    await prefs.setString('user_id', widget.userId);
+    await prefs.setString('username', widget.username);
+    // prefs.setString('dropLocation', Dropaddress.trim());
+
 
   }
   @override
@@ -179,7 +194,7 @@ class _BookingdetailsState extends State<Bookingdetails> {
                               context,
                               label: "Trip Date",
                               // value: tripDetails['tripsheetdate'] ?? "Not available", // Default text when null
-                              value: _formatDate(tripDetails['tripsheetdate']), // Convert date format
+                              value: _formatDate(tripDetails['startdate']), // Convert date format
                               icon: Icons.calendar_today,
                             ),
                             _buildDetailTile(

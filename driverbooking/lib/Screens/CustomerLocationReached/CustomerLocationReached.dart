@@ -1072,6 +1072,8 @@
 
 
 
+import 'dart:convert';
+
 import 'package:jessy_cabs/Screens/SignatureEndRide/SignatureEndRide.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -1091,6 +1093,8 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:location/location.dart' as loc;
 import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:location/location.dart' as loc;
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 
 class Customerlocationreached extends StatefulWidget {
@@ -1101,7 +1105,9 @@ class Customerlocationreached extends StatefulWidget {
   State<Customerlocationreached> createState() => _CustomerlocationreachedState();
 }
 
-class _CustomerlocationreachedState extends State<Customerlocationreached> {
+class _CustomerlocationreachedState extends State<Customerlocationreached>   {
+
+
 
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
@@ -1129,7 +1135,9 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
   LatLng? _lastLocation;        // Store last recorded location
   StreamSubscription<geo.Position>? _positionStreamSubscription;
-
+  String? Tripdestination;
+  String? Testvehinum;
+  String? Testtripstatus;
 
 
 
@@ -1143,15 +1151,103 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         FetchTripTrackingDetails(widget.tripId));
     _checkMapLoading();
     _startTracking();
-    _setDestinationFromDropLocation();
+    // _setDestinationFromDropLocation();
     _startTimer();
+
+    saveScreenData();
+
+    print('Drop Location: ${Tripdestination}');
+
+    print( 'sedfvgbhnjgggggggggggggggggg');
+
+    _loadTripSheetDetailsByTripId();
+  }
+
+  Future<void> _loadTripSheetDetailsByTripId() async {
+
+    try {
+
+      // Fetch trip details from the API
+
+      final tripDetails = await ApiService.fetchTripDetails(widget.tripId);
+
+      print('Trip details fetchedd: $tripDetails');
+
+      if (tripDetails != null) {
+
+
+
+        var desti = tripDetails['useage'].toString();
+
+        var vechnum = tripDetails['vehRegNo'].toString();
+        var tripstatetest = tripDetails['apps'].toString();
+
+        print('Trip details guest desti: $desti');
+        print('Trip details guest desti: $tripstatetest');
+        print('Trip details guest desti: $vechnum');
+
+
+
+        setState(() {
+
+          Tripdestination = desti;
+           Testvehinum = vechnum;
+           Testtripstatus = tripstatetest;
+
+        });
+
+        _setDestinationFromDropLocation();
+        // sendLocationToServer(double.latitude, double.longitude);
+        // sendLocationToServer(double.parse(latitude!),
+        //     double.parse(longitude!));
+      } else {
+
+        print('No trip details found.');
+
+      }
+
+    } catch (e) {
+
+      print('Error loading trip details: $e');
+
+    }
+
+  }
+
+
+
+
+
+
+
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'customerLocationPage');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+    await prefs.setString('drop_location', Tripdestination!); // 🔥 Save droplocation too
+
+
+    print('Saved screen data:');
+
+    print('last_screen: customerLocationPage');
+
+    print('trip_id: ${widget.tripId}');
+
+    print('drop_location: ${Tripdestination}'); // ✅ Debug log
 
   }
 
 
   void _setDestinationFromDropLocation() async {
     try {
-      String address = globals.dropLocation; // Example: "Tambaram"
+      // String address = globals.dropLocation; // Example: "Tambaram"
+      String address = Tripdestination ?? ''; // Example: "Tambaram"
+
+
       print("Address to be converted: $address");
 
       // List<Location> locations = await locationFromAddress(address);
@@ -1315,9 +1411,20 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         return;
       }
 
+      // if (Testvehinum!.isNotEmpty && Testtripstatus!.isNotEmpty && Testtripstatus =='On_Going') {
+      //   sendLocationToServer(latitude, longitude);
+      // } else {
+      //   print("⚠ Test sendLocationToServer");
+      // }
+      // sendLocationToServer(latitude, longitude);
+
+
+
       // Ensure vehicleNumber and tripStatus are available before calling saveLocation
-      if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
+      if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus=='On_Going') {
         saveLocationCustomer(latitude, longitude);
+        sendLocationToServer(latitude, longitude);
+
       } else {
         print("⚠ Trip details not loaded yet, waiting...");
       }
@@ -1346,7 +1453,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
           longitude: longitude,
           vehicleNo: vehicleNumber,
           tripId: widget.tripId,
-          tripStatus: tripStatus,
+          tripStatus: 'On_Going',
         ),
       );
     } else {
@@ -1395,7 +1502,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
         longitude: longitude,
         vehicleNo: vehicleNumber,
         tripId: widget.tripId,
-        tripStatus: tripStatus,
+        // tripStatus: tripStatus,
+        tripStatus: 'Reached',
       ),
 
     );
@@ -1487,6 +1595,62 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
 
 
+
+
+
+  void sendLocationToServer(double latitude, double longitude) async {
+    print("Vehicle Number sendLocationToServer  : $Testvehinum, Trip Status: $Testtripstatus");
+
+    try {
+      // Reverse geocode coordinates to get address
+      String address = '';
+      print("addddddddddddddddddd");
+      try {
+        print("➡ Starting reverse geocoding for coordinates: $latitude, $longitude");
+
+        List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(13.0310248, 80.2392546);
+
+        print("✅ placemarkFromCoordinates call succeeded.");
+
+        if (placemarks.isNotEmpty) {
+          print("✅ Received non-empty placemarks list.");
+
+          final placemark = placemarks.first;
+          print("ℹ First Placemark: ${placemark.toJson()}"); // You can log all fields if needed
+
+          address = "${placemark.street},${placemark.thoroughfare},${placemark.subLocality}, ${placemark.locality},${placemark.postalCode}, ${placemark.administrativeArea}, ${placemark.country}";
+          print("📍 Constructed Address: $address");
+        } else {
+          print("⚠ placemarks list is empty.");
+        }
+      } catch (geoError) {
+        print("❌ Reverse geocoding failed with error: $geoError");
+        address = "Unknown address";
+      }
+
+      final response = await ApiService.addVehicleLocation(
+        vehicleno: Testvehinum ?? '',
+        latitudeloc: latitude,
+        longitutdeloc: longitude,
+        tripId: widget.tripId,
+        runingDate: Testtripstatus ?? '',
+        runingTime: DateTime.now().toIso8601String(),
+        tripStatus: DateTime.now().toIso8601String(),
+        tripStartTime: DateTime.now().toIso8601String(),
+        tripEndTime: DateTime.now().toIso8601String(),
+        createdAt: DateTime.now().toIso8601String(),
+        gpsPointAddrress: address,
+      );
+
+      final data = jsonDecode(response.body);
+      print("Server Response: ${data['message']}");
+    } catch (e) {
+      print("Error sending location: $e");
+    }
+  }
+
+
+
   @override
   void dispose() {
     // _locationSubscription!.cancel();
@@ -1538,12 +1702,15 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
     if (_currentLatLng != null) {
       _handleEndRide(_currentLatLng!.latitude, _currentLatLng!.longitude);
 
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => Signatureendride(tripId: widget.tripId),
-          ),(route)=>false
-      );
+      // Navigator.pushAndRemoveUntil(
+      //     context,
+      //     MaterialPageRoute(
+      //       builder: (context) => Signatureendride(tripId: widget.tripId),
+      //     ),(route)=>false
+      // );
+
+
+      Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId)));
 
 
       print('for current location');
@@ -1559,7 +1726,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
 
   @override
   Widget build(BuildContext context) {
-    String dropLocation = globals.dropLocation; // Access the global variable
+    // String dropLocation = globals.dropLocation; // Access the global variable
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
     globals.savedTripDistance = _totalDistance;
 
@@ -1574,13 +1741,13 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
             print("Trip details loaded. Vehicle: $vehicleNumber, Status: $tripStatus");
 
             // Ensure trip details are set before calling saveLocation
-            if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
+            if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus == 'On_Going') {
               saveLocationCustomer(0.0 , 0.0); // Example coordinates
             } else {
               print("Trip details are still empty after setting state.");
             }
           } else if (state is SaveLocationSuccess) {
-            showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
+            // showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
             print("inside the success function");
           } else if (state is SaveLocationFailure) {
 
@@ -1715,7 +1882,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
                                             ),
                                             SizedBox(height: 32),
                                             Text(
-                                              '$dropLocation',
+                                              // '$dropLocation',
+                                              Tripdestination ?? '',
                                               style: TextStyle(
                                                 color: Colors.grey.shade800,
                                                 fontSize: 20.0,

@@ -54,12 +54,41 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
     // _loadTripSheetDetailsByTripId();
     context.read<TripSheetDetailsTripIdBloc>().add(FetchTripDetailsByTripIdEventClass(tripId: widget.tripId));
       fetchImages(); // Make sure fetchImages is being called
+    saveScreenData();
   }
 
   Future<void> _refreshTripDetails() async {
     // Re-fetch the trip details using BLoC
     context.read<TripSheetDetailsTripIdBloc>().add(FetchTripDetailsByTripIdEventClass(tripId: widget.tripId));
+    saveScreenData();
+
   }
+
+
+
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'TripDetailsPreview');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+
+
+
+
+    print('Saved screen data:');
+
+    print('last_screen: TripDetailsPreview');
+
+    print('trip_id: ${widget.tripId}');
+
+
+
+  }
+
+
 
   Future<void> _loadTripSheetDetailsByTripId() async {
     try {

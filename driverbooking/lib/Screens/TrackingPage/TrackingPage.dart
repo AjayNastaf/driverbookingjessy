@@ -13,6 +13,7 @@ import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../GlobalVariable/global_variable.dart' as globals;
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
@@ -47,6 +48,9 @@ class TrackingPage extends StatefulWidget {
 }
 
 class _TrackingPageState extends State<TrackingPage> {
+
+
+
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
   LatLng _destination = LatLng( 13.028159, 80.243306); // Chennai Central Railway Station
@@ -65,7 +69,8 @@ class _TrackingPageState extends State<TrackingPage> {
   String vehicleNumber = "";
   String tripStatus = "";
   bool _isMapLoading = true; // Add this variable to track loading state
-
+  late String dropLocations; // 🔹 Declare it at class level
+  bool _isLocationInitialized = false;
 
 
 
@@ -83,10 +88,43 @@ class _TrackingPageState extends State<TrackingPage> {
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId!));
     _checkMapLoading();
+    dropLocations = globals.dropLocation;
+
+
+    saveScreenData();
+
+  }
+
+
+  Future<void> saveScreenData() async {
+
+    print('1one');
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'TrackingPage');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+    await prefs.setString('address', widget.address);
+
+
+
+
+
+    print('Saved screen datang:');
+
+    print('last_screen: TrackingPage');
+
+    print('trip_id: ${widget.tripId}');
+
+    print('address: ${widget.address}');
 
 
 
   }
+
+
 
 
   void _checkMapLoading() {
@@ -177,30 +215,118 @@ class _TrackingPageState extends State<TrackingPage> {
   StreamSubscription<
       LocationData>? _locationSubscription; // Store the subscription
 
+  // Future<void> _initializeLocationTracking() async {
+  //   Location location = Location();
+  //
+  //   bool serviceEnabled = await location.serviceEnabled();
+  //   if (!serviceEnabled) {
+  //     serviceEnabled = await location.requestService();
+  //     if (!serviceEnabled) return;
+  //   }
+  //
+  //   PermissionStatus permissionGranted = await location.hasPermission();
+  //   if (permissionGranted == PermissionStatus.denied) {
+  //     permissionGranted = await location.requestPermission();
+  //     if (permissionGranted != PermissionStatus.granted) return;
+  //   }
+  //
+  //   final initialLocation = await location.getLocation();
+  //   _updateCurrentLocation(initialLocation);
+  //
+  //
+  //   _locationSubscription = location.onLocationChanged.listen((newLocation) {
+  //     print("New location received: $newLocation");
+  //     _updateCurrentLocation(newLocation);
+  //   });
+  // }
+
+
   Future<void> _initializeLocationTracking() async {
+
+    print("yyyyyyyyyyyyyyyyyyy");
+
     Location location = Location();
 
+
+
     bool serviceEnabled = await location.serviceEnabled();
+
     if (!serviceEnabled) {
+
       serviceEnabled = await location.requestService();
+
       if (!serviceEnabled) return;
+
     }
+
+
 
     PermissionStatus permissionGranted = await location.hasPermission();
+
     if (permissionGranted == PermissionStatus.denied) {
+
       permissionGranted = await location.requestPermission();
+
       if (permissionGranted != PermissionStatus.granted) return;
+
     }
 
-    final initialLocation = await location.getLocation();
+
+
+    LocationData? initialLocation;
+
+
+
+    // Keep checking until we get a valid location
+
+    while (true) {
+
+      initialLocation = await location.getLocation();
+
+      print("🔄 Waiting for valid location: ${initialLocation.latitude}, ${initialLocation.longitude}");
+
+
+
+      if (initialLocation.latitude != null &&
+
+          initialLocation.longitude != null &&
+
+          initialLocation.latitude != 0.0 &&
+
+          initialLocation.longitude != 0.0) {
+
+        break;
+
+      }
+
+
+
+      await Future.delayed(Duration(seconds: 1));
+
+    }
+
+
+
     _updateCurrentLocation(initialLocation);
 
 
-    _locationSubscription = location.onLocationChanged.listen((newLocation) {
-      print("New location received: $newLocation");
-      _updateCurrentLocation(newLocation);
+
+    setState(() {
+
+      _isLocationInitialized = true;
+
     });
+
+
+
+    _locationSubscription = location.onLocationChanged.listen((newLocation) {
+
+      _updateCurrentLocation(newLocation);
+
+    });
+
   }
+
 
 
   List<LatLng> _decodePolyline(String encoded) {
@@ -360,7 +486,7 @@ class _TrackingPageState extends State<TrackingPage> {
       }
 
       // Ensure vehicleNumber and tripStatus are available before calling saveLocation
-      if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
+      if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus=='Accept') {
         saveLocation(latitude, longitude);
       } else {
         print("⚠ Trip details not loaded yet, waiting...");
@@ -373,6 +499,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
 
   void saveLocation(double latitude, double longitude) {
+
     print("Inside saveLocation function");
     print("Vehicle Number: $vehicleNumber, Trip Status: $tripStatus");
     // Prevent saving if latitude and longitude are (0.0, 0.0)
@@ -388,8 +515,9 @@ class _TrackingPageState extends State<TrackingPage> {
           latitude: latitude,
           longitude: longitude,
           vehicleNo: vehicleNumber,
-          tripId: widget.tripId!,
-          tripStatus: tripStatus,
+          tripId: widget.tripId,
+          // tripStatus: tripStatus,
+          tripStatus: 'Accept',
         ),
       );
     } else {
@@ -562,20 +690,33 @@ class _TrackingPageState extends State<TrackingPage> {
         print('Status updated successfully ongoing');
 
 
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Customerlocationreached(tripId: tripId!),
-            ),(route)=> false
-        );
-
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => Customerlocationreached(tripId: tripId!),
-        //   ),
+        // Navigator.pushAndRemoveUntil(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => Customerlocationreached(tripId: tripId!),
+        //     ),(route)=> false
         // );
-        // Stop location tracking before navigating
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+
+          Navigator.pushReplacement(
+
+            context,
+
+            MaterialPageRoute(
+
+              builder: (context) =>
+
+                  Customerlocationreached(
+
+                      tripId: tripId!),
+
+            ),
+
+          );
+
+        });
+
         _locationSubscription?.cancel();
       } else {
         print('Failed to update status: ${response.body}');
@@ -601,6 +742,7 @@ class _TrackingPageState extends State<TrackingPage> {
     //   (latitude as num?)?.toDouble() ?? 0.0,
     //   (longitude as num?)?.toDouble() ?? 0.0,
     // );
+
     if (_currentLatLng != null) {
       _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
       // Navigator.pushAndRemoveUntil(
@@ -611,16 +753,17 @@ class _TrackingPageState extends State<TrackingPage> {
       // );
 
 
+      await _handleStartRide(context);
 
       showInfoSnackBar(context, 'Trip started');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Location not available yet! Please Wait")),
-      );
-      showWarningSnackBar(context, "Location not available yet!");
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Location not available yet! Please Wait")),
+      // );
+      showWarningSnackBar(context, "Location not available yet! Please Wait");
     }
 
-    await _handleStartRide(context);
+    // await _handleStartRide(context);
 
     // Navigator.push(
     //   context,
@@ -640,6 +783,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
   @override
   Widget build(BuildContext context) {
+    String dropLocations = globals.dropLocation; // Access the global variable
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
     return BlocListener<TripTrackingDetailsBloc, TripTrackingDetailsState>(
@@ -653,7 +797,7 @@ class _TrackingPageState extends State<TrackingPage> {
             print("Trip details loaded. Vehicle: $vehicleNumber, Status: $tripStatus");
 
             // Ensure trip details are set before calling saveLocation
-            if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
+            if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus=='Accept') {
               saveLocation(0.0 , 0.0); // Example coordinates
             } else {
               print("Trip details are still empty after setting state.");
@@ -662,7 +806,7 @@ class _TrackingPageState extends State<TrackingPage> {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text("Location saved successfully!")),
             // );
-            showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
+            // showSuccessSnackBar(context, "Location saved successfully! $tripStatus");
           } else if (state is SaveLocationFailure) {
             // ScaffoldMessenger.of(context).showSnackBar(
             //   SnackBar(content: Text(state.errorMessage)),
@@ -686,164 +830,392 @@ class _TrackingPageState extends State<TrackingPage> {
               onRefresh: _refreshTrackingPage,
 
 
-       child: Stack(
+//        child: Stack(
+//
+//          children: [
+//               if (!_isMapLoading && _currentLatLng != null)
+//                 GoogleMap(
+//                   initialCameraPosition: CameraPosition(
+//                     target: _currentLatLng!,
+//                     zoom: 15,
+//                   ),
+//                   onMapCreated: (controller) {
+//                     _mapController = controller;
+//                     Future.delayed(Duration(milliseconds: 500), () {
+//                       if (mounted) {
+//                         setState(() {
+//                           _isMapLoading = false; // Hide loader after small delay
+//                         });
+//                       }
+//                     });
+//                   },
+//                   markers: {
+//                     Marker(
+//                       markerId: MarkerId('currentLocation'),
+//                       position: _currentLatLng!,
+//                       icon: BitmapDescriptor.defaultMarkerWithHue(
+//                           // BitmapDescriptor.hueBlue),
+//                           BitmapDescriptor.hueGreen),
+//                     ),
+//                     Marker(
+//                       markerId: MarkerId('destination'),
+//                       position: _destination,
+//                     ),
+//                   },
+//                   polylines: {
+//                     if (_routeCoordinates.isNotEmpty)
+//                       Polyline(
+//                         polylineId: PolylineId('route'),
+//                         points: _routeCoordinates,
+//                         color: Colors.green,
+//                         width: 5,
+//                       ),
+//                   },
+//                   myLocationEnabled: true,
+//                   myLocationButtonEnabled: false,
+//                 ),
+//            // Show CircularProgressIndicator while map is loading
+//            // Show loader until Google Map loads
+//            if (_isMapLoading)
+//              Positioned.fill(
+//                child: Container(
+//                  color: Colors.white.withOpacity(0.9), // Optional: add slight overlay
+//                  child: Center(
+//                    child: CircularProgressIndicator(),
+//                  ),
+//                ),
+//              ),
+//
+//
+//            Positioned(
+//                 bottom: 0,
+//                 left: 0,
+//                 right: 0,
+//                 child: IgnorePointer(
+//                   ignoring: false,
+//                   child: Container(
+//                     height: 150,
+//                     padding: EdgeInsets.all(16),
+//                     color: Colors.white,
+//
+//                     child: Column(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//
+//                         // SizedBox(height: 40),
+//                         Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0),),
+//                         // SizedBox(height: 40),
+//                         SizedBox(
+//                           width: double.infinity,
+//                           child:
+//
+//
+//                           ElevatedButton(
+//                             // onPressed: () async {
+//                             //   setState(() {
+//                             //     Statusvalue = 'Start'; // Set Trip_Status to "waypoint"
+//                             //   });
+//                             //
+//                             //   // Call the function to save location with updated status
+//                             //   if (_currentLatLng != null) {
+//                             //     _saveLocationToDatabase(
+//                             //       _currentLatLng!.latitude,
+//                             //       _currentLatLng!.longitude,
+//                             //     );
+//                             //
+//                             //     // await _handleStartRide(context);
+//                             //     // _handleStartTrip
+//                             //
+//                             //     Navigator.push(
+//                             //       context,
+//                             //       MaterialPageRoute(
+//                             //         builder: (context) => Customerlocationreached(tripId:tripId!),
+//                             //       ),
+//                             //     );
+//                             //     print(' values success');
+//                             //
+//                             //   } else {
+//                             //     print("Errorrrr: _currentLatLng is null");
+//                             //   }
+//                             //   // await _handleStartRide(context);
+//                             //
+//                             // },
+//                             onPressed: _handleStartRideButton,
+//
+//                             style: ElevatedButton.styleFrom(
+//                               backgroundColor: AppTheme.Navblue1,
+//                               padding: EdgeInsets.symmetric(vertical: 16),
+//                               shape: RoundedRectangleBorder(
+//                                 borderRadius: BorderRadius.circular(8),
+//                               ),
+//                             ),
+//
+//                             child: Text(
+//                               'Start Ride',
+//                               style: TextStyle(
+//                                   fontSize: 20.0, color: Colors.white),
+//                             ),
+//                           ),
+//
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//            Positioned(
+//              top: 15,
+//              left: 0,
+//              right: 0,
+//              child: NoInternetBanner(isConnected: isConnected),
+//            ),
+//     ],
+//           )
+//           )
+//         )
+//     );
+//   }
+//
+//
+// }
 
-         children: [
-              if (!_isMapLoading && _currentLatLng != null)
-                GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: _currentLatLng!,
-                    zoom: 15,
-                  ),
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                    Future.delayed(Duration(milliseconds: 500), () {
-                      if (mounted) {
-                        setState(() {
-                          _isMapLoading = false; // Hide loader after small delay
-                        });
-                      }
-                    });
-                  },
-                  markers: {
-                    Marker(
-                      markerId: MarkerId('currentLocation'),
-                      position: _currentLatLng!,
-                      icon: BitmapDescriptor.defaultMarkerWithHue(
-                          // BitmapDescriptor.hueBlue),
-                          BitmapDescriptor.hueGreen),
-                    ),
-                    Marker(
-                      markerId: MarkerId('destination'),
-                      position: _destination,
-                    ),
-                  },
-                  polylines: {
-                    if (_routeCoordinates.isNotEmpty)
-                      Polyline(
-                        polylineId: PolylineId('route'),
-                        points: _routeCoordinates,
-                        color: Colors.green,
-                        width: 5,
+
+
+
+
+              child: Stack(
+
+                children: [
+
+                  // if (!_isMapLoading && _currentLatLng != null)
+
+                  if (_isLocationInitialized  && _currentLatLng != null)
+
+                    GoogleMap(
+
+                      initialCameraPosition: CameraPosition(
+
+                        target: _currentLatLng!,
+
+                        zoom: 15,
+
                       ),
-                  },
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                ),
-           // Show CircularProgressIndicator while map is loading
-           // Show loader until Google Map loads
-           if (_isMapLoading)
-             Positioned.fill(
-               child: Container(
-                 color: Colors.white.withOpacity(0.9), // Optional: add slight overlay
-                 child: Center(
-                   child: CircularProgressIndicator(),
-                 ),
-               ),
-             ),
 
+                      onMapCreated: (controller) {
 
-           Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: IgnorePointer(
-                  ignoring: false,
-                  child: Container(
-                    height: 150,
-                    padding: EdgeInsets.all(16),
-                    color: Colors.white,
+                        _mapController = controller;
 
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                        Future.delayed(Duration(milliseconds: 500), () {
 
-                        // SizedBox(height: 40),
-                        Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0),),
-                        // SizedBox(height: 40),
-                        SizedBox(
-                          width: double.infinity,
-                          child:
+                          if (mounted) {
 
+                            setState(() {
 
-                          ElevatedButton(
-                            // onPressed: () async {
-                            //   setState(() {
-                            //     Statusvalue = 'Start'; // Set Trip_Status to "waypoint"
-                            //   });
-                            //
-                            //   // Call the function to save location with updated status
-                            //   if (_currentLatLng != null) {
-                            //     _saveLocationToDatabase(
-                            //       _currentLatLng!.latitude,
-                            //       _currentLatLng!.longitude,
-                            //     );
-                            //
-                            //     // await _handleStartRide(context);
-                            //     // _handleStartTrip
-                            //
-                            //     Navigator.push(
-                            //       context,
-                            //       MaterialPageRoute(
-                            //         builder: (context) => Customerlocationreached(tripId:tripId!),
-                            //       ),
-                            //     );
-                            //     print(' values success');
-                            //
-                            //   } else {
-                            //     print("Errorrrr: _currentLatLng is null");
-                            //   }
-                            //   // await _handleStartRide(context);
-                            //
-                            // },
-                            onPressed: _handleStartRideButton,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.Navblue1,
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
+                              _isMapLoading = false; // Hide loader after small delay
 
-                            child: Text(
-                              'Start Ride',
-                              style: TextStyle(
-                                  fontSize: 20.0, color: Colors.white),
-                            ),
-                          ),
+                            });
+
+                          }
+
+                        });
+
+                      },
+
+                      markers: {
+
+                        Marker(
+
+                          markerId: MarkerId('currentLocation'),
+
+                          position: _currentLatLng!,
+
+                          icon: BitmapDescriptor.defaultMarkerWithHue(
+
+                            // BitmapDescriptor.hueBlue),
+
+                              BitmapDescriptor.hueGreen),
 
                         ),
-                      ],
+
+                        Marker(
+
+                          markerId: MarkerId('destination'),
+
+                          position: _destination,
+
+                        ),
+
+                      },
+
+                      polylines: {
+
+                        if (_routeCoordinates.isNotEmpty)
+
+                          Polyline(
+
+                            polylineId: PolylineId('route'),
+
+                            points: _routeCoordinates,
+
+                            color: Colors.green,
+
+                            width: 5,
+
+                          ),
+
+                      },
+
+                      myLocationEnabled: true,
+
+                      myLocationButtonEnabled: false,
+
                     ),
+
+
+
+                  if (_isMapLoading || _currentLatLng == null)
+
+                    Positioned.fill(
+
+                      child: Container(
+
+                        color: Colors.white.withOpacity(0.9), // Optional: add slight overlay
+
+                        child: Center(
+
+                          child: CircularProgressIndicator(),
+
+                        ),
+
+                      ),
+
+                    ),
+
+                  Positioned(
+
+                    bottom: 0,
+
+                    left: 0,
+
+                    right: 0,
+
+                    child: IgnorePointer(
+
+                      ignoring: false,
+
+                      child: Container(
+
+                        height: 200,
+
+                        padding: EdgeInsets.all(16),
+
+                        color: Colors.white,
+
+
+
+                        child: Column(
+
+                          mainAxisSize: MainAxisSize.min,
+
+                          children: [
+
+                            Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0,),),
+
+                            // Text('Current Trip Status:  ${widget.address}',style: TextStyle(fontSize: 20.0,color: Colors.red),),
+
+                            // Text('Current Trip Status:  ${_destination}',style: TextStyle(fontSize: 20.0,color: Colors.red),),
+
+                            // Text('Current Trip Status: ${ _isMapLoading}',style: TextStyle(fontSize: 20.0,color: Colors.red),),
+
+                            // Text('Current _currentLatLng: ${ _currentLatLng}',style: TextStyle(fontSize: 20.0,color: Colors.red),),
+
+                            Text(
+
+                              ' currentLatLng: $_currentLatLng',
+
+                              style: TextStyle(fontSize: 20.0, ),
+
+                            ),
+
+                            // SizedBox(height: 40),
+
+                            SizedBox(
+
+                              width: double.infinity,
+
+                              child:
+
+                              ElevatedButton(
+
+                                onPressed: _handleStartRideButton,
+
+                                style: ElevatedButton.styleFrom(
+
+                                  backgroundColor: AppTheme.Navblue1,
+
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+
+                                  shape: RoundedRectangleBorder(
+
+                                    borderRadius: BorderRadius.circular(8),
+
+                                  ),
+
+                                ),
+
+
+
+                                child: Text(
+
+                                  'Start Ride',
+
+                                  style: TextStyle(
+
+                                      fontSize: 20.0, color: Colors.white),
+
+                                ),
+
+                              ),
+
+
+
+                            ),
+
+                          ],
+
+                        ),
+
+                      ),
+
+                    ),
+
                   ),
-                ),
-              ),
-           Positioned(
-             top: 15,
-             left: 0,
-             right: 0,
-             child: NoInternetBanner(isConnected: isConnected),
-           ),
-    ],
+
+                  Positioned(
+
+                    top: 15,
+
+                    left: 0,
+
+                    right: 0,
+
+                    child: NoInternetBanner(isConnected: isConnected),
+
+                  ),
+
+                ],
+
+              )
+
           )
-          )
-        )
+
+    )
+
     );
+
   }
 
-
-
-
-
-
-
 }
-
-
-
-
-
-
 
 
 

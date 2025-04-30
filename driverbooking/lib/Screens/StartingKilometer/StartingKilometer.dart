@@ -4,6 +4,7 @@ import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../PickupScreen/PickupScreen.dart';
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,10 @@ class StartingKilometer extends StatefulWidget {
   State<StartingKilometer> createState() => _StartingKilometerState();
 }
 
-class _StartingKilometerState extends State<StartingKilometer> {
+class _StartingKilometerState extends State<StartingKilometer>  {
+
+
+
   // final TextEditingController _startKM = TextEditingController();
   TextEditingController _startKM = TextEditingController(text: "0");
 
@@ -34,9 +38,43 @@ class _StartingKilometerState extends State<StartingKilometer> {
   @override
   void initState() {
     super.initState();
+    _refreshData();
+    _loadTripDetailsData();
+    saveScreenData();
+  }
+
+  Future<void> _refreshData() async {
     _loadTripDetailsData();
 
   }
+
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'startingkm');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+    await prefs.setString('address', widget.address);
+
+
+
+
+
+    print('Saved screen data:');
+
+    print('last_screen: startingkm');
+
+    print('trip_id: ${widget.tripId}');
+
+    print('address: ${widget.address}');
+
+
+
+  }
+
+
 
   Future<void> _loadTripDetailsData() async {
     try {
@@ -45,11 +83,17 @@ class _StartingKilometerState extends State<StartingKilometer> {
       print('Trip details values: $tripDetails');
       if (tripDetails != null) {
 
-        var tripIdvalue = tripDetails['tripid'].toString();
-        hclhybriddata = tripDetails['Hybriddata'];
-        duty = tripDetails['duty'];
-        print('Trip details guest: $duty');
-
+        // var tripIdvalue = tripDetails['tripid'].toString();
+        // hclhybriddata = tripDetails['Hybriddata'];
+        // duty = tripDetails['duty'];
+        // print('Trip details guest: $hclhybriddata');
+        // print('Trip details guest: $hclhybriddata ');
+        setState(() {
+          var tripIdvalue = tripDetails['tripid'].toString();
+          hclhybriddata = tripDetails['Hybriddata'];
+          duty = tripDetails['duty'];
+          print('Trip details guest: $duty');
+        });
 
       } else {
         print('No trip details found.');
@@ -186,7 +230,9 @@ class _StartingKilometerState extends State<StartingKilometer> {
           setState(() {}); // Update UI after refreshing
         },
         child: SingleChildScrollView(
-      child:
+          physics: const AlwaysScrollableScrollPhysics(),
+
+          child:
       Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -200,6 +246,7 @@ class _StartingKilometerState extends State<StartingKilometer> {
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.digitsOnly, // ✅ allows only digits (0-9)
               ],
+              enabled: hclhybriddata != 1, // disable when value is 1
               decoration: InputDecoration(
                 hintText: "Starting Kilometer",
                 border: OutlineInputBorder(

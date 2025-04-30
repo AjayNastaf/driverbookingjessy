@@ -624,8 +624,31 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     BlocProvider.of<GettingClosingKilometerBloc>(context).add(FetchClosingKilometer(widget.tripId));
     _loadTripSheetDetailsByTripId();
 
+    saveScreenData();
 
 
+
+
+  }
+
+
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'TripDetailsUpload');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+
+
+
+
+    print('Saved screen data:');
+
+    print('last_screen: TripDetailsUpload');
+
+    print('trip_id: ${widget.tripId}');
 
 
 
@@ -647,14 +670,14 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       duty = tripDetails['duty']; // Assuming `duty` is part of the trip details
       setState(() {
         // Update the controllers with the values
-        guestMobileController.text = tripDetails['guestmobileno'] ?? 'Not available';
-        guestNameController.text = tripDetails['guestname'] ?? 'Not available';
-        tripIdController.text = tripDetails['tripid'].toString()  ?? 'Not available';
-        vehicleTypeController.text = tripDetails['vehicleName'] ?? 'Not available';
-        // startDateController.text = tripDetails['startdate'] ?? 'Not available';
-        startDateController.text = setFormattedDate(tripDetails['startdate']); // Assuming 'startdate' is from the database;
-        // closeDateController.text = tripDetails['closeDate'] ?? 'Not available';
-        closeDateController.text = setFormattedDate(tripDetails['closedate']);
+        // guestMobileController.text = tripDetails['guestmobileno'] ?? 'Not available';
+        // guestNameController.text = tripDetails['guestname'] ?? 'Not available';
+        // tripIdController.text = tripDetails['tripid'].toString()  ?? 'Not available';
+        // vehicleTypeController.text = tripDetails['vehicleName'] ?? 'Not available';
+        // // startDateController.text = tripDetails['startdate'] ?? 'Not available';
+        // startDateController.text = setFormattedDate(tripDetails['startdate']); // Assuming 'startdate' is from the database;
+        // // closeDateController.text = tripDetails['closeDate'] ?? 'Not available';
+        // closeDateController.text = setFormattedDate(tripDetails['closedate']);
 
       });
     } else {
@@ -686,10 +709,36 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
 
         var fetchedStartkmvalue = tripDetails['startkm'].toString();
+        var fetchedtripid = tripDetails['tripid'].toString();
+
+        var fetchedguestname = tripDetails['guestname'].toString();
+
+        var fetchedguestmobile = tripDetails['guestmobileno'].toString();
+
+        var fetchedvechtype = tripDetails['vehicleName'].toString();
+
+        var fetchedStartdate = tripDetails['startdate'].toString();
+
+        var fetchedClosedate = tripDetails['closedate'].toString();
+
+        var fetchedClosedkm = tripDetails['closekm'].toString();
 
         print('Fetched startkmvalue: $fetchedStartkmvalue');
         setState(() {
            startkmvalue = fetchedStartkmvalue;
+           tripIdController.text = fetchedtripid ?? '';
+
+           guestNameController.text = fetchedguestname ?? '';
+
+           guestMobileController.text = fetchedguestmobile ?? '';
+
+           vehicleTypeController.text = fetchedvechtype ?? '';
+
+           startDateController.text = fetchedStartdate ?? '';
+
+           closeDateController.text = fetchedguestmobile ?? '';
+
+           closeKmController.text = fetchedClosedkm ?? '';
           // Populate the form fields with the fetched data
 
           // startKmController.text = startkmvalue ?? '';
@@ -1225,8 +1274,10 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                       children: [
                         Expanded(
                           child: TextField(
+                            readOnly: true,
+                            enabled: false,
                             controller: closeKmController,
-                            enabled: isCloseKmEnabled,
+                            // enabled: isCloseKmEnabled,
                             decoration: const InputDecoration(
                               labelText: "Closing Kilometer",
                               border: OutlineInputBorder(),

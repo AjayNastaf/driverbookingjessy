@@ -25,7 +25,9 @@ class Signatureendride extends StatefulWidget {
   State<Signatureendride> createState() => _SignatureendrideState();
 }
 
-class _SignatureendrideState extends State<Signatureendride> {
+class _SignatureendrideState extends State<Signatureendride>  {
+
+
   bool _isLoading = false;
 
   // Controller for the signature pad
@@ -38,7 +40,7 @@ class _SignatureendrideState extends State<Signatureendride> {
   @override
   void initState() {
     super.initState();
-
+    saveScreenData();
     // Trigger API call when drawing ends
     _signatureController.onDrawEnd = () async {
       if (_signatureController.isNotEmpty) {
@@ -69,6 +71,28 @@ class _SignatureendrideState extends State<Signatureendride> {
         }
       }
     };
+  }
+
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'signpagescreen');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+
+
+
+
+    print('Saved screen data:');
+
+    print('last_screen: signpagescreen');
+
+    print('trip_id: ${widget.tripId}');
+
+
+
   }
 
   Future<void> _refreshdignatureScreen() async {
@@ -232,7 +256,8 @@ class _SignatureendrideState extends State<Signatureendride> {
 
   void _handleNavNextpage(){
     // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
-    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
+    // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
 
   }
 

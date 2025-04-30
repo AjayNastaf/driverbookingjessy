@@ -69,11 +69,166 @@
 
 
 
+// import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+// import 'package:jessy_cabs/Utils/AllImports.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:permission_handler/permission_handler.dart';
+// import 'package:sizer/sizer.dart';
+// import 'package:jessy_cabs/Screens/SplashScreen.dart';
+// import 'package:jessy_cabs/Screens/Home.dart';
+// import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
+// import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+// import 'package:jessy_cabs/Networks/Api_Service.dart';// Import your Bloc file
+// import 'package:jessy_cabs/Utils/AppConstants.dart';
+// import 'package:provider/provider.dart';
+// import 'Screens/AuthWrapper.dart';
+// import 'Screens/network_manager.dart';// Import your Bloc file
+// import 'package:flutter/services.dart';
+//
+//
+// void main() {
+//   WidgetsFlutterBinding.ensureInitialized();
+//
+//   runApp(
+//     ChangeNotifierProvider(
+//       create: (context) => NetworkManager(),
+//       child:MultiBlocProvider(
+//       providers: [
+//         BlocProvider(
+//           create: (context) => TripSheetValuesBloc(), // No event added yet
+//         ),
+//         BlocProvider(
+//           create: (context) => TripSheetClosedValuesBloc(), // No event added yet
+//         ),
+//         BlocProvider(
+//             create: (context) => DrawerDriverDataBloc(),
+//         ),
+//         BlocProvider(
+//           create: (context) => GettingTripSheetDetailsByUseridBloc(),
+//         ),
+//
+//         BlocProvider(
+//             create: (context) => UpdateTripStatusInTripsheetBloc()
+//         ),
+//         BlocProvider(
+//           create: (context) => StartKmBloc(),
+//         ),
+//         BlocProvider(
+//             create: (context) => TripSignatureBloc()
+//         ),
+//         BlocProvider(
+//             create: (context) => TripSheetDetailsTripIdBloc()
+//         ),
+//         BlocProvider(
+//             create: (context) => TollParkingDetailsBloc()
+//         ),
+//         BlocProvider(
+//             create: (context) => TripBloc()
+//         ),
+//         // BlocProvider(create: (context) => FetchTripSheetClosedBloc()),
+//
+//         BlocProvider(create: (context) => TripSheetBloc()),
+//
+//         // BlocProvider(create: (context) => FetchFilteredRidesBloc()),
+//         BlocProvider(create: (context) => FetchFilteredRidesBloc()),
+//         BlocProvider(create: (context) => ProfileBloc()),
+//         BlocProvider(create: (context) => TripTrackingDetailsBloc()),
+//         BlocProvider(create: (context) => GettingClosingKilometerBloc(apiService)),
+//         BlocProvider(create: (context) => TripClosedTodayBloc(apiService)),
+//
+//         BlocProvider(create: (context) => DocumentImagesBloc(
+//             apiService: ApiService(apiUrl: "${AppConstants.baseUrl}"))),
+//
+//         // BlocProvider<GettingClosingKilometerBloc>(
+//         //   create: (context) => GettingClosingKilometerBloc(),
+//         // ),
+//
+//         BlocProvider(create: (_) => AuthenticationBloc()..add(AppStarted())), // 👈 Add this
+//
+//
+//       ],
+//       child: const MyApp(),
+//     ),
+//   ),
+//   );
+// }
+//
+// class MyApp extends StatefulWidget {
+//   const MyApp({super.key});
+//
+//   @override
+//   State<MyApp> createState() => _MyAppState();
+// }
+//
+// class _MyAppState extends State<MyApp> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addPostFrameCallback((_) async {
+//        requestPermissions(); // Request permissions before starting the service
+//       BackgroundServiceHelper.startBackgroundService();
+//     });
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Sizer(builder: (context, orientation, deviceType) {
+//       return MaterialApp(
+//
+//         debugShowCheckedModeBanner: false,
+//         title: "Vehicle Booking App",
+//         theme: ThemeData(primarySwatch: Colors.blue),
+//         // home: const SplashScreen(),
+//         home: const AuthWrapper(), // 👈 replace SplashScreen
+//
+//         routes: {
+//
+//           'home': (context) => const Home(),
+//           // 'home': (context) => const SplashScreen(),
+//           'login': (context) => const Login_Screen(),
+//         },
+//       );
+//     });
+//   }
+// }
+//
+//
+//
+// void requestPermissions() async {
+//   var status = await Permission.location.request();
+//   if (status.isGranted) {
+//     // Permissions granted, proceed with location tracking
+//   } else {
+//     // Handle the case when permissions are not granted
+//   }
+// }
+//
+// class BackgroundServiceHelper {
+//   static const MethodChannel _channel = MethodChannel("com.example.jessy_cabs/background");
+//
+//   static Future<void> startBackgroundService() async {
+//     try {
+//       final result = await _channel.invokeMethod("startService");
+//       print("Background service result: $result");
+//     } on PlatformException catch (e) {
+//       print("Error starting background service: ${e.message}");
+//     }
+//   }
+// }
+
+
+
+//working
+
+
 import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:jessy_cabs/Screens/SplashScreen.dart';
 import 'package:jessy_cabs/Screens/Home.dart';
@@ -83,91 +238,190 @@ import 'package:jessy_cabs/Networks/Api_Service.dart';// Import your Bloc file
 import 'package:jessy_cabs/Utils/AppConstants.dart';
 import 'package:provider/provider.dart';
 import 'Screens/AuthWrapper.dart';
+import 'Screens/CustomerLocationReached/CustomerLocationReached.dart';
+import 'Screens/PickupScreen/PickupScreen.dart';
+import 'Screens/SignatureEndRide/SignatureEndRide.dart';
+import 'Screens/StartingKilometer/StartingKilometer.dart';
+import 'Screens/TollParkingUpload/TollParkingUpload.dart';
+import 'Screens/TrackingPage/TrackingPage.dart';
+import 'Screens/TripDetailsPreview/TripDetailsPreview.dart';
+import 'Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'Screens/network_manager.dart';// Import your Bloc file
 import 'package:flutter/services.dart';
 
 
-void main() {
+void main()async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  String? lastScreen = prefs.getString('last_screen');
+
+  String? tripId = prefs.getString('trip_id');
+
+  String? duty = prefs.getString('duty');
+
+  String? userId = prefs.getString('user_id');
+
+  String? username = prefs.getString('username');
+
+  String? address = prefs.getString('address');
+
+  String? dropLocation = prefs.getString('drop_location'); // 👈 Add this
+
+
+
+  // Debug prints
+
+  print('Loaded from SharedPreferences:');
+
+  print('last_screen: $lastScreen');
+
+  print('trip_id: $tripId');
+
+  print('duty: $duty');
+
+  print('user_id: $userId');
+
+  print('username: $username');
+
+  print('address: $address');
+
+  print('destination: $dropLocation');
 
   runApp(
     ChangeNotifierProvider(
       create: (context) => NetworkManager(),
       child:MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => TripSheetValuesBloc(), // No event added yet
-        ),
-        BlocProvider(
-          create: (context) => TripSheetClosedValuesBloc(), // No event added yet
-        ),
-        BlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => TripSheetValuesBloc(), // No event added yet
+          ),
+          BlocProvider(
+            create: (context) => TripSheetClosedValuesBloc(), // No event added yet
+          ),
+          BlocProvider(
             create: (context) => DrawerDriverDataBloc(),
-        ),
-        BlocProvider(
-          create: (context) => GettingTripSheetDetailsByUseridBloc(),
-        ),
+          ),
+          BlocProvider(
+            create: (context) => GettingTripSheetDetailsByUseridBloc(),
+          ),
 
-        BlocProvider(
-            create: (context) => UpdateTripStatusInTripsheetBloc()
+          BlocProvider(
+              create: (context) => UpdateTripStatusInTripsheetBloc()
+          ),
+          BlocProvider(
+            create: (context) => StartKmBloc(),
+          ),
+          BlocProvider(
+              create: (context) => TripSignatureBloc()
+          ),
+          BlocProvider(
+              create: (context) => TripSheetDetailsTripIdBloc()
+          ),
+          BlocProvider(
+              create: (context) => TollParkingDetailsBloc()
+          ),
+          BlocProvider(
+              create: (context) => TripBloc()
+          ),
+          // BlocProvider(create: (context) => FetchTripSheetClosedBloc()),
+
+          BlocProvider(create: (context) => TripSheetBloc()),
+
+          // BlocProvider(create: (context) => FetchFilteredRidesBloc()),
+          BlocProvider(create: (context) => FetchFilteredRidesBloc()),
+          BlocProvider(create: (context) => ProfileBloc()),
+          BlocProvider(create: (context) => TripTrackingDetailsBloc()),
+          BlocProvider(create: (context) => GettingClosingKilometerBloc(apiService)),
+          BlocProvider(create: (context) => TripClosedTodayBloc(apiService)),
+
+          BlocProvider(create: (context) => DocumentImagesBloc(
+              apiService: ApiService(apiUrl: "${AppConstants.baseUrl}"))),
+
+          // BlocProvider<GettingClosingKilometerBloc>(
+          //   create: (context) => GettingClosingKilometerBloc(),
+          // ),
+
+          BlocProvider(create: (_) => AuthenticationBloc()..add(AppStarted())), // 👈 Add this
+
+
+        ],
+        // child: const MyApp(),
+        child: MyApp(
+
+          initialRoute: lastScreen,
+
+          tripId: tripId,
+
+          duty: duty,
+
+          userId: userId,
+
+          username: username,
+
+          address: address,
+
+          dropLocation: dropLocation,
+
         ),
-        BlocProvider(
-          create: (context) => StartKmBloc(),
-        ),
-        BlocProvider(
-            create: (context) => TripSignatureBloc()
-        ),
-        BlocProvider(
-            create: (context) => TripSheetDetailsTripIdBloc()
-        ),
-        BlocProvider(
-            create: (context) => TollParkingDetailsBloc()
-        ),
-        BlocProvider(
-            create: (context) => TripBloc()
-        ),
-        // BlocProvider(create: (context) => FetchTripSheetClosedBloc()),
-
-        BlocProvider(create: (context) => TripSheetBloc()),
-
-        // BlocProvider(create: (context) => FetchFilteredRidesBloc()),
-        BlocProvider(create: (context) => FetchFilteredRidesBloc()),
-        BlocProvider(create: (context) => ProfileBloc()),
-        BlocProvider(create: (context) => TripTrackingDetailsBloc()),
-        BlocProvider(create: (context) => GettingClosingKilometerBloc(apiService)),
-        BlocProvider(create: (context) => TripClosedTodayBloc(apiService)),
-
-        BlocProvider(create: (context) => DocumentImagesBloc(
-            apiService: ApiService(apiUrl: "${AppConstants.baseUrl}"))),
-
-        // BlocProvider<GettingClosingKilometerBloc>(
-        //   create: (context) => GettingClosingKilometerBloc(),
-        // ),
-
-        BlocProvider(create: (_) => AuthenticationBloc()..add(AppStarted())), // 👈 Add this
-
-
-      ],
-      child: const MyApp(),
+      ),
     ),
-  ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final String? initialRoute;
 
+  final String? tripId;
+
+  final String? duty;
+
+  final String? userId;
+
+  final String? username;
+
+  final String? address;
+
+  final String? dropLocation;
+
+
+
+  const MyApp({
+
+    super.key,
+
+    required this.initialRoute,
+
+    this.tripId,
+
+    this.duty,
+
+    this.userId,
+
+    this.username,
+
+    this.address,
+
+    this.dropLocation,
+
+  });
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
+
+  bool? isOptimized;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-       requestPermissions(); // Request permissions before starting the service
+      requestPermissions(); // Request permissions before starting the service
       BackgroundServiceHelper.startBackgroundService();
+
+
     });
   }
 
@@ -175,12 +429,29 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Sizer(builder: (context, orientation, deviceType) {
       return MaterialApp(
+
         debugShowCheckedModeBanner: false,
         title: "Vehicle Booking App",
         theme: ThemeData(primarySwatch: Colors.blue),
         // home: const SplashScreen(),
-        home: const AuthWrapper(), // 👈 replace SplashScreen
+        // home: const AuthWrapper(), // 👈 replace SplashScreen
+        home: _getInitialScreen(
 
+          widget.initialRoute,
+
+          tripId: widget.tripId,
+
+          duty: widget.duty,
+
+          userId: widget.userId,
+
+          username: widget.username,
+
+          address: widget.address,
+
+          dropLocation: widget.dropLocation,
+
+        ),
         routes: {
 
           'home': (context) => const Home(),
@@ -192,7 +463,123 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
+Widget _getInitialScreen(
 
+    String? lastScreen, {
+
+      String? tripId,
+
+      String? duty,
+
+      String? userId,
+
+      String? username,
+
+      String? address,
+
+      String? dropLocation, // 👈 Add this
+
+    }) {
+
+  switch (lastScreen) {
+
+    case 'FirstHomeScreen':
+
+      return Homescreen(
+        userId: userId ?? '',
+
+        username: username ?? '',
+
+
+      );
+
+    case 'Pickupscreen':
+
+      return Pickupscreen(
+
+        tripId: tripId ?? '',
+
+        address: address ?? '',
+
+      );
+
+    case 'Bookingdetails':
+
+      return Bookingdetails(
+
+        userId: userId ?? '',
+
+        username: username ?? '',
+
+        tripId: tripId ?? '',
+
+        duty: duty ?? '',
+
+      );
+
+    case 'startingkm':
+
+      return StartingKilometer(
+
+        tripId: tripId ?? '',
+
+        address: address ?? '',
+
+      );
+
+    case 'TrackingPage':
+
+      return Builder(
+
+        builder: (_) => TrackingPage(
+
+          key: UniqueKey(),
+
+          tripId: tripId ?? '',
+
+          address: address ?? '',
+
+        ),
+
+      );
+
+    case 'customerLocationPage':
+
+      return Builder(
+
+        builder: (_) => Customerlocationreached(
+
+          key: UniqueKey(),
+
+          tripId: tripId ?? '',
+
+        ),
+
+      );
+
+    case 'signpagescreen':
+
+      return Signatureendride(tripId: tripId ?? '');
+
+    case 'TripDetailsUpload':
+
+      return TripDetailsUpload(tripId: tripId ?? '');
+
+    case 'TripDetailsPreview':
+
+      return TripDetailsPreview(tripId: tripId ?? '');
+
+    case 'TollParkingUpload':
+
+      return TollParkingUpload(tripId: tripId ?? '');
+
+    default:
+
+      return const AuthWrapper(); // Default screen
+
+  }
+
+}
 
 void requestPermissions() async {
   var status = await Permission.location.request();
@@ -215,3 +602,200 @@ class BackgroundServiceHelper {
     }
   }
 }
+
+
+
+// //working 2
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+// import 'package:jessy_cabs/Networks/Api_Service.dart';
+// import 'package:jessy_cabs/Screens/AuthWrapper.dart';
+// import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+// import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
+// import 'package:jessy_cabs/Screens/Home.dart';
+// import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
+// import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
+// import 'package:jessy_cabs/Screens/PickupScreen/PickupScreen.dart';
+// import 'package:jessy_cabs/Screens/SignatureEndRide/SignatureEndRide.dart';
+// import 'package:jessy_cabs/Screens/StartingKilometer/StartingKilometer.dart';
+// import 'package:jessy_cabs/Screens/TollParkingUpload/TollParkingUpload.dart';
+// import 'package:jessy_cabs/Screens/TrackingPage/TrackingPage.dart';
+// import 'package:jessy_cabs/Screens/TripDetailsPreview/TripDetailsPreview.dart';
+// import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
+// import 'package:jessy_cabs/Screens/network_manager.dart';
+// import 'package:jessy_cabs/Utils/AllImports.dart';
+// import 'package:jessy_cabs/Utils/AppConstants.dart';
+// import 'package:permission_handler/permission_handler.dart';
+// import 'package:provider/provider.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:sizer/sizer.dart';
+//
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   SharedPreferences prefs = await SharedPreferences.getInstance();
+//
+//   String? lastScreen = prefs.getString('last_screen');
+//   String? tripId = prefs.getString('trip_id');
+//   String? duty = prefs.getString('duty');
+//   String? userId = prefs.getString('user_id');
+//   String? username = prefs.getString('username');
+//   String? address = prefs.getString('address');
+//   String? dropLocation = prefs.getString('drop_location');
+//
+//   // Initialize background tracking only if user is ON DUTY
+//   if (duty == "on") {
+//     await _requestPermissions();
+//     await BackgroundServiceHelper.startBackgroundService();
+//   }
+//
+//   runApp(
+//     ChangeNotifierProvider(
+//       create: (context) => NetworkManager(),
+//       child: MultiBlocProvider(
+//         providers: [
+//           BlocProvider(create: (_) => TripSheetValuesBloc()),
+//           BlocProvider(create: (_) => TripSheetClosedValuesBloc()),
+//           BlocProvider(create: (_) => DrawerDriverDataBloc()),
+//           BlocProvider(create: (_) => GettingTripSheetDetailsByUseridBloc()),
+//           BlocProvider(create: (_) => UpdateTripStatusInTripsheetBloc()),
+//           BlocProvider(create: (_) => StartKmBloc()),
+//           BlocProvider(create: (_) => TripSignatureBloc()),
+//           BlocProvider(create: (_) => TripSheetDetailsTripIdBloc()),
+//           BlocProvider(create: (_) => TollParkingDetailsBloc()),
+//           BlocProvider(create: (_) => TripBloc()),
+//           BlocProvider(create: (_) => TripSheetBloc()),
+//           BlocProvider(create: (_) => FetchFilteredRidesBloc()),
+//           BlocProvider(create: (_) => ProfileBloc()),
+//           BlocProvider(create: (_) => TripTrackingDetailsBloc()),
+//           BlocProvider(create: (_) => GettingClosingKilometerBloc(apiService)),
+//           BlocProvider(create: (_) => TripClosedTodayBloc(apiService)),
+//           BlocProvider(
+//             create: (_) => DocumentImagesBloc(
+//               apiService: ApiService(apiUrl: "${AppConstants.baseUrl}"),
+//             ),
+//           ),
+//           BlocProvider(create: (_) => AuthenticationBloc()..add(AppStarted())),
+//         ],
+//         child: MyApp(
+//           initialRoute: lastScreen,
+//           tripId: tripId,
+//           duty: duty,
+//           userId: userId,
+//           username: username,
+//           address: address,
+//           dropLocation: dropLocation,
+//         ),
+//       ),
+//     ),
+//   );
+// }
+//
+// class MyApp extends StatelessWidget {
+//   final String? initialRoute;
+//   final String? tripId;
+//   final String? duty;
+//   final String? userId;
+//   final String? username;
+//   final String? address;
+//   final String? dropLocation;
+//
+//   const MyApp({
+//     super.key,
+//     required this.initialRoute,
+//     this.tripId,
+//     this.duty,
+//     this.userId,
+//     this.username,
+//     this.address,
+//     this.dropLocation,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Sizer(
+//       builder: (context, orientation, deviceType) {
+//         return MaterialApp(
+//           debugShowCheckedModeBanner: false,
+//           title: "Vehicle Booking App",
+//           theme: ThemeData(primarySwatch: Colors.blue),
+//           home: _getInitialScreen(
+//             initialRoute,
+//             tripId: tripId,
+//             duty: duty,
+//             userId: userId,
+//             username: username,
+//             address: address,
+//             dropLocation: dropLocation,
+//           ),
+//           routes: {
+//             'home': (context) => const Home(),
+//             'login': (context) => const Login_Screen(),
+//           },
+//         );
+//       },
+//     );
+//   }
+// }
+//
+// Widget _getInitialScreen(
+//     String? lastScreen, {
+//       String? tripId,
+//       String? duty,
+//       String? userId,
+//       String? username,
+//       String? address,
+//       String? dropLocation,
+//     }) {
+//   switch (lastScreen) {
+//     case 'FirstHomeScreen':
+//       return Homescreen(userId: userId ?? '', username: username ?? '');
+//     case 'Pickupscreen':
+//       return Pickupscreen(tripId: tripId ?? '', address: address ?? '');
+//     case 'Bookingdetails':
+//       return Bookingdetails(
+//         userId: userId ?? '',
+//         username: username ?? '',
+//         tripId: tripId ?? '',
+//         duty: duty ?? '',
+//       );
+//     case 'startingkm':
+//       return StartingKilometer(tripId: tripId ?? '', address: address ?? '');
+//     case 'TrackingPage':
+//       return TrackingPage(key: UniqueKey(), tripId: tripId ?? '', address: address ?? '');
+//     case 'customerLocationPage':
+//       return Customerlocationreached(key: UniqueKey(), tripId: tripId ?? '');
+//     case 'signpagescreen':
+//       return Signatureendride(tripId: tripId ?? '');
+//     case 'TripDetailsUpload':
+//       return TripDetailsUpload(tripId: tripId ?? '');
+//     case 'TripDetailsPreview':
+//       return TripDetailsPreview(tripId: tripId ?? '');
+//     case 'TollParkingUpload':
+//       return TollParkingUpload(tripId: tripId ?? '');
+//     default:
+//       return const AuthWrapper();
+//   }
+// }
+//
+// Future<void> _requestPermissions() async {
+//   await [
+//     Permission.locationAlways,
+//     Permission.locationWhenInUse,
+//     Permission.notification,
+//   ].request();
+// }
+//
+// class BackgroundServiceHelper {
+//   static const MethodChannel _channel = MethodChannel("com.example.jessy_cabs/background");
+//
+//   static Future<void> startBackgroundService() async {
+//     try {
+//       final result = await _channel.invokeMethod("startService");
+//       print("✅ Background service started: $result");
+//     } on PlatformException catch (e) {
+//       print("❌ Error starting background service: ${e.message}");
+//     }
+//   }
+// }

@@ -1996,6 +1996,67 @@ class ApiService {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//for testing latlong for g map data
+  static Future<http.Response> addVehicleLocation({
+    required String vehicleno,
+    required double latitudeloc,
+    required double longitutdeloc,
+    required String gpsPointAddrress,
+    required String tripId,
+    required String runingDate,
+    required String runingTime,
+    required String tripStatus,
+    required String tripStartTime,
+    required String tripEndTime,
+    required String createdAt,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/addvehiclelocationUniqueLatlongTest');
+
+    final body = {
+      "vehicleno": vehicleno,
+      "latitudeloc": latitudeloc,
+      "longitutdeloc": longitutdeloc,
+      "gpsPointAddrress": gpsPointAddrress,
+
+      "Trip_id": tripId,
+      "Runing_Date": runingDate,
+      "Runing_Time": runingTime,
+      "Trip_Status": tripStatus,
+      "Tripstarttime": tripStartTime,
+      "TripEndTime": tripEndTime,
+      "created_at": createdAt,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      return response;
+    } catch (e) {
+      throw Exception("Failed to connect to the server: $e");
+    }
+  }
+
+
 }
 
 
