@@ -2,6 +2,7 @@ import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
 
 import 'package:jessy_cabs/Screens/PickupScreen/PickupScreen.dart';
 import 'package:jessy_cabs/Screens/StartingKilometer/StartingKilometer.dart';
@@ -131,6 +132,28 @@ class _BookingdetailsState extends State<Bookingdetails>  {
     }
   }
 
+
+//local storage of username
+  void _loadLoginDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    String storedUsername = prefs.getString('username') ?? "Guest";
+    String storedUserId = prefs.getString('userId') ?? "N/A";
+
+    // Debugging print statements
+    print("Local Storage - username: $storedUsername");
+    print("Local Storage - userId: $storedUserId");
+
+    // Navigate to Homescreen with stored values
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Homescreen(userId: storedUserId, username: storedUsername),
+      ),
+    );
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
@@ -139,12 +162,18 @@ class _BookingdetailsState extends State<Bookingdetails>  {
       appBar: AppBar(
         title: const Text(
           "Trip Details",
-          style:
-              TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
+          style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back), // Custom back icon
+          onPressed: () {
+            _loadLoginDetails();
+            },
         ),
         backgroundColor: AppTheme.Navblue1,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
+
       body:
           Stack(
             children: [
@@ -211,12 +240,12 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                               value: tripDetails['duty'] ?? "Not available", // Default text when null
                               icon: Icons.business_center,
                             ),
-                            _buildDetailTile(
-                              context,
-                              label: "Vehicle Type",
-                              value: tripDetails['vehType'] ?? "Not available", // Default text when null
-                              icon: Icons.directions_car,
-                            ),
+                            // _buildDetailTile(
+                            //   context,
+                            //   label: "Vehicle Type",
+                            //   value: tripDetails['vehType'] ?? "Not available", // Default text when null
+                            //   icon: Icons.directions_car,
+                            // ),
                             _buildDetailTile(
                               context,
                               label: "Company Name",
@@ -296,12 +325,26 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                         //     builder: (context) => StartingKilometer(address: tripDetails['address1'], tripId: widget.tripId),
                         //   ),
                         // );
-                        Navigator.push(
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => Pickupscreen(address: tripDetails['address1'], tripId: widget.tripId),
+                        //   ),
+                        // );
+                        Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
                             builder: (context) => Pickupscreen(address: tripDetails['address1'], tripId: widget.tripId),
-                          ),
+                          ),(route)=> false
                         );
+
+    // Navigator.pushAndRemoveUntil(
+    // context,
+    // MaterialPageRoute(
+    // builder: (context) => Customerlocationreached(tripId: tripId!),
+    // ),(route)=> false
+    // );
+    //
 
 
                       } else if (state is UpdateTripStatusInTripsheetFailure) {

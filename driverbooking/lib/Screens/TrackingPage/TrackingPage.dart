@@ -552,12 +552,12 @@ class _TrackingPageState extends State<TrackingPage> {
     if (success) {
       showInfoSnackBar(context, "Trip started  Successfully!");
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Customerlocationreached(tripId: tripId!),
-        ),(route)=> false
-      );
+      // Navigator.pushAndRemoveUntil(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => Customerlocationreached(tripId: tripId!),
+      //   ),(route)=> false
+      // );
     }
 
 
@@ -690,29 +690,15 @@ class _TrackingPageState extends State<TrackingPage> {
         print('Status updated successfully ongoing');
 
 
-        // Navigator.pushAndRemoveUntil(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) => Customerlocationreached(tripId: tripId!),
-        //     ),(route)=> false
-        // );
+
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
 
-          Navigator.pushReplacement(
-
-            context,
-
-            MaterialPageRoute(
-
-              builder: (context) =>
-
-                  Customerlocationreached(
-
-                      tripId: tripId!),
-
-            ),
-
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Customerlocationreached(tripId: tripId!),
+              ),(route)=> false
           );
 
         });
@@ -823,7 +809,9 @@ class _TrackingPageState extends State<TrackingPage> {
                   color: Colors.white, fontSize: AppTheme.appBarFontSize),
             ),
             backgroundColor: AppTheme.Navblue1,
-            iconTheme: const IconThemeData(color: Colors.white),
+            // iconTheme: const IconThemeData(color: Colors.white),
+            automaticallyImplyLeading: false, // 👈 disables the default back icon
+
           ),
           body: RefreshIndicator(
               // child: child,
@@ -1105,7 +1093,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
                       child: Container(
 
-                        height: 200,
+                        height: 150,
 
                         padding: EdgeInsets.all(16),
 
@@ -1119,25 +1107,18 @@ class _TrackingPageState extends State<TrackingPage> {
 
                           children: [
 
-                            Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0,),),
+                            // Text('Current Trip Status:  $tripStatus',style: TextStyle(fontSize: 20.0,),),
 
-                            // Text('Current Trip Status:  ${widget.address}',style: TextStyle(fontSize: 20.0,color: Colors.red),),
 
-                            // Text('Current Trip Status:  ${_destination}',style: TextStyle(fontSize: 20.0,color: Colors.red),),
+                            // Text(
+                            //
+                            //   ' currentLatLng: $_currentLatLng',
+                            //
+                            //   style: TextStyle(fontSize: 20.0, ),
+                            //
+                            // ),
 
-                            // Text('Current Trip Status: ${ _isMapLoading}',style: TextStyle(fontSize: 20.0,color: Colors.red),),
-
-                            // Text('Current _currentLatLng: ${ _currentLatLng}',style: TextStyle(fontSize: 20.0,color: Colors.red),),
-
-                            Text(
-
-                              ' currentLatLng: $_currentLatLng',
-
-                              style: TextStyle(fontSize: 20.0, ),
-
-                            ),
-
-                            // SizedBox(height: 40),
+                            SizedBox(height: 40),
 
                             SizedBox(
 

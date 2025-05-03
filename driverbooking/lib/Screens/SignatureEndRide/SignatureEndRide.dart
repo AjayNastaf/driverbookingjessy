@@ -256,8 +256,8 @@ class _SignatureendrideState extends State<Signatureendride>  {
 
   void _handleNavNextpage(){
     // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
-    // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
+    // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
 
   }
 
@@ -360,6 +360,8 @@ class _SignatureendrideState extends State<Signatureendride>  {
      child:  Scaffold(
       appBar: AppBar(
         title: Text("End Ride"),
+        automaticallyImplyLeading: false, // 👈 disables the default back icon
+
       ),
       body:Stack(
         children: [

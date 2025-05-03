@@ -329,6 +329,8 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
     },child:Scaffold(
       appBar: AppBar(
         title: const Text("Trip Preview"),
+        automaticallyImplyLeading: false,
+
       ),
       body: Stack(
         children: [
@@ -376,17 +378,17 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Vehicle Type
-              TextField(
-                controller: vehicleTypeController,
-                enabled: false,
-                decoration: const InputDecoration(
-                  labelText: "Vehicle Type",
-                  border: OutlineInputBorder(),
-                ),
-              ),
+              // const SizedBox(height: 16),
+              //
+              // // Vehicle Type
+              // TextField(
+              //   controller: vehicleTypeController,
+              //   enabled: false,
+              //   decoration: const InputDecoration(
+              //     labelText: "Vehicle Type",
+              //     border: OutlineInputBorder(),
+              //   ),
+              // ),
               const SizedBox(height: 16),
 
               // Starting Date

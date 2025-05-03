@@ -201,11 +201,11 @@ class _StartingKilometerState extends State<StartingKilometer>  {
     //   ),
     // );
 
-    Navigator.push(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder: (context) => TrackingPage(address: widget.address,tripId:widget.tripId),
-      ),
+      ),(route)=>false
     );
   }
 
@@ -217,8 +217,8 @@ class _StartingKilometerState extends State<StartingKilometer>  {
       appBar: AppBar(
         title: Text("Upload Starting Kilometer", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, )),
         backgroundColor: AppTheme.Navblue1,
-        iconTheme: IconThemeData(color: AppTheme.white1),
-
+        // iconTheme: IconThemeData(color: AppTheme.white1),
+        automaticallyImplyLeading: false,
         elevation: 2,
       ),
       body: Stack(

@@ -1608,7 +1608,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
       try {
         print("➡ Starting reverse geocoding for coordinates: $latitude, $longitude");
 
-        List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(13.0310248, 80.2392546);
+        List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(latitude, longitude);
 
         print("✅ placemarkFromCoordinates call succeeded.");
 
@@ -1702,15 +1702,15 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     if (_currentLatLng != null) {
       _handleEndRide(_currentLatLng!.latitude, _currentLatLng!.longitude);
 
-      // Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => Signatureendride(tripId: widget.tripId),
-      //     ),(route)=>false
-      // );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Signatureendride(tripId: widget.tripId),
+          ),(route)=>false
+      );
 
 
-      Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId)));
+      // Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId)));
 
 
       print('for current location');
@@ -1758,6 +1758,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         child:Scaffold (
             appBar: AppBar(
               title: Text("Trip Started"),
+              automaticallyImplyLeading: false, // 👈 disables the default back icon
+
             ),
             body: RefreshIndicator(onRefresh: _refreshCustomerDestination,
 

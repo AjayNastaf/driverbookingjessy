@@ -1174,6 +1174,8 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Uploading Closing Kilometer"),
+          automaticallyImplyLeading: false,
+
         ),
         body: MultiBlocListener(
           listeners: [

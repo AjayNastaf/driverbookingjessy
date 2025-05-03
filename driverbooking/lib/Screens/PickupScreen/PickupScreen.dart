@@ -63,6 +63,7 @@ class _PickupscreenState extends State<Pickupscreen>{
       _setDestinationFromAddress(widget.address);
 
       _initializeLocationTracking();
+      // _updateCurrentLocation();
     }
 
 
@@ -203,6 +204,7 @@ class _PickupscreenState extends State<Pickupscreen>{
   }
 
   void _updateCurrentLocation(LocationData locationData) {
+      print("hi");
     double? latitude = locationData.latitude;
     double? longitude = locationData.longitude;
 
@@ -214,6 +216,8 @@ class _PickupscreenState extends State<Pickupscreen>{
         setState(() {
           _currentLatLng = newLatLng;
         });
+        print('lotlong ${_currentLatLng}');
+        print('lotlong ${newLatLng}');
       }
       _fetchRoute();
       _updateCameraPosition();
@@ -226,6 +230,7 @@ class _PickupscreenState extends State<Pickupscreen>{
   StreamSubscription<
       LocationData>? _locationSubscription; // Store the subscription
   Future<void> _initializeLocationTracking() async {
+    print('hi inside the function');
     // Location location = Location();
     List<geocoding.Location> locations = await geocoding.locationFromAddress(widget.address);
 
@@ -279,73 +284,88 @@ class _PickupscreenState extends State<Pickupscreen>{
           "Pick Up",
           style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
         ),
+        // leading: BackButton(), // explicitly show back button
+        automaticallyImplyLeading: false, // 👈 disables the default back icon
+
         backgroundColor: AppTheme.Navblue1,
-        iconTheme: const IconThemeData(color: Colors.white),
+        // iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Stack(
         children: [
           // Google Map
-          if (!_isMapLoading && _currentLatLng != null && _destination != null )
-          // GoogleMap(
-          //   onMapCreated: (controller) {
-          //     // You can save the controller for further use if needed
-          //     Future.delayed(Duration(milliseconds: 500), () {
-          //       if (mounted) {
-          //         setState(() {
-          //           _isMapLoading = false; // Hide loader after small delay
-          //         });
-          //       }
-          //     });
-          //   },
-          //   initialCameraPosition: CameraPosition(
-          //     target: _initialPosition, // Fixed location
-          //     zoom: 15, // Adjust zoom level as required
-          //   ),
-          //   myLocationEnabled: false, // Disable 'my location' marker
-          //   myLocationButtonEnabled: false, // Disable 'my location' button
-          // ),
-
-            GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: _currentLatLng!,
-                zoom: 15,
-              ),
-              onMapCreated: (controller) {
-                _mapController = controller;
-                Future.delayed(Duration(milliseconds: 500), () {
-                  if (mounted) {
-                    setState(() {
-                      _isMapLoading = false; // Hide loader after small delay
-                    });
-                  }
-                });
-              },
+          // if (!_isMapLoading && _currentLatLng != null && _destination != null )
+          // if (!_isMapLoading && _currentLatLng != null  )
+          GoogleMap(
+            onMapCreated: (controller) {
+              // You can save the controller for further use if needed
+              Future.delayed(Duration(milliseconds: 500), () {
+                if (mounted) {
+                  setState(() {
+                    _isMapLoading = false; // Hide loader after small delay
+                  });
+                }
+              });
+            },
+            initialCameraPosition: CameraPosition(
+              target: _initialPosition, // Fixed location
+              zoom: 15, // Adjust zoom level as required
+            ),
               markers: {
                 Marker(
                   markerId: MarkerId('currentLocation'),
-                  position: _currentLatLng!,
+                  position: _currentLatLng ?? _initialPosition,
                   icon: BitmapDescriptor.defaultMarkerWithHue(
                     // BitmapDescriptor.hueBlue),
-                      BitmapDescriptor.hueGreen),
+                      BitmapDescriptor.hueRed),
                 ),
-                if (_destination != null)
-                  Marker(
-                  markerId: MarkerId('destination'),
-                  position: _destination!,
-                ),
+
               },
-              polylines: {
-                if (_routeCoordinates.isNotEmpty)
-                  Polyline(
-                    polylineId: PolylineId('route'),
-                    points: _routeCoordinates,
-                    color: Colors.green,
-                    width: 5,
-                  ),
-              },
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-            ),
+
+            myLocationEnabled: false, // Disable 'my location' marker
+            myLocationButtonEnabled: false, // Disable 'my location' button
+          ),
+
+            // GoogleMap(
+            //   initialCameraPosition: CameraPosition(
+            //     target: _currentLatLng!,
+            //     zoom: 15,
+            //   ),
+            //   onMapCreated: (controller) {
+            //     _mapController = controller;
+            //     Future.delayed(Duration(milliseconds: 500), () {
+            //       if (mounted) {
+            //         setState(() {
+            //           _isMapLoading = false; // Hide loader after small delay
+            //         });
+            //       }
+            //     });
+            //   },
+            //   markers: {
+            //     Marker(
+            //       markerId: MarkerId('currentLocation'),
+            //       position: _currentLatLng!,
+            //       icon: BitmapDescriptor.defaultMarkerWithHue(
+            //         // BitmapDescriptor.hueBlue),
+            //           BitmapDescriptor.hueGreen),
+            //     ),
+            //     if (_destination != null)
+            //       Marker(
+            //       markerId: MarkerId('destination'),
+            //       position: _destination!,
+            //     ),
+            //   },
+            //   polylines: {
+            //     if (_routeCoordinates.isNotEmpty)
+            //       Polyline(
+            //         polylineId: PolylineId('route'),
+            //         points: _routeCoordinates,
+            //         color: Colors.green,
+            //         width: 5,
+            //       ),
+            //   },
+            //   myLocationEnabled: true,
+            //   myLocationButtonEnabled: false,
+            // ),
 
 
           if (_isMapLoading)

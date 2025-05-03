@@ -551,7 +551,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
               const SizedBox(height: 16),
               buildSectionTitle("Duty Information"),
               _buildInputField("Duty Type", dutyTypeController,alwaysDisabled: true),
-              _buildInputField("Vehicle Type", vehicleTypeController,alwaysDisabled: true),
+              _buildInputField("Vehicle Name", vehicleTypeController,alwaysDisabled: true),
               const SizedBox(height: 16),
               buildSectionTitle("Guest Information"),
               _buildInputField("Guest Name", guestNameController,alwaysDisabled: true),

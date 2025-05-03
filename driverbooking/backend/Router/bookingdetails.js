@@ -30,7 +30,8 @@ router.get('/tripsheet/:username/:startdate', async (req, res) => {
   console.log(username, "ajay90")
   try {
 //    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "waiting" ';
-    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept") and startdate = ? order by tripid desc' ;
+//    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept") and startdate = ? order by tripid desc' ;
+    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept") and startdate = ? order by tripid Asc' ;
 
     db.query(query, [username,startdate], (err, results) => {
       if (err) {
