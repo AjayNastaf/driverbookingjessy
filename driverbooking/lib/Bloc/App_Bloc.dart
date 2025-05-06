@@ -1182,8 +1182,8 @@ class TripTrackingDetailsBloc extends Bloc<TripTrackingDetailsEvent, TripTrackin
     on<FetchTripTrackingDetails>(_onFetchTripTrackingDetails);
     on<SaveLocationToDatabase>(_onSaveLocationToDatabase);
     on<EndRideEvent>(_onEndRide);
-    on<StartWayPointEvent>(_onStartingWayPoint);
-    on<EndWayPointEvent>(_onEndingWayPoint);
+    // on<StartWayPointEvent>(_onStartingWayPoint);
+    // on<EndWayPointEvent>(_onEndingWayPoint);
 
   }
 
@@ -1231,7 +1231,6 @@ print('yess');
       "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
       "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
       "Trip_Status": event.tripStatus,
-      // "Trip_Status": 'On_Going',
       "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
       "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
       "created_at": DateTime.now().toIso8601String(),
@@ -1256,7 +1255,7 @@ print('yess');
   }
 }
 
-//trip tracking bloc reached completed (tracking, customer location reached page)
+//// trip tracking bloc reached completed (tracking, customer location reached page)
 Future<void> _onEndRide(
     EndRideEvent event, Emitter<TripTrackingDetailsState> emit) async {
 
@@ -1320,123 +1319,123 @@ Future<void> _onEndRide(
 
 
 //trip tracking way point bloc starts (tracking, customer location reached page)
-
-Future<void> _onStartingWayPoint(
-    StartWayPointEvent event, Emitter<TripTrackingDetailsState> emit) async {
-  print("➡ Event received: EndRideEvent");
-  emit(SaveLocationLoading()); // Show loading state
-
-  print("🔹 Latitude: ${event.latitude}, Longitude: ${event.longitude}");
-  print("🔹 Vehicle No: ${event.vehicleNo}, Trip ID: ${event.tripId}");
-
-  if (event.latitude == 0.0 && event.longitude == 0.0) {
-    print("⚠ Invalid location (0.0, 0.0) - Not saving to database.");
-    emit(SaveLocationFailure("⚠ Invalid location (0.0, 0.0) - Not saving to database."));
-    return;
-  }
-
-  final Map<String, dynamic> requestData = {
-
-    "Vehicle_No": event.vehicleNo, // Ensure it matches the DB column name
-    "Latitude_loc": event.latitude,
-    "Longtitude_loc": event.longitude,
-    "Trip_id": event.tripId,
-    "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
-    "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
-    "Trip_Status": "waypoint_Started ",
-    "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
-    "TripEndTime": DateTime.now().toIso8601String(),
-    "created_at": DateTime.now().toIso8601String(),
-
-
-  };
-
-  print("📤 Sending request to API: ${AppConstants.baseUrl}/insertWayPointData");
-  print("📌 Requested Data: $requestData");
-
-  try {
-    final response = await http.post(
-      Uri.parse("${AppConstants.baseUrl}/insertReachedData"),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(requestData),
-    );
-
-    print("✅ Response Status Code: ${response.statusCode}");
-    print("✅ Response Body: ${response.body}");
-
-    if (response.statusCode == 200) {
-      emit(SaveLocationSuccess());
-      print("🎉wap Point starts successfully!");
-    } else {
-      print("❌ Failed to end trip. Status Code: ${response.statusCode}");
-      emit(SaveLocationFailure("Failed to end trip."));
-    }
-  } catch (e) {
-    print("🚨 Error ending trip: $e");
-    emit(SaveLocationFailure("Error ending trip: $e"));
-  }
-}
+//
+// Future<void> _onStartingWayPoint(
+//     StartWayPointEvent event, Emitter<TripTrackingDetailsState> emit) async {
+//   print("➡ Event received: EndRideEvent");
+//   emit(SaveLocationLoading()); // Show loading state
+//
+//   print("🔹 Latitude: ${event.latitude}, Longitude: ${event.longitude}");
+//   print("🔹 Vehicle No: ${event.vehicleNo}, Trip ID: ${event.tripId}");
+//
+//   if (event.latitude == 0.0 && event.longitude == 0.0) {
+//     print("⚠ Invalid location (0.0, 0.0) - Not saving to database.");
+//     emit(SaveLocationFailure("⚠ Invalid location (0.0, 0.0) - Not saving to database."));
+//     return;
+//   }
+//
+//   final Map<String, dynamic> requestData = {
+//
+//     "Vehicle_No": event.vehicleNo, // Ensure it matches the DB column name
+//     "Latitude_loc": event.latitude,
+//     "Longtitude_loc": event.longitude,
+//     "Trip_id": event.tripId,
+//     "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
+//     "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
+//     "Trip_Status": "waypoint_Started ",
+//     "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
+//     "TripEndTime": DateTime.now().toIso8601String(),
+//     "created_at": DateTime.now().toIso8601String(),
+//
+//
+//   };
+//
+//   print("📤 Sending request to API: ${AppConstants.baseUrl}/insertWayPointData");
+//   print("📌 Requested Data: $requestData");
+//
+//   try {
+//     final response = await http.post(
+//       Uri.parse("${AppConstants.baseUrl}/insertReachedData"),
+//       headers: {"Content-Type": "application/json"},
+//       body: json.encode(requestData),
+//     );
+//
+//     print("✅ Response Status Code: ${response.statusCode}");
+//     print("✅ Response Body: ${response.body}");
+//
+//     if (response.statusCode == 200) {
+//       emit(SaveLocationSuccess());
+//       print("🎉wap Point starts successfully!");
+//     } else {
+//       print("❌ Failed to end trip. Status Code: ${response.statusCode}");
+//       emit(SaveLocationFailure("Failed to end trip."));
+//     }
+//   } catch (e) {
+//     print("🚨 Error ending trip: $e");
+//     emit(SaveLocationFailure("Error ending trip: $e"));
+//   }
+// }
 //trip tracking way point starts bloc completed (tracking, customer location reached page)
 
 
 
 //trip tracking way point reached bloc starts (tracking, customer location reached page)
-
-Future<void> _onEndingWayPoint(
-    EndWayPointEvent event, Emitter<TripTrackingDetailsState> emit) async {
-  print("➡ Event received: EndRideEvent");
-  emit(SaveLocationLoading()); // Show loading state
-
-  print("🔹 Latitude: ${event.latitude}, Longitude: ${event.longitude}");
-  print("🔹 Vehicle No: ${event.vehicleNo}, Trip ID: ${event.tripId}");
-
-  if (event.latitude == 0.0 && event.longitude == 0.0) {
-    print("⚠ Invalid location (0.0, 0.0) - Not saving to database.");
-    emit(SaveLocationFailure("⚠ Invalid location (0.0, 0.0) - Not saving to database."));
-    return;
-  }
-
-  final Map<String, dynamic> requestData = {
-
-    "Vehicle_No": event.vehicleNo, // Ensure it matches the DB column name
-    "Latitude_loc": event.latitude,
-    "Longtitude_loc": event.longitude,
-    "Trip_id": event.tripId,
-    "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
-    "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
-    "Trip_Status": "waypoint_Reached ",
-    "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
-    "TripEndTime": DateTime.now().toIso8601String(),
-    "created_at": DateTime.now().toIso8601String(),
-
-
-  };
-
-  print("📤 Sending request to API: ${AppConstants.baseUrl}/insertWayPointData");
-  print("📌 Requested Data: $requestData");
-
-  try {
-    final response = await http.post(
-      Uri.parse("${AppConstants.baseUrl}/insertReachedData"),
-      headers: {"Content-Type": "application/json"},
-      body: json.encode(requestData),
-    );
-
-    print("✅ Response Status Code: ${response.statusCode}");
-    print("✅ Response Body: ${response.body}");
-
-    if (response.statusCode == 200) {
-      emit(SaveLocationSuccess());
-      print("🎉 wap Point Reached successfully!");
-    } else {
-      print("❌ Failed to end trip. Status Code: ${response.statusCode}");
-      emit(SaveLocationFailure("Failed to end trip."));
-    }
-  } catch (e) {
-    print("🚨 Error ending trip: $e");
-    emit(SaveLocationFailure("Error ending trip: $e"));
-  }
-}
+//
+// Future<void> _onEndingWayPoint(
+//     EndWayPointEvent event, Emitter<TripTrackingDetailsState> emit) async {
+//   print("➡ Event received: EndRideEvent");
+//   emit(SaveLocationLoading()); // Show loading state
+//
+//   print("🔹 Latitude: ${event.latitude}, Longitude: ${event.longitude}");
+//   print("🔹 Vehicle No: ${event.vehicleNo}, Trip ID: ${event.tripId}");
+//
+//   if (event.latitude == 0.0 && event.longitude == 0.0) {
+//     print("⚠ Invalid location (0.0, 0.0) - Not saving to database.");
+//     emit(SaveLocationFailure("⚠ Invalid location (0.0, 0.0) - Not saving to database."));
+//     return;
+//   }
+//
+//   final Map<String, dynamic> requestData = {
+//
+//     "Vehicle_No": event.vehicleNo, // Ensure it matches the DB column name
+//     "Latitude_loc": event.latitude,
+//     "Longtitude_loc": event.longitude,
+//     "Trip_id": event.tripId,
+//     "Runing_Date": DateTime.now().toIso8601String().split("T")[0],
+//     "Runing_Time": DateTime.now().toLocal().toString().split(" ")[1],
+//     "Trip_Status": "waypoint_Reached ",
+//     "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
+//     "TripEndTime": DateTime.now().toIso8601String(),
+//     "created_at": DateTime.now().toIso8601String(),
+//
+//
+//   };
+//
+//   print("📤 Sending request to API: ${AppConstants.baseUrl}/insertWayPointData");
+//   print("📌 Requested Data: $requestData");
+//
+//   try {
+//     final response = await http.post(
+//       Uri.parse("${AppConstants.baseUrl}/insertReachedData"),
+//       headers: {"Content-Type": "application/json"},
+//       body: json.encode(requestData),
+//     );
+//
+//     print("✅ Response Status Code: ${response.statusCode}");
+//     print("✅ Response Body: ${response.body}");
+//
+//     if (response.statusCode == 200) {
+//       emit(SaveLocationSuccess());
+//       print("🎉 wap Point Reached successfully!");
+//     } else {
+//       print("❌ Failed to end trip. Status Code: ${response.statusCode}");
+//       emit(SaveLocationFailure("Failed to end trip."));
+//     }
+//   } catch (e) {
+//     print("🚨 Error ending trip: $e");
+//     emit(SaveLocationFailure("Error ending trip: $e"));
+//   }
+// }
 
 //trip tracking way point reached bloc completed (tracking, customer location reached page)
 

@@ -61,6 +61,8 @@ class _TripDetailsPreviewState extends State<TripDetailsPreview> {
     // Re-fetch the trip details using BLoC
     context.read<TripSheetDetailsTripIdBloc>().add(FetchTripDetailsByTripIdEventClass(tripId: widget.tripId));
     saveScreenData();
+    fetchImages(); // Make sure fetchImages is being called
+
 
   }
 

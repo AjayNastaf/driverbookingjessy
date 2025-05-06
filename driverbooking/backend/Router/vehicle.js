@@ -152,6 +152,8 @@ router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
+               if(Trip_Status !== "Reached"){
+
             db.query(insertUserSql, [vehicleno, Trip_id, latitudeloc, longitutdeloc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at], (err, insertResult) => {
                 if (err) {
                     console.log("Error inserting vehicle data:", err);
@@ -160,6 +162,7 @@ router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
 
                 res.status(200).send({ message: "Vehicle registered successfully." });
             });
+            }
         });
     });
 });
@@ -330,7 +333,7 @@ router.post('/insertStartData', (req, res) => {
                 req.body.Trip_Status,
                 req.body.Tripstarttime,
                 req.body.TripEndTime,
-                new Date().toISOString()
+                req.body.created_at,
             ];
 
             console.log("📌 Insert query to be executed:", insertUserSql);
@@ -396,7 +399,7 @@ router.post('/insertReachedData', (req, res) => {
         req.body.Trip_Status,
         req.body.Tripstarttime,
         req.body.TripEndTime,
-        new Date().toISOString() // Auto-generate created_at timestamp
+        req.body.created_at,
     ];
 
     console.log("📌 Query to be executed:", insertUserSql);

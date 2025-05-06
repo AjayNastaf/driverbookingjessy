@@ -1120,7 +1120,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
   bool isStartRideEnabled = false;
   String? latitude;
   String? longitude;
-  bool isRideStopped = false; // Initially, show "Stop Ride" button
   bool isEndRideClicked = false; // Initially, show "Stop Ride" button
   bool isStartWayPointClicked = false;
   bool isCloseWayPointClicked = false;
@@ -1197,9 +1196,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         });
 
         _setDestinationFromDropLocation();
-        // sendLocationToServer(double.latitude, double.longitude);
-        // sendLocationToServer(double.parse(latitude!),
-        //     double.parse(longitude!));
+
       } else {
 
         print('No trip details found.');
@@ -1384,12 +1381,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         return; // Stop execution here
       }
 
-      if (isRideStopped == true) {
-        print("Successsss Ajay");
-        print("object");
-        // saveWayPointLocationCustomer(latitude, longitude);
-        return;
-      }
+
 
       if (isEndRideClicked == true) {
         print(" Ajay ERT");
@@ -1398,32 +1390,26 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         return;
       }
 
-      if (isStartWayPointClicked == true) {
-        print(" Ajay ERT");
-        print("object");
-        _handleEndRide(latitude, longitude);
-        return;
-      }
-      if (isCloseWayPointClicked == true) {
-        print(" Ajay ERT");
-        print("object");
-        _handleEndRide(latitude, longitude);
-        return;
-      }
-
-      // if (Testvehinum!.isNotEmpty && Testtripstatus!.isNotEmpty && Testtripstatus =='On_Going') {
-      //   sendLocationToServer(latitude, longitude);
-      // } else {
-      //   print("⚠ Test sendLocationToServer");
+      // if (isStartWayPointClicked == true) {
+      //   print(" Ajay ERT");
+      //   print("object");
+      //   _handleEndRide(latitude, longitude);
+      //   return;
       // }
-      // sendLocationToServer(latitude, longitude);
+      // if (isCloseWayPointClicked == true) {
+      //   print(" Ajay ERT");
+      //   print("object");
+      //   _handleEndRide(latitude, longitude);
+      //   return;
+      // }
+
+
 
 
 
       // Ensure vehicleNumber and tripStatus are available before calling saveLocation
       if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus=='On_Going') {
         saveLocationCustomer(latitude, longitude);
-        sendLocationToServer(latitude, longitude);
 
       } else {
         print("⚠ Trip details not loaded yet, waiting...");
@@ -1432,6 +1418,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
       print("⚠ Location data is null, skipping update");
     }
   }
+
+
 
 
 
@@ -1502,8 +1490,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         longitude: longitude,
         vehicleNo: vehicleNumber,
         tripId: widget.tripId,
-        // tripStatus: tripStatus,
-        tripStatus: 'Reached',
+        tripStatus: tripStatus,
       ),
 
     );
@@ -1598,56 +1585,56 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
 
 
 
-  void sendLocationToServer(double latitude, double longitude) async {
-    print("Vehicle Number sendLocationToServer  : $Testvehinum, Trip Status: $Testtripstatus");
-
-    try {
-      // Reverse geocode coordinates to get address
-      String address = '';
-      print("addddddddddddddddddd");
-      try {
-        print("➡ Starting reverse geocoding for coordinates: $latitude, $longitude");
-
-        List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(latitude, longitude);
-
-        print("✅ placemarkFromCoordinates call succeeded.");
-
-        if (placemarks.isNotEmpty) {
-          print("✅ Received non-empty placemarks list.");
-
-          final placemark = placemarks.first;
-          print("ℹ First Placemark: ${placemark.toJson()}"); // You can log all fields if needed
-
-          address = "${placemark.street},${placemark.thoroughfare},${placemark.subLocality}, ${placemark.locality},${placemark.postalCode}, ${placemark.administrativeArea}, ${placemark.country}";
-          print("📍 Constructed Address: $address");
-        } else {
-          print("⚠ placemarks list is empty.");
-        }
-      } catch (geoError) {
-        print("❌ Reverse geocoding failed with error: $geoError");
-        address = "Unknown address";
-      }
-
-      final response = await ApiService.addVehicleLocation(
-        vehicleno: Testvehinum ?? '',
-        latitudeloc: latitude,
-        longitutdeloc: longitude,
-        tripId: widget.tripId,
-        runingDate: Testtripstatus ?? '',
-        runingTime: DateTime.now().toIso8601String(),
-        tripStatus: DateTime.now().toIso8601String(),
-        tripStartTime: DateTime.now().toIso8601String(),
-        tripEndTime: DateTime.now().toIso8601String(),
-        createdAt: DateTime.now().toIso8601String(),
-        gpsPointAddrress: address,
-      );
-
-      final data = jsonDecode(response.body);
-      print("Server Response: ${data['message']}");
-    } catch (e) {
-      print("Error sending location: $e");
-    }
-  }
+  // void sendLocationToServer(double latitude, double longitude) async {
+  //   print("Vehicle Number sendLocationToServer  : $Testvehinum, Trip Status: $Testtripstatus");
+  //
+  //   try {
+  //     // Reverse geocode coordinates to get address
+  //     String address = '';
+  //     print("addddddddddddddddddd");
+  //     try {
+  //       print("➡ Starting reverse geocoding for coordinates: $latitude, $longitude");
+  //
+  //       List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(latitude, longitude);
+  //
+  //       print("✅ placemarkFromCoordinates call succeeded.");
+  //
+  //       if (placemarks.isNotEmpty) {
+  //         print("✅ Received non-empty placemarks list.");
+  //
+  //         final placemark = placemarks.first;
+  //         print("ℹ First Placemark: ${placemark.toJson()}"); // You can log all fields if needed
+  //
+  //         address = "${placemark.street},${placemark.thoroughfare},${placemark.subLocality}, ${placemark.locality},${placemark.postalCode}, ${placemark.administrativeArea}, ${placemark.country}";
+  //         print("📍 Constructed Address: $address");
+  //       } else {
+  //         print("⚠ placemarks list is empty.");
+  //       }
+  //     } catch (geoError) {
+  //       print("❌ Reverse geocoding failed with error: $geoError");
+  //       address = "Unknown address";
+  //     }
+  //
+  //     final response = await ApiService.addVehicleLocation(
+  //       vehicleno: Testvehinum ?? '',
+  //       latitudeloc: latitude,
+  //       longitutdeloc: longitude,
+  //       tripId: widget.tripId,
+  //       runingDate: Testtripstatus ?? '',
+  //       runingTime: DateTime.now().toIso8601String(),
+  //       tripStatus: DateTime.now().toIso8601String(),
+  //       tripStartTime: DateTime.now().toIso8601String(),
+  //       tripEndTime: DateTime.now().toIso8601String(),
+  //       createdAt: DateTime.now().toIso8601String(),
+  //       gpsPointAddrress: address,
+  //     );
+  //
+  //     final data = jsonDecode(response.body);
+  //     print("Server Response: ${data['message']}");
+  //   } catch (e) {
+  //     print("Error sending location: $e");
+  //   }
+  // }
 
 
 

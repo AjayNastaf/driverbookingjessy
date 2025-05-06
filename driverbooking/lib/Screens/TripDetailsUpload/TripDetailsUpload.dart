@@ -600,6 +600,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   String? duty;
   int? hcl;
   late TripUploadBloc _tripUploadBloc;
+  bool _isLoading = false; // Add this in your state
 
   String? startkmvalue;
 
@@ -757,6 +758,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
   Future<void> _StartCloseKm() async {
     int roundedDistance = globals.savedTripDistance.round();
+    // int roundedDistance = 13;
     print('Rounded Trip Distance: $roundedDistance');
 
     if (startkmvalue != null) {
@@ -1167,6 +1169,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -1191,6 +1194,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
             BlocListener<GettingClosingKilometerBloc, GettingClosingKilometerState>(
               listener: (context, state) {
                 if (state is ClosingKilometerLoaded) {
+                  print("object is coming inside");
 
                 } else if (state is ClosingKilometerError) {
                   print("Error fetching closing kilometerrrs: ${state.error}");
@@ -1270,6 +1274,8 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                       "Rounded Distance : ${globals.savedTripDistance.round()} km",
                       style: TextStyle(fontSize: 18),
                     ),
+
+
                     const SizedBox(height: 16),
 
                     Row(
@@ -1356,7 +1362,10 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: () {
+                          onPressed: _isLoading ? null : () {
+                            setState(() {
+                              _isLoading = true;
+                            });
 
                             // if (closeKmController.text.isEmpty || _selectedImage2 == null) {
                             //
@@ -1394,13 +1403,27 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
 
 
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => TripDetailsPreview(tripId: widget.tripId)),
-                            );
+                            Future.delayed(Duration(seconds: 2), () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TripDetailsPreview(tripId: widget.tripId),
+                                ),
+                              );
+                            });
+
                           },
                           // child: Text("Upload Toll and Parking Data"),
-                          child: Text("Next"),
+                          child:  _isLoading
+                              ? SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                              : Text("Next"),
                         ),
                       ),
                     ),

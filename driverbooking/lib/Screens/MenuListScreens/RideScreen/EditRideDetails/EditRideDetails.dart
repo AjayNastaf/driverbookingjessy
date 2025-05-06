@@ -110,6 +110,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
         var dutyvalue = tripDetails['duty'].toString();
         var vectypeValue = tripDetails['vehicleName2'].toString();
         var guestnamevalue = tripDetails['guestname'].toString();
+        // var guestnamevalue = tripDetails['closekm'].toString();
         var guestmobilenovalue = tripDetails['guestmobileno'].toString();
         var pickupvalue = tripDetails['address1'].toString();
         var droplocationvalue = tripDetails['useage'].toString();

@@ -544,7 +544,8 @@ class _TrackingPageState extends State<TrackingPage> {
       runningTime: DateTime.now().toLocal().toString().split(" ")[1],
       tripStatus: "Started",
       tripStartTime: DateTime.now().toLocal().toString().split(" ")[1],
-      tripEndTime: DateTime.now().toIso8601String(),
+      tripEndTime: DateTime.now().toLocal().toString().split(" ")[1],
+
 
 
     );
