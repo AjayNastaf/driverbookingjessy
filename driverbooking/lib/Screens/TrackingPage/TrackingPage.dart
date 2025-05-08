@@ -71,6 +71,7 @@ class _TrackingPageState extends State<TrackingPage> {
   bool _isMapLoading = true; // Add this variable to track loading state
   late String dropLocations; // 🔹 Declare it at class level
   bool _isLocationInitialized = false;
+  bool _isLoading = false; // Declare at the top of your state class
 
 
 
@@ -730,24 +731,51 @@ class _TrackingPageState extends State<TrackingPage> {
     //   (longitude as num?)?.toDouble() ?? 0.0,
     // );
 
+
+    if (_currentLatLng == null) {
+      showWarningSnackBar(context, "Location not available yet! Please Wait");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+
     if (_currentLatLng != null) {
-      _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
-      // Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => Customerlocationreached(tripId: tripId!),
-      //     ),(route)=> false
-      // );
+      // _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
+      // // Navigator.pushAndRemoveUntil(
+      // //     context,
+      // //     MaterialPageRoute(
+      // //       builder: (context) => Customerlocationreached(tripId: tripId!),
+      // //     ),(route)=> false
+      // // );
+      //
+      //
+      // await _handleStartRide(context);
+      //
+      // showInfoSnackBar(context, 'Trip started');
+
+      try {
+        _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
+        await _handleStartRide(context);
+        showInfoSnackBar(context, 'Trip started');
+      } finally {
+        setState(() => _isLoading = false);
+      }
 
 
-      await _handleStartRide(context);
-
-      showInfoSnackBar(context, 'Trip started');
     } else {
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(content: Text("Location not available yet! Please Wait")),
       // );
       showWarningSnackBar(context, "Location not available yet! Please Wait");
+    }
+
+    try {
+      _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
+      await _handleStartRide(context);
+      showInfoSnackBar(context, 'Trip started');
+    } finally {
+      setState(() => _isLoading = false);
     }
 
     // await _handleStartRide(context);
@@ -1129,7 +1157,8 @@ class _TrackingPageState extends State<TrackingPage> {
 
                               ElevatedButton(
 
-                                onPressed: _handleStartRideButton,
+                                // onPressed: _handleStartRideButton,
+                                onPressed: _isLoading ? null : _handleStartRideButton,
 
                                 style: ElevatedButton.styleFrom(
 
@@ -1147,7 +1176,16 @@ class _TrackingPageState extends State<TrackingPage> {
 
 
 
-                                child: Text(
+                                child:  _isLoading
+                                    ? SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                                    : Text(
 
                                   'Start Ride',
 

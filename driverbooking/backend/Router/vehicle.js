@@ -336,7 +336,7 @@ router.post('/insertStartData', (req, res) => {
                 req.body.created_at,
             ];
 
-            console.log("📌 Insert query to be executed:", insertUserSql);
+            console.log("📌 Insert query to be executed starting:", insertUserSql);
             console.log("📊 Query Values:", values);
 
             db.query(insertUserSql, values, (error, result) => {
@@ -345,8 +345,8 @@ router.post('/insertStartData', (req, res) => {
                     return res.status(500).send({ message: "Insert error", error: error });
                 }
 
-                console.log("✅ Data inserted successfully:", result);
-                res.status(200).send({ message: "Start Vehicle registered successfully." });
+                console.log("✅ Data inserted successfully starting:", result);
+                res.status(200).send({ message: "Start Vehicle registered successfully starting." });
             });
 
         } else {
