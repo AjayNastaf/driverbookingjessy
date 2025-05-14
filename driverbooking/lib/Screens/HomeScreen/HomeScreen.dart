@@ -589,6 +589,18 @@ class _HomescreenState extends State<Homescreen> {
   // }
 
 
+  Future<void> clearSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('last_screen');
+    await prefs.remove('trip_id');
+    await prefs.remove('user_id');
+    await prefs.remove('username');
+    await prefs.remove('address');
+    await prefs.remove('drop_location');
+    print("SharedPreferences cleared successfully");
+  }
+
+
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
@@ -606,7 +618,8 @@ class _HomescreenState extends State<Homescreen> {
               child: const Text("Cancel"),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: ()  {
+                 clearSharedPreferences();
                 context.read<AuthenticationBloc>().add(LoggedOut());
 
                 Navigator.of(context).pop(); // Close the popup
@@ -1211,35 +1224,81 @@ class _HomescreenState extends State<Homescreen> {
                 ],
               );
             } else {
+              // return ListView.builder(
+              //   physics: const AlwaysScrollableScrollPhysics(),
+              //   itemCount: state.tripSheetData.length,
+              //   itemBuilder: (context, index) {
+              //     final trip = state.tripSheetData[index];
+              //     return buildSection(
+              //       context,
+              //       title: '${trip['duty']}',
+              //       dateTime: '${trip['tripid']}',
+              //       buttonText: '${trip['apps']}',
+              //       // onTap: () {
+              //       //   Navigator.push(
+              //       //     context,
+              //       //     MaterialPageRoute(
+              //       //       builder: (context) => Bookingdetails(
+              //       //         username: widget.username,
+              //       //         userId: widget.userId,
+              //       //         tripId: trip['tripid'].toString(),
+              //       //         duty: trip['duty'].toString(),
+              //       //       ),
+              //       //     ),
+              //       //   );
+              //       // },
+              //       onTap: () {
+              //         if (trip['apps'] == 'On_Going') {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => Customerlocationreached(tripId: trip['tripid'].toString()),
+              //             ),
+              //           );
+              //         } else {
+              //           Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //               builder: (context) => Bookingdetails(
+              //                 username: widget.username,
+              //                 userId: widget.userId,
+              //                 tripId: trip['tripid'].toString(),
+              //                 duty: trip['duty'].toString(),
+              //               ),
+              //             ),
+              //           );
+              //         }
+              //       },
+              //
+              //     );
+              //   },
+              // );
+
+
               return ListView.builder(
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: state.tripSheetData.length,
                 itemBuilder: (context, index) {
                   final trip = state.tripSheetData[index];
+
+                  // Check if the current item is the first one
+                  final isFirstItem = (index == 0);
+
                   return buildSection(
                     context,
                     title: '${trip['duty']}',
                     dateTime: '${trip['tripid']}',
                     buttonText: '${trip['apps']}',
-                    // onTap: () {
-                    //   Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) => Bookingdetails(
-                    //         username: widget.username,
-                    //         userId: widget.userId,
-                    //         tripId: trip['tripid'].toString(),
-                    //         duty: trip['duty'].toString(),
-                    //       ),
-                    //     ),
-                    //   );
-                    // },
-                    onTap: () {
+                    isEnabled: isFirstItem,  // Pass enabled status
+
+                    onTap: isFirstItem
+                        ? () {
                       if (trip['apps'] == 'On_Going') {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Customerlocationreached(tripId: trip['tripid'].toString()),
+                            builder: (context) => Customerlocationreached(
+                                tripId: trip['tripid'].toString()),
                           ),
                         );
                       } else {
@@ -1255,11 +1314,25 @@ class _HomescreenState extends State<Homescreen> {
                           ),
                         );
                       }
-                    },
-
+                    }
+                        : null,  // Disable onTap if not the first item
                   );
                 },
               );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             }
           }
           return const SizedBox(); // Fallback empty widget

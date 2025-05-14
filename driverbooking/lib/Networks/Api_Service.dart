@@ -848,140 +848,376 @@ class ApiService {
 
 
   //for parking file upload
-  static Future<bool> uploadTollFile({
+  // static Future<bool> uploadTollFile({
+  //   required String tripid,
+  //   required String documenttype,
+  //   required File tollFile,
+  // }) async {
+  //   try {
+  //     // Generate the unique filename based on the current date
+  //     String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+  //     // String fileName = 'file_$formattedDate.jpg';
+  //
+  //     var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+  //     // var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+  //     var request = http.MultipartRequest('POST', uri);
+  //
+  //     request.fields['tripid'] = tripid;
+  //     request.fields['documenttype'] = documenttype;
+  //
+  //     // Upload the file with the unique name
+  //     request.files.add(await http.MultipartFile.fromPath('file', tollFile.path,
+  //         // filename: fileName
+  //     ));
+  //
+  //     var response = await request.send();
+  //
+  //     if (response.statusCode == 200) {
+  //       try {
+  //         // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+  //
+  //         var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+  //         var request = http.MultipartRequest('POST', uri);
+  //
+  //
+  //
+  //         // Upload the file with the unique name
+  //         request.files.add(await http.MultipartFile.fromPath('file', tollFile.path,
+  //           // filename: fileName
+  //         ));
+  //
+  //         // var response = await request.send();
+  //         var response1 = await request.send();
+  //         var responseBody = await response1.stream.bytesToString();
+  //
+  //     print("${responseBody},'asdf'");
+  //     if (response1.statusCode == 200) {
+  //       print('success request');
+  //           return true;
+  //         } else {
+  //           print("Failed to upload file: ${response1.statusCode}");
+  //           return false;
+  //         }
+  //       } catch (e) {
+  //         print("Error during upload: $e");
+  //         return false;
+  //       }
+  //
+  //
+  //       return true;
+  //     } else {
+  //       print("Failed to upload file: ${response.statusCode}");
+  //       return false;
+  //     }
+  //   } catch (e) {
+  //     print("Error during upload: $e");
+  //     return false;
+  //   }
+  // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Updated method for uploading toll and parking files
+  static Future<bool> uploadTollFiles({
     required String tripid,
     required String documenttype,
-    required File tollFile,
+    required List<File> tollFiles,
   }) async {
     try {
-      // Generate the unique filename based on the current date
-      String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
-      // String fileName = 'file_$formattedDate.jpg';
+      // Create a list to hold all future upload tasks
+      List<Future<void>> uploadTasks = [];
 
-      var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
-      // var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
-      var request = http.MultipartRequest('POST', uri);
+      for (var file in tollFiles) {
+        // Create an upload task for each file
+        var uploadTask = () async {
+          try {
+            // Generate a unique filename based on the current timestamp
+            String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
+            var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+            var request = http.MultipartRequest('POST', uri);
 
-      request.fields['tripid'] = tripid;
-      request.fields['documenttype'] = documenttype;
+            // Add trip ID and document type to the request
+            request.fields['tripid'] = tripid;
+            request.fields['documenttype'] = documenttype;
 
-      // Upload the file with the unique name
-      request.files.add(await http.MultipartFile.fromPath('file', tollFile.path,
-          // filename: fileName
-      ));
+            // Add the file to the request
+            String fileName = 'toll_${formattedDate}_${file.path.split('/').last}';
+            print("Uploading toll file: $fileName");
+            request.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
 
-      var response = await request.send();
+            var response = await request.send();
 
-      if (response.statusCode == 200) {
-        try {
-          // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+            if (response.statusCode == 200) {
+              try {
+                var uri2 = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+                var request2 = http.MultipartRequest('POST', uri2);
 
-          var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
-          var request = http.MultipartRequest('POST', uri);
+                // Add the file to the second request as well
+                request2.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
 
+                var response2 = await request2.send();
+                var responseBody = await response2.stream.bytesToString();
 
-
-          // Upload the file with the unique name
-          request.files.add(await http.MultipartFile.fromPath('file', tollFile.path,
-            // filename: fileName
-          ));
-
-          // var response = await request.send();
-          var response1 = await request.send();
-          var responseBody = await response1.stream.bytesToString();
-
-      print("${responseBody},'asdf'");
-      if (response1.statusCode == 200) {
-        print('success request');
-            return true;
-          } else {
-            print("Failed to upload file: ${response1.statusCode}");
-            return false;
+                print("Response from second upload: $responseBody");
+                if (response2.statusCode == 200) {
+                  print('Toll file uploaded successfully: $fileName');
+                } else {
+                  print("Failed to upload toll file (second request): ${response2.statusCode}");
+                }
+              } catch (e) {
+                print("Error in second upload: $e");
+              }
+            } else {
+              print("Failed to upload toll file (first request): ${response.statusCode}");
+            }
+          } catch (e) {
+            print("Error during toll file upload: $e");
           }
-        } catch (e) {
-          print("Error during upload: $e");
-          return false;
-        }
+        };
 
-
-        return true;
-      } else {
-        print("Failed to upload file: ${response.statusCode}");
-        return false;
+        // Add the upload task to the list
+        uploadTasks.add(uploadTask());
       }
+
+      // Wait for all uploads to complete
+      await Future.wait(uploadTasks);
+
+      print("All toll files uploaded.");
+      return true;
     } catch (e) {
-      print("Error during upload: $e");
+      print("Error during toll file upload: $e");
       return false;
     }
   }
 
-  static Future<bool> uploadParkingFile({
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // static Future<bool> uploadParkingFiles({
+  //   required String tripid,
+  //   required String documenttype,
+  //   required List<File> parkingFiles,  // Accepting list of files
+  // }) async {
+  //   try {
+  //     // Generate a unique filename based on the current date
+  //     String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
+  //     var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+  //     var request = http.MultipartRequest('POST', uri);
+  //
+  //     // Add trip ID and document type to the request
+  //     request.fields['tripid'] = tripid;
+  //     request.fields['documenttype'] = documenttype;
+  //
+  //     // Add all files to the request
+  //     for (var file in parkingFiles) {
+  //       request.files.add(await http.MultipartFile.fromPath('file', file.path));
+  //     }
+  //
+  //     var response = await request.send();
+  //
+  //     if (response.statusCode == 200) {
+  //       try {
+  //         var uri2 = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+  //         var request2 = http.MultipartRequest('POST', uri2);
+  //
+  //         // Add all files to the second request as well
+  //         for (var file in parkingFiles) {
+  //           request2.files.add(await http.MultipartFile.fromPath('file', file.path));
+  //         }
+  //
+  //         var response2 = await request2.send();
+  //         var responseBody = await response2.stream.bytesToString();
+  //
+  //         print("Response from second upload: $responseBody");
+  //         if (response2.statusCode == 200) {
+  //           print('Multiple parking file upload successful');
+  //           return true;
+  //         } else {
+  //           print("Failed to upload parking files (second request): ${response2.statusCode}");
+  //           return false;
+  //         }
+  //       } catch (e) {
+  //         print("Error in second upload: $e");
+  //         return false;
+  //       }
+  //     } else {
+  //       print("Failed to upload parking files (first request): ${response.statusCode}");
+  //       return false;
+  //     }
+  //   } catch (e) {
+  //     print("Error during parking file upload: $e");
+  //     return false;
+  //   }
+  // }
+
+
+  static Future<bool> uploadParkingFiles({
     required String tripid,
     required String documenttype,
-    required File parkingFile,
+    required List<File> parkingFiles,
   }) async {
     try {
-      // Generate the unique filename based on the current date
-      String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
-      // String fileName = 'file_$formattedDate.jpg';
+      // Create a list to hold all future upload tasks
+      List<Future<void>> uploadTasks = [];
 
-      var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
-      var request = http.MultipartRequest('POST', uri);
+      for (var file in parkingFiles) {
+        // Generate a unique filename based on the current date for each file
+        String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
+        var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
 
-      request.fields['tripid'] = tripid;
-      request.fields['documenttype'] = documenttype;
+        // Create a task for each file upload
+        var uploadTask = () async {
+          try {
+            var request = http.MultipartRequest('POST', uri);
 
-      // Upload the file with the unique name
-      request.files.add(await http.MultipartFile.fromPath('file', parkingFile.path,
-        // filename: fileName
-      ));
+            // Add trip ID and document type to the request
+            request.fields['tripid'] = tripid;
+            request.fields['documenttype'] = documenttype;
 
-      var response = await request.send();
+            // Add the file to the request
+            String fileName = 'parking_${formattedDate}_${file.path.split('/').last}';
+            print("Uploading file: $fileName");
+            request.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
 
-      if (response.statusCode == 200) {
+            var response = await request.send();
 
+            if (response.statusCode == 200) {
+              try {
+                var uri2 = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+                var request2 = http.MultipartRequest('POST', uri2);
 
-        try {
-          // Generate the unique filename based on the current date
-          // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
-          // String fileName = 'file_$formattedDate.jpg';
+                // Add the file to the second request as well
+                request2.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
 
-          var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
-          var request = http.MultipartRequest('POST', uri);
+                var response2 = await request2.send();
+                var responseBody = await response2.stream.bytesToString();
 
-
-
-          // Upload the file with the unique name
-          request.files.add(await http.MultipartFile.fromPath('file', parkingFile.path,
-            // filename: fileName
-          ));
-
-          var response1 = await request.send();
-          var responseBody = await response1.stream.bytesToString();
-          print("repo to upload file: ${responseBody}");
-          if (response1.statusCode == 200) {
-            return true;
-          } else {
-            print("Failed to upload file: ${response.statusCode}");
-            return false;
+                print("Response from second upload: $responseBody");
+                if (response2.statusCode == 200) {
+                  print('File uploaded successfully: $fileName');
+                } else {
+                  print("Failed to upload file (second request): ${response2.statusCode}");
+                }
+              } catch (e) {
+                print("Error in second upload: $e");
+              }
+            } else {
+              print("Failed to upload file (first request): ${response.statusCode}");
+            }
+          } catch (e) {
+            print("Error during file upload: $e");
           }
-        } catch (e) {
-          print("Error during upload: $e");
-          return false;
-        }
+        };
 
-
-        return true;
-      } else {
-        print("Failed to upload file: ${response.statusCode}");
-        return false;
+        // Add the task to the list
+        uploadTasks.add(uploadTask());
       }
+
+      // Wait for all uploads to complete
+      await Future.wait(uploadTasks);
+
+      print("All files uploaded.");
+      return true;
     } catch (e) {
-      print("Error during upload: $e");
+      print("Error during parking file upload: $e");
       return false;
     }
   }
 
+
+
+
+
+
+
+
+  // static Future<bool> uploadParkingFile({
+  //   required String tripid,
+  //   required String documenttype,
+  //   required File parkingFile,
+  // }) async {
+  //   try {
+  //     // Generate the unique filename based on the current date
+  //     String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
+  //     // String fileName = 'file_$formattedDate.jpg';
+  //
+  //     var uri = Uri.parse("${AppConstants.baseUrl}/uploadsdriverapp/$formattedDate");
+  //     var request = http.MultipartRequest('POST', uri);
+  //
+  //     request.fields['tripid'] = tripid;
+  //     request.fields['documenttype'] = documenttype;
+  //
+  //     // Upload the file with the unique name
+  //     request.files.add(await http.MultipartFile.fromPath('file', parkingFile.path,
+  //       // filename: fileName
+  //     ));
+  //
+  //     var response = await request.send();
+  //
+  //     if (response.statusCode == 200) {
+  //
+  //
+  //       try {
+  //         // Generate the unique filename based on the current date
+  //         // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();
+  //         // String fileName = 'file_$formattedDate.jpg';
+  //
+  //         var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+  //         var request = http.MultipartRequest('POST', uri);
+  //
+  //
+  //
+  //         // Upload the file with the unique name
+  //         request.files.add(await http.MultipartFile.fromPath('file', parkingFile.path,
+  //           // filename: fileName
+  //         ));
+  //
+  //         var response1 = await request.send();
+  //         var responseBody = await response1.stream.bytesToString();
+  //         print("repo to upload file: ${responseBody}");
+  //         if (response1.statusCode == 200) {
+  //           return true;
+  //         } else {
+  //           print("Failed to upload file: ${response.statusCode}");
+  //           return false;
+  //         }
+  //       } catch (e) {
+  //         print("Error during upload: $e");
+  //         return false;
+  //       }
+  //
+  //
+  //       return true;
+  //     } else {
+  //       print("Failed to upload file: ${response.statusCode}");
+  //       return false;
+  //     }
+  //   } catch (e) {
+  //     print("Error during upload: $e");
+  //     return false;
+  //   }
+  // }
+  //
 
 
 
@@ -1925,6 +2161,34 @@ class ApiService {
     } catch (e) {
       print("🚨 Exception in API Call: $e");
       return null;
+    }
+  }
+
+
+  Future<List<String>> fetchDocumentImages(String tripId, String documentType) async {
+    final url = Uri.parse("${AppConstants.baseUrl}/uploadsfordocumenttype?tripid=$tripId&documenttype=$documentType");
+
+    try {
+      final response = await http.get(url);
+      print("📡 API Response for $documentType: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['attachedImagePaths'].isNotEmpty) {
+          List<String> imagePaths = List<String>.from(data['attachedImagePaths']);
+          print("✅ Image Paths Found for $documentType: $imagePaths");
+          return imagePaths;
+        } else {
+          print("⚠️ No Images Found for $documentType");
+          return [];
+        }
+      } else {
+        print("❌ API Error for $documentType: ${response.statusCode}");
+        return [];
+      }
+    } catch (e) {
+      print("🚨 Exception in API Call: $e");
+      return [];
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
+import 'package:jessy_cabs/Screens/PickUpWithoutHcl/PickUpWithoutHcl.dart';
 
 import 'package:jessy_cabs/Screens/PickupScreen/PickupScreen.dart';
 import 'package:jessy_cabs/Screens/StartingKilometer/StartingKilometer.dart';
@@ -282,6 +283,7 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                               icon: Icons.location_pin,
                               isLast: true,
                             ),
+
                           ],
                         ),
                       ),
@@ -331,6 +333,57 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                         //     builder: (context) => Pickupscreen(address: tripDetails['address1'], tripId: widget.tripId),
                         //   ),
                         // );
+
+                        // if (tripDetails['Hybriddata'].toString() == 1) {
+                        //   // Navigator.pushAndRemoveUntil(
+                        //   //   context,
+                        //   //   MaterialPageRoute(
+                        //   //     builder: (context) => Pickupscreen(
+                        //   //       address: tripDetails['address1'],
+                        //   //       tripId: widget.tripId,
+                        //   //     ),
+                        //   //   ),
+                        //   //       (route) => false,
+                        //   // );
+                        //   print("hcl inside, ${tripDetails['Hybriddata'].toString()}");
+                        //   Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) => Pickupscreen(
+                        //         address: tripDetails['address1'],
+                        //         tripId: widget.tripId,
+                        //       ),
+                        //     ),
+                        //
+                        //   );
+                        // } else {
+                        //   // Navigator.pushAndRemoveUntil(
+                        //   //   context,
+                        //   //   MaterialPageRoute(
+                        //   //     builder: (context) => PickUpWithoutHcl(
+                        //   //       address: tripDetails['address1'],
+                        //   //       tripId: widget.tripId,   ), // Replace with your other screen
+                        //   //   ),
+                        //   //       (route) => false,
+                        //   // );
+                        //   print("non hcl inside, ${tripDetails['Hybriddata'].toString()}");
+                        //
+                        //   Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //       builder: (context) => PickUpWithoutHcl(
+                        //         address: tripDetails['address1'],
+                        //         tripId: widget.tripId,   ), // Replace with your other screen
+                        //     ),
+                        //
+                        //   );
+                        // }
+
+
+
+
+
+
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(

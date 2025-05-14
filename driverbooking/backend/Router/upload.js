@@ -60,36 +60,100 @@ router.post('/uploadfolrderapp/:data', upload.single('image'), (req, res) => {
    
 });
 // -----------------------------------------------------------------------------------------------------------
+//existing and working for single
+//router.post('/uploadsdriverapp/:data', upload.single('file'), (req, res) => {
+//    const selecteTripid = req.body.tripid;
+//    console.log(req.params.data,"daaaa");
+//    const documenttypedata=req.body.documenttype
+//    // const data=req.body.datadate;
+//    console.log(req.file,"fff")
+//
+//    const fileData = {
+//        name: req.file.originalname,
+//        mimetype: req.file.mimetype,
+//        size: req.file.size,
+//        path: req.file.path.replace(/\\/g, '/').replace(/^uploads\//, ''),
+//        tripid: selecteTripid,
+//        documenttype:documenttypedata,
+//    };
+//
+//    console.log(req.file,"dadadate233233")
+//    console.log(documenttypedata,"dooocccc")
+//    console.log(fileData,selecteTripid,"dataaaaaaaaaaaaaaaaa")
+//    const updateQuery = 'INSERT INTO tripsheetupload SET ?';
+//    db.query(updateQuery, [fileData], (err, results) => {
+//        if (err) {
+//            res.status(500).json({ message: 'Internal server error' });
+//            return;
+//        }
+//        res.status(200).json({ message: 'Profile photo uploaded successfully' });
+//    });
+//});
 
-router.post('/uploadsdriverapp/:data', upload.single('file'), (req, res) => {
-    const selecteTripid = req.body.tripid;
-    console.log(req.params.data,"daaaa");
-    const documenttypedata=req.body.documenttype
-    // const data=req.body.datadate;
-    console.log(req.file,"fff")
 
-    const fileData = {
-        name: req.file.originalname,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        path: req.file.path.replace(/\\/g, '/').replace(/^uploads\//, ''),
-        tripid: selecteTripid,
-        documenttype:documenttypedata,
-    };
 
-    console.log(req.file,"dadadate233233")
-    console.log(documenttypedata,"dooocccc")
-    console.log(fileData,selecteTripid,"dataaaaaaaaaaaaaaaaa")
-    const updateQuery = 'INSERT INTO tripsheetupload SET ?';
-    db.query(updateQuery, [fileData], (err, results) => {
-        if (err) {
-            res.status(500).json({ message: 'Internal server error' });
-            return;
-        }
-        res.status(200).json({ message: 'Profile photo uploaded successfully' });
-    });
+
+
+
+
+//existing and working for multiple
+
+
+
+router.post('/uploadsdriverapp/:data', upload.array('file', 10), (req, res) => {
+  const selectedTripId = req.body.tripid;
+  const documentType = req.body.documenttype;
+
+  console.log("Request Params:", req.params.data);
+  console.log("Uploaded Files:", req.files);
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No files uploaded' });
+  }
+
+  const fileDataArray = req.files.map(file => ({
+    name: file.originalname,
+    mimetype: file.mimetype,
+    size: file.size,
+    path: file.path.replace(/\\/g, '/').replace(/^uploads\//, ''),
+    tripid: selectedTripId,
+    documenttype: documentType,
+  }));
+
+  console.log("Processed File Data:", fileDataArray);
+
+  const updateQuery = 'INSERT INTO tripsheetupload (name, mimetype, size, path, tripid, documenttype) VALUES ?';
+
+  // Map file data to the format required for bulk insert
+  const values = fileDataArray.map(file => [file.name, file.mimetype, file.size, file.path, file.tripid, file.documenttype]);
+
+  db.query(updateQuery, [values], (err, results) => {
+    if (err) {
+      console.error("Database Error:", err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    res.status(200).json({ message: 'Files uploaded successfully', data: results });
+  });
 });
 //end tripsheet file upload
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

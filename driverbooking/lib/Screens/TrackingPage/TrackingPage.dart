@@ -762,30 +762,11 @@ class _TrackingPageState extends State<TrackingPage> {
         setState(() => _isLoading = false);
       }
 
-
     } else {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text("Location not available yet! Please Wait")),
-      // );
+
       showWarningSnackBar(context, "Location not available yet! Please Wait");
     }
 
-    try {
-      _handleStartTrip(_currentLatLng!.latitude, _currentLatLng!.longitude);
-      await _handleStartRide(context);
-      showInfoSnackBar(context, 'Trip started');
-    } finally {
-      setState(() => _isLoading = false);
-    }
-
-    // await _handleStartRide(context);
-
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => Customerlocationreached(tripId:tripId!),
-    //   ),
-    // );
   }
 
 
@@ -998,8 +979,10 @@ class _TrackingPageState extends State<TrackingPage> {
 
 
 
-
-
+              child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                      height: MediaQuery.of(context).size.height,
               child: Stack(
 
                 children: [
@@ -1149,57 +1132,57 @@ class _TrackingPageState extends State<TrackingPage> {
 
                             SizedBox(height: 40),
 
-                            SizedBox(
-
-                              width: double.infinity,
-
-                              child:
-
-                              ElevatedButton(
-
-                                // onPressed: _handleStartRideButton,
-                                onPressed: _isLoading ? null : _handleStartRideButton,
-
-                                style: ElevatedButton.styleFrom(
-
-                                  backgroundColor: AppTheme.Navblue1,
-
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-
-                                  shape: RoundedRectangleBorder(
-
-                                    borderRadius: BorderRadius.circular(8),
-
-                                  ),
-
-                                ),
-
-
-
-                                child:  _isLoading
-                                    ? SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                    : Text(
-
-                                  'Start Ride',
-
-                                  style: TextStyle(
-
-                                      fontSize: 20.0, color: Colors.white),
-
-                                ),
-
-                              ),
-
-
-
-                            ),
+                            // SizedBox(
+                            //
+                            //   width: double.infinity,
+                            //
+                            //   child:
+                            //
+                            //   ElevatedButton(
+                            //
+                            //     // onPressed: _handleStartRideButton,
+                            //     onPressed: _isLoading ? null : _handleStartRideButton,
+                            //
+                            //     style: ElevatedButton.styleFrom(
+                            //
+                            //       backgroundColor: AppTheme.Navblue1,
+                            //
+                            //       padding: EdgeInsets.symmetric(vertical: 16),
+                            //
+                            //       shape: RoundedRectangleBorder(
+                            //
+                            //         borderRadius: BorderRadius.circular(8),
+                            //
+                            //       ),
+                            //
+                            //     ),
+                            //
+                            //
+                            //
+                            //     child:  _isLoading
+                            //         ? SizedBox(
+                            //       height: 20,
+                            //       width: 20,
+                            //       child: CircularProgressIndicator(
+                            //         color: Colors.white,
+                            //         strokeWidth: 2,
+                            //       ),
+                            //     )
+                            //         : Text(
+                            //
+                            //       'Start Ride',
+                            //
+                            //       style: TextStyle(
+                            //
+                            //           fontSize: 20.0, color: Colors.white),
+                            //
+                            //     ),
+                            //
+                            //   ),
+                            //
+                            //
+                            //
+                            // ),
 
                           ],
 
@@ -1226,8 +1209,46 @@ class _TrackingPageState extends State<TrackingPage> {
                 ],
 
               )
+          ),
 
-          )
+              ),
+
+          ),
+      bottomNavigationBar: BottomAppBar(
+      color: Colors.white,
+      height: 100.0,
+      shape: const CircularNotchedRectangle(),  // Optional: for notch design
+      elevation: 18.0,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _handleStartRideButton,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.Navblue1,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: _isLoading
+                ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+                : const Text(
+              'Start Ride',
+              style: TextStyle(fontSize: 20.0, color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    ),
 
     )
 

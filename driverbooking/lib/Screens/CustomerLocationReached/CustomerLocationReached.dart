@@ -1677,7 +1677,22 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     );
   }
 
-  void _endRide() {
+  Future<void> _endRide() async {
+    final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+    final String signTime = TimeOfDay.now().format(context); // Current time
+
+    try {
+      await ApiService.sendSignatureDetails(
+        tripId: widget.tripId,
+        dateSignature: dateSignature,
+        signTime: signTime,
+        status: "Accept",
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error uploading dataaaaaaaaaa: $error")),
+      );
+    }
     print('for current ');
     isEndRideClicked = true;
 
@@ -1687,7 +1702,10 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     });
 
     if (_currentLatLng != null) {
+
       _handleEndRide(_currentLatLng!.latitude, _currentLatLng!.longitude);
+
+
 
       Navigator.pushAndRemoveUntil(
           context,

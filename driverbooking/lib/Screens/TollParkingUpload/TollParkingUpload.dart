@@ -33,10 +33,14 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
   final TextEditingController parkingController = TextEditingController();
 
   final ImagePicker _imagePicker = ImagePicker();
-  File? tollFile;
-  File? parkingFile;
+  // File? tollFile;
+  // File? parkingFile;
   String? username;
   String? userId;
+  List<File> tollFiles = [];
+
+  List<File> parkingFiles = [];
+
   @override
   void initState() {
     super.initState();
@@ -49,8 +53,9 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
     setState(() {
       tollController.clear();
       parkingController.clear();
-      tollFile = null;
-      parkingFile = null;
+      // tollFile = null;
+      // tollFiles = null;
+      // parkingFile = null;
     });
     saveScreenData();
     // If you need to reload trip details or fetch updated data, do it here
@@ -81,23 +86,42 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
   }
 
 
-  Future<void> _pickFile(bool isToll) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+  // Future<void> _pickFile(bool isToll) async {
+  //   FilePickerResult? result = await FilePicker.platform.pickFiles();
+  //
+  //   if (result != null) {
+  //     File file = File(result.files.single.path!);
+  //     setState(() {
+  //       if (isToll) {
+  //         tollFile = file;
+  //       } else {
+  //         parkingFile = file;
+  //       }
+  //     });
+  //     print("${isToll ? "Toll" : "Parking"} file selected: ${file.path}");
+  //   } else {
+  //     print("File selection canceled");
+  //   }
+  // }
+  //
+  // Future<void> _openCamera(bool isToll) async {
+  //   XFile? photo = await _imagePicker.pickImage(source: ImageSource.camera);
+  //
+  //   if (photo != null) {
+  //     File file = File(photo.path);
+  //     setState(() {
+  //       if (isToll) {
+  //         tollFile = file;
+  //       } else {
+  //         parkingFile = file;
+  //       }
+  //     });
+  //     print("${isToll ? "Toll" : "Parking"} photo captured: ${photo.path}");
+  //   } else {
+  //     print("Camera canceled");
+  //   }
+  // }
 
-    if (result != null) {
-      File file = File(result.files.single.path!);
-      setState(() {
-        if (isToll) {
-          tollFile = file;
-        } else {
-          parkingFile = file;
-        }
-      });
-      print("${isToll ? "Toll" : "Parking"} file selected: ${file.path}");
-    } else {
-      print("File selection canceled");
-    }
-  }
 
   Future<void> _openCamera(bool isToll) async {
     XFile? photo = await _imagePicker.pickImage(source: ImageSource.camera);
@@ -106,16 +130,40 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
       File file = File(photo.path);
       setState(() {
         if (isToll) {
-          tollFile = file;
+          tollFiles.add(file);  // Add to the list
         } else {
-          parkingFile = file;
+          parkingFiles.add(file);  // Add to the list
         }
       });
-      print("${isToll ? "Toll" : "Parking"} photo captured: ${photo.path}");
+      print("${isToll ? "Toll" : "Parking"} photo captured: ${file.path}");
     } else {
       print("Camera canceled");
     }
   }
+  Future<void> _pickFile(bool isToll) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+    );
+
+    if (result != null) {
+      List<File> files = result.paths.map((path) => File(path!)).toList();
+      setState(() {
+        if (isToll) {
+          tollFiles.addAll(files);  // Append to the list
+        } else {
+          parkingFiles.addAll(files);  // Append to the list
+        }
+      });
+      print("${isToll ? "Toll" : "Parking"} files selected: ${files.map((file) => file.path).join(", ")}");
+    } else {
+      print("File selection canceled");
+    }
+  }
+
+
+
+
+
 
   void _showUploadOptions(bool isToll) {
     showModalBottomSheet(
@@ -145,75 +193,6 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
     );
   }
 
-  Future<void> _handleTollSubmit() async {
-    if (tollController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter the toll amount.')),
-      );
-      return;
-    }
-
-    if (tollFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please upload a file or take a photo for Toll.')),
-      );
-      return;
-    }
-
-    // Call the API to upload the Toll file
-    bool result = await ApiService.uploadTollFile(
-      tripid: widget.tripId, // Replace with actual trip ID
-      documenttype: 'Toll',
-      tollFile: tollFile!,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(result ? 'Toll details submitted successfully!' : 'Failed to submit toll details.'),
-      ),
-    );
-  }
-
-  Future<void> _handleParkingSubmit() async {
-    if (parkingController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter the parking amount.')),
-      );
-      return;
-    }
-
-    if (parkingFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please upload a file or take a photo for Parking.')),
-      );
-      return;
-    }
-
-    // Call the API to upload the Parking file
-    bool result = await ApiService.uploadParkingFile(
-      tripid: widget.tripId, // Replace with actual trip ID
-      documenttype: 'Parking',
-      parkingFile: parkingFile!,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(result ? 'Parking details submitted successfully!' : 'Failed to submit parking details.'),
-      ),
-    );
-  }
-
-  // void _loadLoginDetailss() async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   setState(() {
-  //     username = prefs.getString('username') ?? "Guest";
-  //     userId = prefs.getString('userId') ?? "N/A";
-  //   });
-  //
-  //   // Debugging print statements
-  //   print("Local Storage - username: $username");
-  //   print("Local Storage - userId: $userId");
-  // }
 
 
   void _loadLoginDetails() async {
@@ -234,62 +213,6 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
     );
   }
 
-
-  // Future<void> _handleSubmitButton() async {
-  //   // Validate fields
-  //   // if (tollController.text.isEmpty) {
-  //   //   ScaffoldMessenger.of(context).showSnackBar(
-  //   //     SnackBar(content: Text('Please enter the toll amount.')),
-  //   //   );
-  //   //   return;
-  //   // }
-  //   //
-  //   // if (tollFile == null) {
-  //   //   ScaffoldMessenger.of(context).showSnackBar(
-  //   //     SnackBar(content: Text('Please upload a file or take a photo for Toll.')),
-  //   //   );
-  //   //   return;
-  //   // }
-  //   //
-  //   // if (parkingController.text.isEmpty) {
-  //   //   ScaffoldMessenger.of(context).showSnackBar(
-  //   //     SnackBar(content: Text('Please enter the parking amount.')),
-  //   //   );
-  //   //   return;
-  //   // }
-  //   //
-  //   // if (parkingFile == null) {
-  //   //   ScaffoldMessenger.of(context).showSnackBar(
-  //   //     SnackBar(content: Text('Please upload a file or take a photo for Parking.')),
-  //   //   );
-  //   //   return;
-  //   // }
-  //
-  //   bool result = await ApiService.updateTripDetailsTollParking(
-  //     tripid: widget.tripId, // Pass the trip ID
-  //     toll: tollController.text,
-  //     parking: parkingController.text,
-  //   );
-  //
-  //   bool result1 = await ApiService.uploadParkingFile(
-  //     tripid: widget.tripId, // Replace with actual trip ID
-  //     documenttype: 'Parking',
-  //     parkingFile: parkingFile!,
-  //   );
-  //
-  //   // Call the API to upload the Toll file
-  //   bool result2 = await ApiService.uploadTollFile(
-  //     tripid: widget.tripId, // Replace with actual trip ID
-  //     documenttype: 'Toll',
-  //     tollFile: tollFile!,
-  //   );
-  //
-  //   // If all validations pass, call the functions
-  //   // _handleTollSubmit();
-  //   // _handleParkingSubmit();
-  //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: '', username: '',)));
-  //
-  // }
 
 
   void _handleSubmit(BuildContext context) {
@@ -331,19 +254,35 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
       parking: parkingController.text,
     ));
 
-    if (parkingFile != null) {
+    // if (parkingFile != null) {
+    //   context.read<TollParkingDetailsBloc>().add(UploadParkingFile(
+    //     tripId: tripId,
+    //     parkingFile: parkingFile!,
+    //   ));
+    // }
+    if (parkingFiles != null) {
       context.read<TollParkingDetailsBloc>().add(UploadParkingFile(
         tripId: tripId,
-        parkingFile: parkingFile!,
+        parkingFiles: parkingFiles!,
       ));
     }
 
-    if (tollFile != null) {
+
+    // if (tollFile != null) {
+    //   context.read<TollParkingDetailsBloc>().add(UploadTollFile(
+    //     tripId: tripId,
+    //     tollFile: tollFile!,
+    //   ));
+    // }
+
+    if (tollFiles.isNotEmpty) {
       context.read<TollParkingDetailsBloc>().add(UploadTollFile(
         tripId: tripId,
-        tollFile: tollFile!,
+        tollFiles: tollFiles,  // Ensure you're passing a List<File> here
+
       ));
     }
+
     // if ((parkingController.text.isNotEmpty) && (tollController.text.isNotEmpty) && (tollFile != null) && (parkingFile != null)) {
     if ((parkingController.text.isNotEmpty) && (tollController.text.isNotEmpty)) {
       _loadLoginDetails();
@@ -370,20 +309,13 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
         showSuccessSnackBar(context, "Parking file uploaded successfully!");
 
       } else if (state is TollFileUploaded) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text("Toll file uploaded successfully!")),
-        // );
+
         showSuccessSnackBar(context, "Toll file uploaded successfully!");
 
 
-        // Navigate to HomeScreen after success
-        // Navigator.pushReplacement(context, MaterialPageRoute(
-        //   builder: (context) => Homescreen(userId: '', username: ''),
-        // ));
+
       } else if (state is TollParkingDetailsError) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text(state.message)),
-        // );
+
         showFailureSnackBar(context, state.message);
       }
     },
@@ -455,32 +387,74 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
                     ],
                   ),
                   // Image Preview inside a card
-                  if (tollFile != null)
-                    Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.file(
-                                tollFile!,
-                                height: 200,
-                                width: 200,
-                                fit: BoxFit.cover,
+
+
+
+
+
+
+
+                  // if (tollFile != null)
+                  // if (tollFiles != null)
+                  //   Card(
+                  //     elevation: 4,
+                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  //     child: Padding(
+                  //       padding: const EdgeInsets.all(8.0),
+                  //       child: Column(
+                  //         children: [
+                  //           ClipRRect(
+                  //             borderRadius: BorderRadius.circular(12),
+                  //             child: Image.file(
+                  //               // tollFile!,
+                  //               tollFiles! ,
+                  //
+                  //               height: 200,
+                  //               width: 200,
+                  //               fit: BoxFit.cover,
+                  //             ),
+                  //           ),
+                  //           SizedBox(height: 10),
+                  //           Text(
+                  //             "Selected Image",
+                  //             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   )
+
+
+
+                  if (tollFiles != null && tollFiles.isNotEmpty)
+                    Column(
+                      children: tollFiles.map((file) => Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  file,  // Use individual file
+                                  height: 200,
+                                  width: 200,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              "Selected Image",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
-                            ),
-                          ],
+                              SizedBox(height: 10),
+                              Text(
+                                "Selected Image",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      )).toList(),
                     )
+
                   else
                     Center(
                       child: Text(
@@ -541,32 +515,63 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
                     ],
                   ),
                   // Image Preview inside a card
-                  if (parkingFile != null)
-                    Card(
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.file(
-                                parkingFile!,
-                                height: 200,
-                                width: 200,
-                                fit: BoxFit.cover,
+                  // if (parkingFile != null)
+                  //   Card(
+                  //     elevation: 4,
+                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  //     child: Padding(
+                  //       padding: const EdgeInsets.all(8.0),
+                  //       child: Column(
+                  //         children: [
+                  //           ClipRRect(
+                  //             borderRadius: BorderRadius.circular(12),
+                  //             child: Image.file(
+                  //               parkingFile!,
+                  //               height: 200,
+                  //               width: 200,
+                  //               fit: BoxFit.cover,
+                  //             ),
+                  //           ),
+                  //           SizedBox(height: 10),
+                  //           Text(
+                  //             "Selected Image",
+                  //             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   )
+
+
+                  if (parkingFiles != null && parkingFiles.isNotEmpty)
+                    Column(
+                      children: parkingFiles.map((file) => Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  file,  // Use individual file
+                                  height: 200,
+                                  width: 200,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              "Selected Image",
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
-                            ),
-                          ],
+                              SizedBox(height: 10),
+                              Text(
+                                "Selected Image",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                      )).toList(),
                     )
+
                   else
                     Center(
                       child: Text(

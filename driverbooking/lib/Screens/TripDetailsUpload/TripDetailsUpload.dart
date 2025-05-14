@@ -601,6 +601,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   int? hcl;
   late TripUploadBloc _tripUploadBloc;
   bool _isLoading = false; // Add this in your state
+  bool _hasLoadedOnce = false;
 
   String? startkmvalue;
 
@@ -627,9 +628,27 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
     saveScreenData();
 
+    _reloadScreen();
 
 
 
+  }
+
+
+
+
+
+  void _reloadScreen() {
+    if (!_hasLoadedOnce) {
+      // Perform the reload or initialization logic here
+      print("Screen reloaded one time!");
+      // Simulate data fetching or any necessary operation
+      Future.delayed(Duration(seconds: 1), () {
+        setState(() {
+          _hasLoadedOnce = true;
+        });
+      });
+    }
   }
 
 
@@ -854,7 +873,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         tripId: widget.tripId,
         dateSignature: dateSignature,
         signTime: signTime,
-        status: "Accepting",
+        status: "Accept",
       );
 
       ScaffoldMessenger.of(context).showSnackBar(

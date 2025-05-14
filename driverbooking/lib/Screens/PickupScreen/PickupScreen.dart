@@ -185,7 +185,7 @@ class _PickupscreenState extends State<Pickupscreen>{
           style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
         ),
         // leading: BackButton(), // explicitly show back button
-        automaticallyImplyLeading: false, // 👈 disables the default back icon
+        // automaticallyImplyLeading: false, // 👈 disables the default back icon
 
         backgroundColor: AppTheme.Navblue1,
         // iconTheme: const IconThemeData(color: Colors.white),

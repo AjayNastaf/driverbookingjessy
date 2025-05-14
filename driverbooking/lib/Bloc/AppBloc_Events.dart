@@ -507,23 +507,31 @@ class UpdateTollParking extends TollParkingDetailsEvent {
 // Event for uploading parking file
 class UploadParkingFile extends TollParkingDetailsEvent {
   final String tripId;
-  final File parkingFile;
+  // final File parkingFile;
+  final List<File> parkingFiles;  // Updated to accept multiple files
 
-  const UploadParkingFile({required this.tripId, required this.parkingFile});
+  const UploadParkingFile({required this.tripId, required this.parkingFiles});
+  // const UploadParkingFile({required this.tripId, required this.parkingFile});
 
   @override
-  List<Object?> get props => [tripId, parkingFile];
+  // List<Object?> get props => [tripId, parkingFile];
+  List<Object?> get props => [tripId, parkingFiles];
 }
 
 // Event for uploading toll file
 class UploadTollFile extends TollParkingDetailsEvent {
   final String tripId;
-  final File tollFile;
+  final List<File> tollFiles;  // Updated to accept multiple files
+  // final File tollFile;
 
-  const UploadTollFile({required this.tripId, required this.tollFile});
+  const   UploadTollFile({required this.tripId, required this.tollFiles});
+
+  // const UploadTollFile({required this.tripId, required this.tollFile});
+
 
   @override
-  List<Object?> get props => [tripId, tollFile];
+  // List<Object?> get props => [tripId, tollFile];
+  List<Object?> get props => [tripId, tollFiles];
 }
 
 

@@ -224,6 +224,7 @@
 
 import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
 import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
+import 'package:jessy_cabs/Screens/PickUpWithoutHcl/PickUpWithoutHcl.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -248,11 +249,13 @@ import 'Screens/TripDetailsPreview/TripDetailsPreview.dart';
 import 'Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'Screens/network_manager.dart';// Import your Bloc file
 import 'package:flutter/services.dart';
+import 'package:jessy_cabs/services/notification_service.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await NotificationService.initializeNotifications();
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
   String? lastScreen = prefs.getString('last_screen');
@@ -420,10 +423,18 @@ class _MyAppState extends State<MyApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       requestPermissions(); // Request permissions before starting the service
       BackgroundServiceHelper.startBackgroundService();
-
+      startBackgroundService();
 
     });
   }
+  @override
+
+  void dispose() {
+
+    super.dispose();
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -496,6 +507,16 @@ Widget _getInitialScreen(
     case 'Pickupscreen':
 
       return Pickupscreen(
+
+        tripId: tripId ?? '',
+
+        address: address ?? '',
+
+      );
+
+      case 'PickupscreenwithoutHcl':
+
+      return PickUpWithoutHcl(
 
         tripId: tripId ?? '',
 
@@ -592,7 +613,7 @@ void requestPermissions() async {
 
 class BackgroundServiceHelper {
   static const MethodChannel _channel = MethodChannel("com.example.jessy_cabs/background");
-
+  static const MethodChannel _notificationChannel = MethodChannel("com.example.jessy_cabs/notification");
   static Future<void> startBackgroundService() async {
     try {
       final result = await _channel.invokeMethod("startService");
@@ -605,197 +626,21 @@ class BackgroundServiceHelper {
 
 
 
-// //working 2
-// import 'package:flutter/material.dart';
-// import 'package:flutter/services.dart';
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:jessy_cabs/Bloc/App_Bloc.dart';
-// import 'package:jessy_cabs/Networks/Api_Service.dart';
-// import 'package:jessy_cabs/Screens/AuthWrapper.dart';
-// import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
-// import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
-// import 'package:jessy_cabs/Screens/Home.dart';
-// import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
-// import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
-// import 'package:jessy_cabs/Screens/PickupScreen/PickupScreen.dart';
-// import 'package:jessy_cabs/Screens/SignatureEndRide/SignatureEndRide.dart';
-// import 'package:jessy_cabs/Screens/StartingKilometer/StartingKilometer.dart';
-// import 'package:jessy_cabs/Screens/TollParkingUpload/TollParkingUpload.dart';
-// import 'package:jessy_cabs/Screens/TrackingPage/TrackingPage.dart';
-// import 'package:jessy_cabs/Screens/TripDetailsPreview/TripDetailsPreview.dart';
-// import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
-// import 'package:jessy_cabs/Screens/network_manager.dart';
-// import 'package:jessy_cabs/Utils/AllImports.dart';
-// import 'package:jessy_cabs/Utils/AppConstants.dart';
-// import 'package:permission_handler/permission_handler.dart';
-// import 'package:provider/provider.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:sizer/sizer.dart';
-//
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   SharedPreferences prefs = await SharedPreferences.getInstance();
-//
-//   String? lastScreen = prefs.getString('last_screen');
-//   String? tripId = prefs.getString('trip_id');
-//   String? duty = prefs.getString('duty');
-//   String? userId = prefs.getString('user_id');
-//   String? username = prefs.getString('username');
-//   String? address = prefs.getString('address');
-//   String? dropLocation = prefs.getString('drop_location');
-//
-//   // Initialize background tracking only if user is ON DUTY
-//   if (duty == "on") {
-//     await _requestPermissions();
-//     await BackgroundServiceHelper.startBackgroundService();
-//   }
-//
-//   runApp(
-//     ChangeNotifierProvider(
-//       create: (context) => NetworkManager(),
-//       child: MultiBlocProvider(
-//         providers: [
-//           BlocProvider(create: (_) => TripSheetValuesBloc()),
-//           BlocProvider(create: (_) => TripSheetClosedValuesBloc()),
-//           BlocProvider(create: (_) => DrawerDriverDataBloc()),
-//           BlocProvider(create: (_) => GettingTripSheetDetailsByUseridBloc()),
-//           BlocProvider(create: (_) => UpdateTripStatusInTripsheetBloc()),
-//           BlocProvider(create: (_) => StartKmBloc()),
-//           BlocProvider(create: (_) => TripSignatureBloc()),
-//           BlocProvider(create: (_) => TripSheetDetailsTripIdBloc()),
-//           BlocProvider(create: (_) => TollParkingDetailsBloc()),
-//           BlocProvider(create: (_) => TripBloc()),
-//           BlocProvider(create: (_) => TripSheetBloc()),
-//           BlocProvider(create: (_) => FetchFilteredRidesBloc()),
-//           BlocProvider(create: (_) => ProfileBloc()),
-//           BlocProvider(create: (_) => TripTrackingDetailsBloc()),
-//           BlocProvider(create: (_) => GettingClosingKilometerBloc(apiService)),
-//           BlocProvider(create: (_) => TripClosedTodayBloc(apiService)),
-//           BlocProvider(
-//             create: (_) => DocumentImagesBloc(
-//               apiService: ApiService(apiUrl: "${AppConstants.baseUrl}"),
-//             ),
-//           ),
-//           BlocProvider(create: (_) => AuthenticationBloc()..add(AppStarted())),
-//         ],
-//         child: MyApp(
-//           initialRoute: lastScreen,
-//           tripId: tripId,
-//           duty: duty,
-//           userId: userId,
-//           username: username,
-//           address: address,
-//           dropLocation: dropLocation,
-//         ),
-//       ),
-//     ),
-//   );
-// }
-//
-// class MyApp extends StatelessWidget {
-//   final String? initialRoute;
-//   final String? tripId;
-//   final String? duty;
-//   final String? userId;
-//   final String? username;
-//   final String? address;
-//   final String? dropLocation;
-//
-//   const MyApp({
-//     super.key,
-//     required this.initialRoute,
-//     this.tripId,
-//     this.duty,
-//     this.userId,
-//     this.username,
-//     this.address,
-//     this.dropLocation,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Sizer(
-//       builder: (context, orientation, deviceType) {
-//         return MaterialApp(
-//           debugShowCheckedModeBanner: false,
-//           title: "Vehicle Booking App",
-//           theme: ThemeData(primarySwatch: Colors.blue),
-//           home: _getInitialScreen(
-//             initialRoute,
-//             tripId: tripId,
-//             duty: duty,
-//             userId: userId,
-//             username: username,
-//             address: address,
-//             dropLocation: dropLocation,
-//           ),
-//           routes: {
-//             'home': (context) => const Home(),
-//             'login': (context) => const Login_Screen(),
-//           },
-//         );
-//       },
-//     );
-//   }
-// }
-//
-// Widget _getInitialScreen(
-//     String? lastScreen, {
-//       String? tripId,
-//       String? duty,
-//       String? userId,
-//       String? username,
-//       String? address,
-//       String? dropLocation,
-//     }) {
-//   switch (lastScreen) {
-//     case 'FirstHomeScreen':
-//       return Homescreen(userId: userId ?? '', username: username ?? '');
-//     case 'Pickupscreen':
-//       return Pickupscreen(tripId: tripId ?? '', address: address ?? '');
-//     case 'Bookingdetails':
-//       return Bookingdetails(
-//         userId: userId ?? '',
-//         username: username ?? '',
-//         tripId: tripId ?? '',
-//         duty: duty ?? '',
-//       );
-//     case 'startingkm':
-//       return StartingKilometer(tripId: tripId ?? '', address: address ?? '');
-//     case 'TrackingPage':
-//       return TrackingPage(key: UniqueKey(), tripId: tripId ?? '', address: address ?? '');
-//     case 'customerLocationPage':
-//       return Customerlocationreached(key: UniqueKey(), tripId: tripId ?? '');
-//     case 'signpagescreen':
-//       return Signatureendride(tripId: tripId ?? '');
-//     case 'TripDetailsUpload':
-//       return TripDetailsUpload(tripId: tripId ?? '');
-//     case 'TripDetailsPreview':
-//       return TripDetailsPreview(tripId: tripId ?? '');
-//     case 'TollParkingUpload':
-//       return TollParkingUpload(tripId: tripId ?? '');
-//     default:
-//       return const AuthWrapper();
-//   }
-// }
-//
-// Future<void> _requestPermissions() async {
-//   await [
-//     Permission.locationAlways,
-//     Permission.locationWhenInUse,
-//     Permission.notification,
-//   ].request();
-// }
-//
-// class BackgroundServiceHelper {
-//   static const MethodChannel _channel = MethodChannel("com.example.jessy_cabs/background");
-//
-//   static Future<void> startBackgroundService() async {
-//     try {
-//       final result = await _channel.invokeMethod("startService");
-//       print("✅ Background service started: $result");
-//     } on PlatformException catch (e) {
-//       print("❌ Error starting background service: ${e.message}");
-//     }
-//   }
-// }
+const platform = MethodChannel('com.example.jessy_cabs/background');
+
+Future<void> startBackgroundService() async {
+  try {
+    await platform.invokeMethod('startBackgroundService');
+  } catch (e) {
+    print("Error starting service: $e");
+  }
+}
+
+Future<void> stopBackgroundService() async {
+  try {
+    await platform.invokeMethod('stopBackgroundService');
+  } catch (e) {
+    print("Error stopping service: $e");
+  }
+}
+

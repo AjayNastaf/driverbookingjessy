@@ -32,8 +32,8 @@ class EditRideDetails extends StatefulWidget {
 
 class _EditRideDetailsState extends State<EditRideDetails> {
   bool isEditable = false;
-  File? tollFile;
-  File? parkingFile;
+  // File? tollFile;
+  // File? parkingFile;
   final ImagePicker _imagePicker = ImagePicker();
   bool _isLoading = false;
   bool isDisabled = false;
@@ -45,6 +45,8 @@ class _EditRideDetailsState extends State<EditRideDetails> {
   bool hasError = false;
   String? imageUrl;
   bool isLoading1 = true;
+  List<File> tollFiles = [];
+  List<File> parkingFiles = [];
 
   // Controllers for input fields
   final TextEditingController tripSheetNumberController = TextEditingController();
@@ -156,112 +158,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
 
 
 
-  Future<void> _pickFile(bool isToll) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
 
-    if (result != null) {
-      File file = File(result.files.single.path!);
-      setState(() {
-        if (isToll) {
-          tollFile = file;
-        } else {
-          parkingFile = file;
-        }
-      });
-      print("${isToll ? "Toll" : "Parking"} file selected: ${file.path}");
-    } else {
-      print("File selection canceled");
-    }
-  }
-
-  Future<void> _openCamera(bool isToll) async {
-    XFile? photo = await _imagePicker.pickImage(source: ImageSource.camera);
-
-    if (photo != null) {
-      File file = File(photo.path);
-      setState(() {
-        if (isToll) {
-          tollFile = file;
-        } else {
-          parkingFile = file;
-        }
-      });
-      print("${isToll ? "Toll" : "Parking"} photo captured: ${photo.path}");
-    } else {
-      print("Camera canceled");
-    }
-  }
-
-  void _showUploadOptions(bool isToll) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Wrap(
-          children: [
-            ListTile(
-              leading: Icon(Icons.upload_file),
-              title: Text('Upload from device'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickFile(isToll);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text('Open Camera'),
-              onTap: () {
-                Navigator.pop(context);
-                _openCamera(isToll);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-
-  Future<void> _saveSignature() async {
-    if (_signatureController.isNotEmpty) {
-      final signature = await _signatureController.toPngBytes();
-      // Save or upload signature here
-      print("Signature saved.");
-
-      showSuccessSnackBar(context, "Signature saved successfully!");
-    } else {
-
-      showInfoSnackBar(context, "Please provide a signature first.");
-    }
-  }
-
-  Future<void> _uploadFile(String purpose) async {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text('Open Camera'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add camera logic
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.file_upload),
-              title: Text('Upload File'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add file upload logic
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
 
 
@@ -355,17 +252,24 @@ class _EditRideDetailsState extends State<EditRideDetails> {
         ),
       );
 
-      if (parkingFile != null) {
+      if (parkingFiles != null) {
         context.read<TollParkingDetailsBloc>().add(UploadParkingFile(
           tripId: tripId,
-          parkingFile: parkingFile!,
+          parkingFiles: parkingFiles!,
         ));
       }
 
-      if (tollFile != null) {
+      // if (tollFile != null) {
+      //   context.read<TollParkingDetailsBloc>().add(UploadTollFile(
+      //     tripId: tripId,
+      //     tollFile: tollFile!,
+      //   ));
+      // }
+
+      if (tollFiles != null) {
         context.read<TollParkingDetailsBloc>().add(UploadTollFile(
           tripId: tripId,
-          tollFile: tollFile!,
+          tollFiles: tollFiles!,
         ));
       }
 
@@ -619,8 +523,22 @@ class _EditRideDetailsState extends State<EditRideDetails> {
                           child: Column(
                             children: [
                               buildSectionTitle("Toll image"),
-                              state.TollImage != null
-                                  ? Image.network(state.TollImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
+                              // state.TollImage != null
+                              //     ? Image.network(state.TollImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
+                              state.TollImage != null && state.TollImage!.isNotEmpty
+                                  ? Column(
+                                children: state.TollImage!.toSet().map((url) {  // Convert to Set to remove duplicates
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.network(
+                                      url,
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                }).toList(),
+                              )
                                   : Text("No toll image found", style: TextStyle(color: Colors.grey)),
                             ],
                           ),
@@ -631,8 +549,22 @@ class _EditRideDetailsState extends State<EditRideDetails> {
                           child: Column(
                             children: [
                               buildSectionTitle("Parking image"),
-                              state.ParkingImage != null
-                                  ? Image.network(state.ParkingImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
+                              // state.ParkingImage != null
+                              //     ? Image.network(state.ParkingImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
+                              state.ParkingImage != null && state.ParkingImage!.isNotEmpty
+                                  ? Column(
+                                children: state.ParkingImage!.toSet().map((url) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Image.network(
+                                      url,
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  );
+                                }).toList(),
+                              )
                                   : Text("No Parking Image found", style: TextStyle(color: Colors.grey)),
 
 

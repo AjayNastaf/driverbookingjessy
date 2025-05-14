@@ -988,10 +988,10 @@ class TollParkingDetailsBloc extends Bloc<TollParkingDetailsEvent, TollParkingDe
     emit(TollParkingDetailsLoading());
 
     try {
-      bool result = await ApiService.uploadParkingFile(
+      bool result = await ApiService.uploadParkingFiles(
         tripid: event.tripId,
         documenttype: 'Parking',
-        parkingFile: event.parkingFile,
+        parkingFiles: event.parkingFiles,
       );
 
       if (result) {
@@ -1005,26 +1005,51 @@ class TollParkingDetailsBloc extends Bloc<TollParkingDetailsEvent, TollParkingDe
   }
 
   // API Call: Upload Toll File
+  // Future<void> _onUploadTollFile(
+  //     UploadTollFile event, Emitter<TollParkingDetailsState> emit) async {
+  //   emit(TollParkingDetailsLoading());
+  //
+  //   try {
+  //     bool result = await ApiService.uploadTollFile(
+  //       tripid: event.tripId,
+  //       documenttype: 'Toll',
+  //       tollFile: event.tollFile,
+  //     );
+  //
+  //     if (result) {
+  //       emit(TollFileUploaded());
+  //     } else {
+  //       emit(TollParkingDetailsError(message: "Failed to upload toll file."));
+  //     }
+  //   } catch (e) {
+  //     emit(TollParkingDetailsError(message: "Error uploading toll file: $e"));
+  //   }
+  // }
+
+
+
   Future<void> _onUploadTollFile(
       UploadTollFile event, Emitter<TollParkingDetailsState> emit) async {
     emit(TollParkingDetailsLoading());
 
     try {
-      bool result = await ApiService.uploadTollFile(
+      bool result = await ApiService.uploadTollFiles(
         tripid: event.tripId,
         documenttype: 'Toll',
-        tollFile: event.tollFile,
+        tollFiles: event.tollFiles,  // Pass the list of files
       );
 
       if (result) {
         emit(TollFileUploaded());
       } else {
-        emit(TollParkingDetailsError(message: "Failed to upload toll file."));
+        emit(TollParkingDetailsError(message: "Failed to upload toll files."));
       }
     } catch (e) {
-      emit(TollParkingDetailsError(message: "Error uploading toll file: $e"));
+      emit(TollParkingDetailsError(message: "Error uploading toll files: $e"));
     }
   }
+
+
 }
 
 
@@ -1488,8 +1513,10 @@ class DocumentImagesBloc extends Bloc<DocumentImagesEvent, DocumentImagesState> 
     try {
       final startKmImage = await apiService.fetchSingleDocumentImage(event.tripId, "StartingKm");
       final closingKmImage = await apiService.fetchSingleDocumentImage(event.tripId, "ClosingKm");
-      final TollImage = await apiService.fetchSingleDocumentImage(event.tripId, "Toll");
-      final ParkingImage = await apiService.fetchSingleDocumentImage(event.tripId, "Parking");
+      // final TollImage = await apiService.fetchSingleDocumentImage(event.tripId, "Toll");
+      // final ParkingImage = await apiService.fetchSingleDocumentImage(event.tripId, "Parking");
+      final TollImage = await apiService.fetchDocumentImages(event.tripId, "Toll");
+      final ParkingImage = await apiService.fetchDocumentImages(event.tripId, "Parking");
 
       print("🖼 Start KM Image URL: $startKmImage");
       print("🖼 Closing KM Image URL: $closingKmImage");
@@ -1499,8 +1526,10 @@ class DocumentImagesBloc extends Bloc<DocumentImagesEvent, DocumentImagesState> 
       emit(DocumentImagesLoaded(
         startKmImage: startKmImage != null ? "${AppConstants.baseUrl}/uploads/$startKmImage" : null,
         closingKmImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$closingKmImage" : null,
-        TollImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$TollImage" : null,
-        ParkingImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$ParkingImage" : null,
+        // TollImage: TollImage != null ? "${AppConstants.baseUrl}/uploads/$TollImage" : null,
+        // ParkingImage: ParkingImage != null ? "${AppConstants.baseUrl}/uploads/$ParkingImage" : null,
+        TollImage: TollImage.map((image) => "${AppConstants.baseUrl}/uploads/$image").toList(),
+        ParkingImage: ParkingImage.map((image) => "${AppConstants.baseUrl}/uploads/$image").toList(),
       ));
 
 

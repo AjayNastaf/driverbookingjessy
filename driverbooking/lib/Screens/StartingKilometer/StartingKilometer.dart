@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:jessy_cabs/Screens/TrackingPage/TrackingPage.dart';
+import 'package:jessy_cabs/Screens/TrackingWithOutHcl/TrackingWithOutHcl.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -200,13 +201,32 @@ class _StartingKilometerState extends State<StartingKilometer>  {
     //     ),
     //   ),
     // );
-
     Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TrackingPage(address: widget.address,tripId:widget.tripId),
-      ),(route)=>false
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              TrackingPage(address: widget.address, tripId: widget.tripId),
+        ), (route) => false
     );
+
+// if (hclhybriddata == 1) {
+//   Navigator.pushAndRemoveUntil(
+//       context,
+//       MaterialPageRoute(
+//         builder: (context) =>
+//             TrackingPage(address: widget.address, tripId: widget.tripId),
+//       ), (route) => false
+//   );
+// }else {
+//   Navigator.pushAndRemoveUntil(
+//       context,
+//       MaterialPageRoute(
+//         builder: (context) =>
+//             TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
+//       ), (route) => false
+//   );
+//
+// }
   }
 
   @override

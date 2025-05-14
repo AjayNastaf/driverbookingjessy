@@ -96,6 +96,16 @@ class _Login_ScreenState extends State<Login_Screen> {
   }
 
 
+  Future<void> clearSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('last_screen');
+    await prefs.remove('trip_id');
+    await prefs.remove('user_id');
+    await prefs.remove('username');
+    await prefs.remove('address');
+    await prefs.remove('drop_location');
+    print("SharedPreferences cleared successfully");
+  }
 
 
   @override
@@ -104,6 +114,7 @@ class _Login_ScreenState extends State<Login_Screen> {
         create: (_) => LoginBloc(),
         child: Scaffold(
           appBar: AppBar(
+            automaticallyImplyLeading: false,  // Removes the back button
 
               // title: Text("Login"),
               // actions: [

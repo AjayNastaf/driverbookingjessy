@@ -809,14 +809,17 @@ class DocumentImagesLoading extends DocumentImagesState {}
 class DocumentImagesLoaded extends DocumentImagesState {
   final String? startKmImage;
   final String? closingKmImage;
-  final String? TollImage;
-  final String? ParkingImage;
+  // final String? TollImage;
+  // final String? ParkingImage;
+  final List<String> TollImage;      // Updated to List<String>
+  final List<String> ParkingImage;   // Updated to List<String>
 
 
   DocumentImagesLoaded({required this.startKmImage, required this.closingKmImage, required this.ParkingImage, required this.TollImage});
 
   @override
   List<Object> get props => [startKmImage ?? '', closingKmImage ?? '', ParkingImage ?? '' ,TollImage ??'' ];
+
 }
 
 class DocumentImagesError extends DocumentImagesState {
