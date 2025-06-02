@@ -159,7 +159,7 @@ router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
                     console.log("Error inserting vehicle data:", err);
                     return res.status(500).send({ message: "Failed to add vehicle data." });
                 }
-
+console.log(insertResult,'ssssssssssssssssssss');
                 res.status(200).send({ message: "Vehicle registered successfully." });
             });
             }

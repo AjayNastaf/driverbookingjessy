@@ -29,6 +29,7 @@ class _SignatureendrideState extends State<Signatureendride>  {
 
 
   bool _isLoading = false;
+  bool isClearDisabled = false;
 
   // Controller for the signature pad
   final SignatureController _signatureController = SignatureController(
@@ -198,9 +199,15 @@ class _SignatureendrideState extends State<Signatureendride>  {
   //
   // }
 
+  void handleSubmitclear() {
+    setState(() {
+      isClearDisabled = true;  // Disable the Clear button
+    });
+  }
 
 
   void _handleSubmit(BuildContext context) async {
+    handleSubmitclear();
     if (_signatureController.isNotEmpty) {
       final signature = await _signatureController.toPngBytes();
       if (signature != null) {
@@ -396,7 +403,7 @@ class _SignatureendrideState extends State<Signatureendride>  {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 ElevatedButton(
-                  onPressed: _handleClear,
+                  onPressed:  isClearDisabled ? null : _handleClear ,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   child: Text("Clear" ,style: TextStyle(color: Colors.white, fontSize: 18.0),),
                 ),

@@ -1,0 +1,2 @@
+C:/recenttabsnotification21.05.2025/driverappgit/NASTAF-Driver-Application/driverbooking/android/app/.cxx/RelWithDebInfo/6lj2j3u4/x86/CMakeFiles/edit_cache.dir
+C:/recenttabsnotification21.05.2025/driverappgit/NASTAF-Driver-Application/driverbooking/android/app/.cxx/RelWithDebInfo/6lj2j3u4/x86/CMakeFiles/rebuild_cache.dir

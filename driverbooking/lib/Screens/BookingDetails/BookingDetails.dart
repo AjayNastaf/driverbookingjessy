@@ -18,6 +18,11 @@ import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
 
+import 'dart:async';
+import 'package:flutter/material.dart';
+
+
+
 class Bookingdetails extends StatefulWidget {
   final String userId;
   final String username;
@@ -39,6 +44,9 @@ class Bookingdetails extends StatefulWidget {
 class _BookingdetailsState extends State<Bookingdetails>  {
 
 
+  late Timer _timer;
+  int _secondsElapsed = 0;
+
 
   bool isLoading = true;
   List<Map<String, dynamic>> tripSheetData = [];
@@ -51,7 +59,38 @@ class _BookingdetailsState extends State<Bookingdetails>  {
     globals.dropLocation = Dropaddress; // Set the global variable
     BlocProvider.of<GettingTripSheetDetailsByUseridBloc>(context).add(Getting_TripSheet_Details_By_Userid(userId: widget.userId, username: widget.username, tripId: widget.tripId, duty: widget.duty));
     saveScreenData();
+    _startTimer();
+
   }
+
+
+
+
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _secondsElapsed++;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  String _formatDuration(int totalSeconds) {
+    final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
+
+
+
+
 
   Future<void> saveScreenData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -161,9 +200,22 @@ class _BookingdetailsState extends State<Bookingdetails>  {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Trip Details",
-          style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
+        // title: const Text(
+        //   "Trip Details",
+        //   style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
+        // ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Trip Details",
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            Text(
+              _formatDuration(_secondsElapsed),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ],
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back), // Custom back icon
@@ -284,6 +336,15 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                               isLast: true,
                             ),
 
+                            _buildDetailTile(
+                              context,
+                              label: "Hybriddata",
+                              value: tripDetails['Hybriddata'].toString() ?? "Not available", // Default text when null
+
+                              icon: Icons.location_pin,
+                              isLast: true,
+                            ),
+
                           ],
                         ),
                       ),
@@ -334,62 +395,62 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                         //   ),
                         // );
 
-                        // if (tripDetails['Hybriddata'].toString() == 1) {
-                        //   // Navigator.pushAndRemoveUntil(
-                        //   //   context,
-                        //   //   MaterialPageRoute(
-                        //   //     builder: (context) => Pickupscreen(
-                        //   //       address: tripDetails['address1'],
-                        //   //       tripId: widget.tripId,
-                        //   //     ),
-                        //   //   ),
-                        //   //       (route) => false,
-                        //   // );
-                        //   print("hcl inside, ${tripDetails['Hybriddata'].toString()}");
-                        //   Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) => Pickupscreen(
-                        //         address: tripDetails['address1'],
-                        //         tripId: widget.tripId,
-                        //       ),
-                        //     ),
-                        //
-                        //   );
-                        // } else {
-                        //   // Navigator.pushAndRemoveUntil(
-                        //   //   context,
-                        //   //   MaterialPageRoute(
-                        //   //     builder: (context) => PickUpWithoutHcl(
-                        //   //       address: tripDetails['address1'],
-                        //   //       tripId: widget.tripId,   ), // Replace with your other screen
-                        //   //   ),
-                        //   //       (route) => false,
-                        //   // );
-                        //   print("non hcl inside, ${tripDetails['Hybriddata'].toString()}");
-                        //
-                        //   Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (context) => PickUpWithoutHcl(
-                        //         address: tripDetails['address1'],
-                        //         tripId: widget.tripId,   ), // Replace with your other screen
-                        //     ),
-                        //
-                        //   );
-                        // }
+                        if (tripDetails['Hybriddata'].toString() == 1) {
+                          // Navigator.pushAndRemoveUntil(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => Pickupscreen(
+                          //       address: tripDetails['address1'],
+                          //       tripId: widget.tripId,
+                          //     ),
+                          //   ),
+                          //       (route) => false,
+                          // );
+                          print("hcl inside, ${tripDetails['Hybriddata'].toString()}");
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Pickupscreen(
+                                address: tripDetails['address1'],
+                                tripId: widget.tripId,
+                              ),
+                            ),
+
+                          );
+                        } else {
+                          // Navigator.pushAndRemoveUntil(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => PickUpWithoutHcl(
+                          //       address: tripDetails['address1'],
+                          //       tripId: widget.tripId,   ), // Replace with your other screen
+                          //   ),
+                          //       (route) => false,
+                          // );
+                          print("non hcl inside, ${tripDetails['Hybriddata'].toString()}");
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PickUpWithoutHcl(
+                                address: tripDetails['address1'],
+                                tripId: widget.tripId,   ), // Replace with your other screen
+                            ),
+
+                          );
+                        }
 
 
 
 
 
 
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Pickupscreen(address: tripDetails['address1'], tripId: widget.tripId),
-                          ),(route)=> false
-                        );
+                        // Navigator.pushAndRemoveUntil(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => Pickupscreen(address: tripDetails['address1'], tripId: widget.tripId),
+                        //   ),(route)=> false
+                        // );
 
     // Navigator.pushAndRemoveUntil(
     // context,

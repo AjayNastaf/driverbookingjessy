@@ -13,16 +13,17 @@ class AppConstants {
   static const String Refer_friend = 'assets/image/referfriend.jpg';
   static const String driver_waiting = 'assets/image/driver-waiting.jpg';
   static const String navigation = 'assets/image/navigation.png';
+  static const String cabgif = 'assets/image/cab.gif';
 
 
 
   //local
-  // static const String baseUrl = "http://192.168.0.112:3003";
+  // static const String baseUrl = "http://192.168.0.114:3004";
 
 
 
   static const String baseUrlJessyCabs = "https://jessycabs.com:54462";
-  // static const String baseUrlJessyCabs = "http://192.168.0.112:8081";
+  // static const String baseUrlJessyCabs = "http://192.168.0.114:8081";
 
   //jessycabs
   static const String baseUrl = "https://jessycabs.com:7128";

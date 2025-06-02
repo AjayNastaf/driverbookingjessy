@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'package:jessy_cabs/Screens/CustomerReachedWithouthcl/AnimatedCustomerPage.dart';
 import 'package:jessy_cabs/Screens/SignatureEndRide/SignatureEndRide.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -143,7 +144,7 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
 
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString('last_screen', 'customerLocationPage');
+    await prefs.setString('last_screen', 'CustomerReachedWithouthcl');
 
     await prefs.setString('trip_id', widget.tripId);
 
@@ -152,7 +153,7 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
 
     print('Saved screen data:');
 
-    print('last_screen: customerLocationPage');
+    print('last_screen: CustomerReachedWithouthcl');
 
     print('trip_id: ${widget.tripId}');
 
@@ -270,88 +271,118 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
 
     return Scaffold (
             appBar: AppBar(
-              title: Text("Trip Started with hcl"),
+              title: Text("Trip Started"),
               // automaticallyImplyLeading: false, // 👈 disables the default back icon
 
             ),
-            body: RefreshIndicator(onRefresh: _refreshCustomerDestination,
+            // body: RefreshIndicator(onRefresh: _refreshCustomerDestination,
+            //
+            //   child:Stack(
+            //     children: [
+            //         Text('jiyuv yububu xudggu d'),
+            //       Positioned(
+            //         top: 50,
+            //         left: 10,
+            //         child: Container(
+            //           padding: EdgeInsets.all(10),
+            //           decoration: BoxDecoration(
+            //             color: Colors.white,
+            //             borderRadius: BorderRadius.circular(8),
+            //             boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+            //           ),
+            //           child: Text(
+            //             "Distance Traveled:"
+            //                 "Duration: ",
+            //
+            //             style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            //           ),
+            //         ),
+            //       ),
+            //
+            //       Positioned(
+            //         bottom: 0, // Aligns the bottom section
+            //         left: 0,
+            //         right: 0,
+            //         child: IgnorePointer(
+            //           ignoring: false, // Allows interaction with the map below
+            //           child: Container(
+            //             // height: 100, // Adjust height as needed
+            //             padding: EdgeInsets.all(16),
+            //             color: Colors.white, // Semi-transparent background
+            //             child: Column(
+            //               mainAxisSize: MainAxisSize.min,
+            //               children: [
+            //
+            //
+            //
+            //                 SizedBox(height: 20),
+            //
+            //
+            //                 SizedBox(
+            //                   width: double.infinity,
+            //                   child: ElevatedButton(
+            //
+            //                     onPressed: () {
+            //                       _showEndRideConfirmationDialog(context);
+            //                     },
+            //                     style: ElevatedButton.styleFrom(
+            //                       backgroundColor: Colors.red,
+            //                       padding: EdgeInsets.symmetric(vertical: 16),
+            //                       shape: RoundedRectangleBorder(
+            //                         borderRadius: BorderRadius.circular(8),
+            //                       ),
+            //                     ),
+            //                     child: Text(
+            //                       'End Ride',
+            //                       style: TextStyle(fontSize: 20.0, color: Colors.white),
+            //                     ),
+            //                   ),
+            //                 ),
+            //               ],
+            //             ),
+            //           ),
+            //         ),
+            //       ),
+            //       Positioned(
+            //         top: 15,
+            //         left: 0,
+            //         right: 0,
+            //         child: NoInternetBanner(isConnected: isConnected),
+            //       ),
+            //     ],
+            //   ),
+            //
+            // ),
 
-              child:Stack(
-                children: [
-Text('jiyuv yububu xudggu d'),
-                  Positioned(
-                    top: 50,
-                    left: 10,
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
-                      ),
-                      child: Text(
-                        "Distance Traveled:"
-                            "Duration: ",
 
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-
-                  Positioned(
-                    bottom: 0, // Aligns the bottom section
-                    left: 0,
-                    right: 0,
-                    child: IgnorePointer(
-                      ignoring: false, // Allows interaction with the map below
-                      child: Container(
-                        // height: 100, // Adjust height as needed
-                        padding: EdgeInsets.all(16),
-                        color: Colors.white, // Semi-transparent background
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-
-
-
-                            SizedBox(height: 20),
-
-
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-
-                                onPressed: () {
-                                  _showEndRideConfirmationDialog(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.red,
-                                  padding: EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text(
-                                  'End Ride',
-                                  style: TextStyle(fontSize: 20.0, color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 15,
-                    left: 0,
-                    right: 0,
-                    child: NoInternetBanner(isConnected: isConnected),
-                  ),
-                ],
+      body: AnimatedCustomerPage(),
+      bottomNavigationBar: BottomAppBar(
+        height: 120.00,
+      color: Colors.white,
+      elevation: 8.0,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              _showEndRideConfirmationDialog(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-
-            )
+            ),
+            child: const Text(
+              'End Ride',
+              style: TextStyle(fontSize: 20.0, color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    ),
     );
   }
 

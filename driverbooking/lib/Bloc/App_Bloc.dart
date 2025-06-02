@@ -1244,6 +1244,7 @@ class TripTrackingDetailsBloc extends Bloc<TripTrackingDetailsEvent, TripTrackin
 
 
 
+
   Future<void> _onSaveLocationToDatabase(
       SaveLocationToDatabase event, Emitter<TripTrackingDetailsState> emit) async {
     emit(SaveLocationLoading());

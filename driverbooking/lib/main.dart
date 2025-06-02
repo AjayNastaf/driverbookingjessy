@@ -223,8 +223,10 @@
 
 
 import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
+import 'package:jessy_cabs/Screens/CustomerReachedWithouthcl/CustomerReachedWithouthcl.dart';
 import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
 import 'package:jessy_cabs/Screens/PickUpWithoutHcl/PickUpWithoutHcl.dart';
+import 'package:jessy_cabs/Screens/TrackingWithOutHcl/TrackingWithOutHcl.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -256,6 +258,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.initializeNotifications();
+  requestPermissions();
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
   String? lastScreen = prefs.getString('last_screen');
@@ -564,11 +567,41 @@ Widget _getInitialScreen(
 
       );
 
+    case 'TrackingWithOutHcl':
+
+      return Builder(
+
+        builder: (_) => TrackingWithOutHcl(
+
+          key: UniqueKey(),
+
+          tripId: tripId ?? '',
+
+          address: address ?? '',
+
+        ),
+
+      );
+
     case 'customerLocationPage':
 
       return Builder(
 
         builder: (_) => Customerlocationreached(
+
+          key: UniqueKey(),
+
+          tripId: tripId ?? '',
+
+        ),
+
+      );
+
+    case 'CustomerReachedWithouthcl':
+
+      return Builder(
+
+        builder: (_) => CustomerReachedWithouthcl(
 
           key: UniqueKey(),
 
@@ -616,8 +649,8 @@ class BackgroundServiceHelper {
   static const MethodChannel _notificationChannel = MethodChannel("com.example.jessy_cabs/notification");
   static Future<void> startBackgroundService() async {
     try {
-      final result = await _channel.invokeMethod("startService");
-      print("Background service result: $result");
+      // final result = await _channel.invokeMethod("startService");
+      // print("Background service result: $result");
     } on PlatformException catch (e) {
       print("Error starting background service: ${e.message}");
     }

@@ -884,8 +884,8 @@ app.get('/getAllUploadsByTripId', (req, res) => {
 
 
 //local
-//app.listen(3003, () => {
-//  console.log("Server started on port 30059");
+//app.listen(3004, () => {
+//  console.log("Server started on ports 30059");
 //});
 
 

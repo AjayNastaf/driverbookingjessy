@@ -201,6 +201,14 @@ class _StartingKilometerState extends State<StartingKilometer>  {
     //     ),
     //   ),
     // );
+    // Navigator.pushAndRemoveUntil(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (context) =>
+    //           TrackingPage(address: widget.address, tripId: widget.tripId),
+    //     ), (route) => false
+    // );
+
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(

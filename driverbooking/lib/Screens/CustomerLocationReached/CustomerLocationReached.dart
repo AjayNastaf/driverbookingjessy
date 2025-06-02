@@ -1073,7 +1073,7 @@
 
 
 import 'dart:convert';
-
+import 'package:flutter/services.dart';
 import 'package:jessy_cabs/Screens/SignatureEndRide/SignatureEndRide.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -1083,6 +1083,7 @@ import 'package:jessy_cabs/GlobalVariable/global_variable.dart' as globals;
 import 'package:jessy_cabs/Utils/AllImports.dart';
 
 import 'dart:async';
+import '../NativeTracker.dart';
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
@@ -1094,6 +1095,7 @@ import 'package:location/location.dart' as loc;
 import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:location/location.dart' as loc;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 
 
@@ -1111,9 +1113,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
 
   GoogleMapController? _mapController;
   LatLng? _currentLatLng;
-  // LatLng _destination = LatLng(13.028159, 80.243306);
-  late LatLng _destination;
-// Chennai Central Railway Station
+  // late LatLng _destination;
+  LatLng _destination = LatLng(0.0, 0.0); // Initialized with default value
   List<LatLng> _routeCoordinates = [];
   Stream<LocationData>? _locationStream;
   bool isOtpVerified = false;
@@ -1138,27 +1139,46 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
   String? Testvehinum;
   String? Testtripstatus;
 
+  double _initialDistance = 0.0;
+  // static const platform = MethodChannel('com.example.jessy_cabs/tracking');
+  static const MethodChannel _channel =
+  MethodChannel('com.example.jessy_cabs/tracking');
 
-
+  double totalDistanceInKm = 0.0;
 
   @override
   void initState() {
     super.initState();
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'locationUpdate') {
+        final Map<dynamic, dynamic> locationMap = call.arguments;
+        double totalDistanceMeters = locationMap['totalDistance'] ?? 0.0;
+
+        setState(() {
+          totalDistanceInKm = totalDistanceMeters / 1000;
+        });
+      }
+    });
+
+
+
+    // const platform = MethodChannel('com.example.jessy_cabs/background');
+    // platform.invokeMethod('startTrackingForCurrentPage');
+    NativeTracker.startTracking();
+
     _initializeCustomerLocationTracking();
 
     context.read<TripTrackingDetailsBloc>().add(
         FetchTripTrackingDetails(widget.tripId));
     _checkMapLoading();
+
     _startTracking();
+
     // _setDestinationFromDropLocation();
     _startTimer();
 
     saveScreenData();
-
-    print('Drop Location: ${Tripdestination}');
-
-    print( 'sedfvgbhnjgggggggggggggggggg');
-
+    _setDestinationFromDropLocation();
     _loadTripSheetDetailsByTripId();
   }
 
@@ -1174,8 +1194,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
 
       if (tripDetails != null) {
 
-
-
         var desti = tripDetails['useage'].toString();
 
         var vechnum = tripDetails['vehRegNo'].toString();
@@ -1184,8 +1202,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         print('Trip details guest desti: $desti');
         print('Trip details guest desti: $tripstatetest');
         print('Trip details guest desti: $vechnum');
-
-
 
         setState(() {
 
@@ -1211,12 +1227,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
 
   }
 
-
-
-
-
-
-
   Future<void> saveScreenData() async {
 
     final prefs = await SharedPreferences.getInstance();
@@ -1227,14 +1237,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
 
     await prefs.setString('drop_location', Tripdestination!); // 🔥 Save droplocation too
 
-
-    print('Saved screen data:');
-
-    print('last_screen: customerLocationPage');
-
-    print('trip_id: ${widget.tripId}');
-
-    print('drop_location: ${Tripdestination}'); // ✅ Debug log
 
   }
 
@@ -1294,6 +1296,50 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
           _lastLocation = newLocation; // Update last known location
         });
   }
+
+
+
+  // void _startTracking() {
+  //   final locationSettings = geo.LocationSettings(
+  //     accuracy: geo.LocationAccuracy.high,
+  //     distanceFilter: 10,
+  //   );
+  //
+  //   _positionStreamSubscription =
+  //       Geolocator.getPositionStream(locationSettings: locationSettings)
+  //           .listen((Position position) {
+  //         LatLng newLocation = LatLng(position.latitude, position.longitude);
+  //
+  //         if (_lastLocation != null) {
+  //           double distanceInMeters = Geolocator.distanceBetween(
+  //             _lastLocation!.latitude,
+  //             _lastLocation!.longitude,
+  //             newLocation.latitude,
+  //             newLocation.longitude,
+  //           );
+  //
+  //           setState(() {
+  //             _totalDistance += distanceInMeters / 1000; // meters to km
+  //           });
+  //         }
+  //
+  //         _lastLocation = newLocation;
+  //       });
+  // }
+
+
+  // Future<void> _getSavedDistanceFromNative() async {
+  //   try {
+  //     final double distance = await platform.invokeMethod('getSavedDistance');
+  //     _initialDistance = distance;
+  //     _totalDistance += _initialDistance;
+  //     setState(() {}); // refresh UI
+  //   } catch (e) {
+  //     print("Failed to get distance: $e");
+  //   }
+  // }
+
+
   void _checkMapLoading() {
     Future.delayed(Duration(seconds: 2), () {
       if (mounted) {
@@ -1389,24 +1435,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         _handleEndRide(latitude, longitude);
         return;
       }
-
-      // if (isStartWayPointClicked == true) {
-      //   print(" Ajay ERT");
-      //   print("object");
-      //   _handleEndRide(latitude, longitude);
-      //   return;
-      // }
-      // if (isCloseWayPointClicked == true) {
-      //   print(" Ajay ERT");
-      //   print("object");
-      //   _handleEndRide(latitude, longitude);
-      //   return;
-      // }
-
-
-
-
-
       // Ensure vehicleNumber and tripStatus are available before calling saveLocation
       if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus=='On_Going') {
         saveLocationCustomer(latitude, longitude);
@@ -1452,34 +1480,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
 
 
 
-//save lat long with way point in bloc starts
-  void saveWayPointLocationCustomer(double latitude, double longitude) {
-    print("iInside saveLocation function");
-    print("Vehicle Number: $vehicleNumber, Trip Status: $tripStatus");
-    // Prevent saving if latitude and longitude are (0.0, 0.0)
-    if (latitude == 0.0 && longitude == 0.0) {
-      print("⚠ Invalidd location (0.0, 0.0) - Not saving to database.");
-      return; // Stop execution
-    }
-
-    if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty) {
-      print("Dispatching SaveLocationToDatabase event...");
-      context.read<TripTrackingDetailsBloc>().add(
-        SaveLocationToDatabase(
-          latitude: latitude,
-          longitude: longitude,
-          vehicleNo: vehicleNumber,
-          tripId: widget.tripId,
-          tripStatus: 'waypoint',
-        ),
-      );
-    } else {
-      print("Trip details are not yet loaded. Cannot save location.");
-    }
-  }
-//save lat long with way point in bloc completed
-
-
 
 //for reached status starts
   void _handleEndRide(double latitude, double longitude) {
@@ -1496,8 +1496,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     );
   }
 //for reached status completed
-
-
 
   Future<void> _fetchRouteCustomer() async {
     if (_currentLatLng == null) return;
@@ -1559,8 +1557,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     return polylineCoordinates;
   }
 
-
-
   void _startTimer() {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
@@ -1568,9 +1564,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
       });
     });
   }
-
-
-
 
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
@@ -1580,64 +1573,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     return "$hours:$minutes:$seconds";
   }
 
-
-
-
-
-
-  // void sendLocationToServer(double latitude, double longitude) async {
-  //   print("Vehicle Number sendLocationToServer  : $Testvehinum, Trip Status: $Testtripstatus");
-  //
-  //   try {
-  //     // Reverse geocode coordinates to get address
-  //     String address = '';
-  //     print("addddddddddddddddddd");
-  //     try {
-  //       print("➡ Starting reverse geocoding for coordinates: $latitude, $longitude");
-  //
-  //       List<geocoding.Placemark> placemarks = await geocoding.placemarkFromCoordinates(latitude, longitude);
-  //
-  //       print("✅ placemarkFromCoordinates call succeeded.");
-  //
-  //       if (placemarks.isNotEmpty) {
-  //         print("✅ Received non-empty placemarks list.");
-  //
-  //         final placemark = placemarks.first;
-  //         print("ℹ First Placemark: ${placemark.toJson()}"); // You can log all fields if needed
-  //
-  //         address = "${placemark.street},${placemark.thoroughfare},${placemark.subLocality}, ${placemark.locality},${placemark.postalCode}, ${placemark.administrativeArea}, ${placemark.country}";
-  //         print("📍 Constructed Address: $address");
-  //       } else {
-  //         print("⚠ placemarks list is empty.");
-  //       }
-  //     } catch (geoError) {
-  //       print("❌ Reverse geocoding failed with error: $geoError");
-  //       address = "Unknown address";
-  //     }
-  //
-  //     final response = await ApiService.addVehicleLocation(
-  //       vehicleno: Testvehinum ?? '',
-  //       latitudeloc: latitude,
-  //       longitutdeloc: longitude,
-  //       tripId: widget.tripId,
-  //       runingDate: Testtripstatus ?? '',
-  //       runingTime: DateTime.now().toIso8601String(),
-  //       tripStatus: DateTime.now().toIso8601String(),
-  //       tripStartTime: DateTime.now().toIso8601String(),
-  //       tripEndTime: DateTime.now().toIso8601String(),
-  //       createdAt: DateTime.now().toIso8601String(),
-  //       gpsPointAddrress: address,
-  //     );
-  //
-  //     final data = jsonDecode(response.body);
-  //     print("Server Response: ${data['message']}");
-  //   } catch (e) {
-  //     print("Error sending location: $e");
-  //   }
-  // }
-
-
-
   @override
   void dispose() {
     // _locationSubscription!.cancel();
@@ -1646,9 +1581,13 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
 
     _timer?.cancel(); // Cancel timer when widget is removed
     _positionStreamSubscription?.cancel();
+    // const platform = MethodChannel('com.example.jessy_cabs/background');
+    // platform.invokeMethod('stopTrackingForCurrentPage');
+    NativeTracker.stopTracking();
+
+
     super.dispose();
   }
-
 
   void _showEndRideConfirmationDialog(BuildContext context) {
     showDialog(
@@ -1702,10 +1641,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     });
 
     if (_currentLatLng != null) {
-
       _handleEndRide(_currentLatLng!.latitude, _currentLatLng!.longitude);
-
-
 
       Navigator.pushAndRemoveUntil(
           context,
@@ -1714,11 +1650,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
           ),(route)=>false
       );
 
-
-      // Navigator.push(context, MaterialPageRoute(builder: (context)=>Signatureendride(tripId: widget.tripId)));
-
-
-      print('for current location');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Location not available yet!")),
@@ -1727,7 +1658,10 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     }
   }
 
-
+  Future<void> ForNumberAndIdInbackEndKT() async {
+    await NativeTracker.setTrackingMetadata(tripId: widget.tripId, vehicleNumber: vehicleNumber);
+    await NativeTracker.startTracking();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1743,7 +1677,22 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
               tripStatus = state.status;
             });
 
+
             print("Trip details loaded. Vehicle: $vehicleNumber, Status: $tripStatus");
+
+            // const platform = MethodChannel('com.example.jessy_cabs/background');
+            // platform.invokeMethod('setTrackingMetadata', {
+            //   'tripId': widget.tripId,
+            //   'vehicleNumber': vehicleNumber,
+            // });
+
+            ForNumberAndIdInbackEndKT();
+
+
+
+
+
+
 
             // Ensure trip details are set before calling saveLocation
             if (vehicleNumber.isNotEmpty && tripStatus.isNotEmpty && tripStatus == 'On_Going') {
@@ -1759,7 +1708,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
             showFailureSnackBar(context, state.errorMessage);
           }
         },
-
         child:Scaffold (
             appBar: AppBar(
               title: Text("Trip Started"),
@@ -1831,7 +1779,9 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
                         boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
                       ),
                       child: Text(
-                        "Distance Traveled: ${_totalDistance.toStringAsFixed(2)} km \n"
+                        'Total Distance: ${totalDistanceInKm.toStringAsFixed(4)} km \n'
+
+                        "Distance Traveled: ${_totalDistance.toStringAsFixed(4)} km \n"
                             "Duration: ${_formatDuration(_duration)}",
 
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
@@ -1852,9 +1802,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-
                             SizedBox(height: 10.0,),
-
                             Row(
                               children: [
 
@@ -1871,7 +1819,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
                                 ),
                                 SizedBox(width: 12), // Space between icon and address
                                 Expanded(
-
                                   child: Row(
                                     children: [
                                       Container(
@@ -1917,8 +1864,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
                             ),
 
                             SizedBox(height: 20),
-
-
                             SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
@@ -1957,8 +1902,5 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         )
     );
   }
-
-
-
 
 }

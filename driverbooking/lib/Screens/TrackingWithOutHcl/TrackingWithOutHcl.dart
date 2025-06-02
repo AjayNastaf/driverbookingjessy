@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:jessy_cabs/Screens/CustomerReachedWithouthcl/CustomerReachedWithouthcl.dart';
+import 'package:jessy_cabs/Screens/TrackingWithOutHcl/AnimatedPageTracking.dart';
 import 'package:location/location.dart';
 import 'dart:math' as math;
 import 'package:dio/dio.dart';
@@ -81,7 +82,7 @@ class _TrackingWithOutHclState extends State<TrackingWithOutHcl> {
 
     final prefs = await SharedPreferences.getInstance();
 
-    await prefs.setString('last_screen', 'TrackingPage');
+    await prefs.setString('last_screen', 'TrackingWithOutHcl');
 
     await prefs.setString('trip_id', widget.tripId);
 
@@ -93,7 +94,7 @@ class _TrackingWithOutHclState extends State<TrackingWithOutHcl> {
 
     print('Saved screen datang:');
 
-    print('last_screen: TrackingPage');
+    print('last_screen: TrackingWithOutHcl');
 
     print('trip_id: ${widget.tripId}');
 
@@ -198,7 +199,7 @@ class _TrackingWithOutHclState extends State<TrackingWithOutHcl> {
     return Scaffold(
           appBar: AppBar(
             title: const Text(
-              "Tracking without Hcl",
+              "Tracking",
               style: TextStyle(
                   color: Colors.white, fontSize: AppTheme.appBarFontSize),
             ),
@@ -207,43 +208,23 @@ class _TrackingWithOutHclState extends State<TrackingWithOutHcl> {
             // automaticallyImplyLeading: false, // 👈 disables the default back icon
 
           ),
-          body: RefreshIndicator(
-            // child: child,
-            onRefresh: _refreshTrackingPage,
-
-
-
-
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  child: Stack(
-
-                    children: [
-
-                      Text('gggggggggggggggggggg'),
-
-                      Positioned(
-
-                        top: 15,
-
-                        left: 0,
-
-                        right: 0,
-
-                        child: NoInternetBanner(isConnected: isConnected),
-
-                      ),
-
-                    ],
-
-                  )
-              ),
-
-            ),
-
-          ),
+          // body: RefreshIndicator(
+          //   // child: child,
+          //   onRefresh: _refreshTrackingPage,
+          //
+          //
+          //
+          //
+          //   child: SingleChildScrollView(
+          //     physics: const AlwaysScrollableScrollPhysics(),
+          //     child: AnimatedPageTracking()
+          //
+          //
+          //
+          //   ),
+          //
+          // ),
+          body:AnimatedPageTracking(),
           bottomNavigationBar: BottomAppBar(
             color: Colors.white,
             height: 100.0,

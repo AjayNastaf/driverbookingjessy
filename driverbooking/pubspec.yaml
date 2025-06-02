@@ -68,6 +68,10 @@ dependencies:
   device_info_plus: ^10.1.0
   url_launcher: ^6.2.5
   flutter_local_notifications: ^16.3.2
+  google_fonts: ^4.0.3
+  lottie: ^2.3.2
+  flutter_overlay_window: ^0.5.0
+  android_intent_plus: ^4.0.1
 
 
 
@@ -115,7 +119,12 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/image/
-#    - assets/image/bg-Main.png
+    - assets/animations/Animation.json
+    - assets/animations/Animationed.json
+    - assets/animations/Animationtrack.json
+
+
+  #    - assets/image/bg-Main.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

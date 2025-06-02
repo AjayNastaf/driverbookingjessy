@@ -1,214 +1,230 @@
+//// ✅ FINAL PRODUCTION BACKGROUND SERVICE WITH ACTUAL API CALL
+//// Sends location to API using vehicleNumber, tripId, and tripStatus like in Customerlocationreached.dart
 
-
-
-//working 1
-//
-//
-//package com.example.jessy_cabs
-//
-//import android.Manifest
-//import android.app.*
-//import android.content.Context
-//import android.content.Intent
-//import android.content.pm.ServiceInfo
-//import android.location.Location
-//import android.location.LocationListener
-//import android.location.LocationManager
-//import android.os.Build
-//import android.os.Handler
-//import android.os.IBinder
-//import android.os.Looper
-//import android.util.Log
-//import androidx.core.app.NotificationCompat
-//import androidx.core.content.ContextCompat
-//
-//class MyBackgroundService : Service() {
-//
-//    private val handler = Handler(Looper.getMainLooper())
-//    private lateinit var locationManager: LocationManager
-//    private lateinit var locationListener: LocationListener
-//
-//    private val timerRunnable = object : Runnable {
-//        override fun run() {
-//            Log.d("MyBackgroundService", "Timer is running in background...")
-//            handler.postDelayed(this, 10000) // Every 10 seconds
-//        }
-//    }
-//
-//    override fun onCreate() {
-//        super.onCreate()
-//        createNotificationChannel()
-//
-//        val notification = createNotification()
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-//            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
-//        } else {
-//            startForeground(1, notification)
-//        }
-//    }
-//
-//    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        startTimer()
-//        startLocationUpdates()
-//        return START_STICKY
-//    }
-//
-//    private fun startTimer() {
-//        handler.post(timerRunnable)
-//    }
-//
-//    private fun startLocationUpdates() {
-//        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-//        locationListener = object : LocationListener {
-//            override fun onLocationChanged(location: Location) {
-//                Log.d("MyBackgroundService", "Location: ${location.latitude}, ${location.longitude}")
-//            }
-//        }
-//        try {
-//            val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//            if (permission == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-//                locationManager.requestLocationUpdates(
-//                    LocationManager.GPS_PROVIDER,
-//                    5000L,
-//                    5f,
-//                    locationListener
-//                )
-//            } else {
-//                Log.e("MyBackgroundService", "Location permission not granted")
-//            }
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-//    }
-//
-//    private fun createNotification(): Notification {
-//        val channelId = "location_channel"
-//        return NotificationCompat.Builder(this, channelId)
-//            .setContentTitle("Tracking Location")
-//            .setContentText("Your location is being tracked in the background.")
-//            .setSmallIcon(R.mipmap.ic_launcher)
-//            .setPriority(NotificationCompat.PRIORITY_HIGH) // Important
-//            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-//            .build()
-//    }
-//
-//    private fun createNotificationChannel() {
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            val serviceChannel = NotificationChannel(
-//                "location_channel",
-//                "Location Service Channel",
-//                NotificationManager.IMPORTANCE_HIGH
-//            )
-//            val manager = getSystemService(NotificationManager::class.java)
-//            manager?.createNotificationChannel(serviceChannel)
-//        }
-//    }
-//
-//    override fun onBind(intent: Intent?): IBinder? {
-//        return null
-//    }
-//
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        handler.removeCallbacks(timerRunnable)
-//        if (::locationManager.isInitialized && ::locationListener.isInitialized) {
-//            locationManager.removeUpdates(locationListener)
-//        }
-//    }
-//}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//working recent
 
 package com.example.jessy_cabs
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
+import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.IBinder
-import android.location.Location
-import android.location.LocationListener
-import android.location.LocationManager
+import android.graphics.PixelFormat
+import android.os.*
+import android.provider.Settings
 import android.util.Log
+import android.view.*
 import androidx.core.app.NotificationCompat
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.dart.DartExecutor
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import org.json.JSONObject
+import java.io.BufferedWriter
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.Timer
+import java.util.TimerTask
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import android.location.Location
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.embedding.engine.dart.DartExecutor
+
+
+
 
 class MyBackgroundService : Service() {
-
     private val CHANNEL_ID = "location_channel"
-    private val LOCATION_CHANNEL = "com.example.jessy_cabs/location"
-    private lateinit var locationManager: LocationManager
-    private var flutterEngine: FlutterEngine? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var windowManager: WindowManager
+    private lateinit var floatingView: View
+    private var locationTimer: Timer? = null
+    private var backgroundTimer: Timer? = null
+    private lateinit var channel: MethodChannel
+    private val CHANNEL_NAME = "com.example.jessy_cabs/tracking"
+
+    companion object {
+        var isTrackingEnabled: Boolean = false
+        var tripId: String = ""         // Set from Dart via MethodChannel if needed
+        var vehicleNumber: String = ""  // Set from Dart if required
+        var tripStatus: String = "On_Going"  // Default value
+    }
+
+    // Track distance
+
+    private var lastLat = 0.0
+
+    private var lastLng = 0.0
+
+    private var totalDistanceInMeters = 0.0
 
     override fun onCreate() {
         super.onCreate()
+        Log.d("MyBackgroundService", "Service created")
         createNotificationChannel()
-        startLocationUpdates()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+//        val engine = FlutterEngine(this)
+//        engine.dartExecutor.executeDartEntrypoint(
+//            DartExecutor.DartEntrypoint.createDefault()
+//        )
+//        FlutterEngineCache.getInstance().put("tracking_engine", engine)
+//
+//        channel = MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL_NAME)
+        channel = MethodChannel(
+            FlutterEngine(this).dartExecutor.binaryMessenger,
+            "com.example.jessy_cabs/location"
+        )
+
+        startLocationLoop()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = createNotification()
+        Log.d("MyBackgroundService", "Service started")
+        startForeground(1, createNotification())
 
-        // Start the service as a foreground service
-        startForeground(1, notification)
+        // Handle Dart requests
+//        MethodChannel(FlutterEngineCache.getInstance()["tracking_engine"]!!.dartExecutor.binaryMessenger, CHANNEL_NAME)
+//            .setMethodCallHandler { call, result ->
+//                when (call.method) {
+//                    "getTotalDistance" -> {
+//                        result.success(totalDistanceInMeters)
+//                    }
+//                    else -> result.notImplemented()
+//                }
+//            }
 
-        // Initialize Flutter engine for sending location updates
-        flutterEngine = FlutterEngine(this).apply {
-            dartExecutor.executeDartEntrypoint(
-                DartExecutor.DartEntrypoint.createDefault()
-            )
+
+        val engine = FlutterEngineCache.getInstance()["tracking_engine"]
+        if (engine != null) {
+            channel = MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL_NAME)
+            channel.setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getTotalDistance" -> result.success(totalDistanceInMeters)
+                    else -> result.notImplemented()
+                }
+            }
+        } else {
+            Log.e("MyBackgroundService", "FlutterEngine 'tracking_engine' not found in cache")
         }
 
         return START_STICKY
     }
 
-    private fun startLocationUpdates() {
-        locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-        try {
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                3000L,  // 3 seconds
-                10f,    // 10 meters
-                locationListener
-            )
-        } catch (ex: SecurityException) {
-            Log.e("MyBackgroundService", "Location permission not granted: ${ex.message}")
-        }
+    private fun startLocationLoop() {
+        locationTimer = Timer()
+        locationTimer?.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                if (!isTrackingEnabled) return
+
+                fusedLocationClient.lastLocation
+                    .addOnSuccessListener { location ->
+                        if (location != null) {
+                            Log.d("LocationLoop", "Lat=${location.latitude}, Lon=${location.longitude}")
+                            saveLocationToBackend(location.latitude, location.longitude)
+                        } else {
+                            Log.w("LocationLoop", "Location is null")
+                        }
+                    }
+                    .addOnFailureListener {
+                        Log.e("LocationLoop", "Failed to get location: ${it.localizedMessage}")
+                    }
+            }
+        }, 0, 3000)
     }
 
-    private val locationListener = LocationListener { location: Location ->
-        Log.d("MyBackgroundService", "Location: ${location.latitude}, ${location.longitude}")
+    private fun saveLocationToBackend(lat: Double, lon: Double) {
+            Log.i("BackgroundDebug", "📡 saveLocationToBackend triggered with: lat=$lat, lon=$lon")
+        Log.d("BackgroundDebug", "🔍 Preparing to send location data:")
+        Log.d("BackgroundDebug", "latitude = $lat")
+        Log.d("BackgroundDebug", "longitude = $lon")
+        Log.d("BackgroundDebug", "vehicleNo = $vehicleNumber")
+        Log.d("BackgroundDebug", "tripId = $tripId")
+        Log.d("BackgroundDebug", "tripStatus = $tripStatus")
 
-        // Sending location update via MethodChannel
-        flutterEngine?.let {
-            MethodChannel(it.dartExecutor.binaryMessenger, LOCATION_CHANNEL)
-                .invokeMethod("locationUpdate", mapOf(
-                    "latitude" to location.latitude,
-                    "longitude" to location.longitude
-                ))
+
+        var distance = 0.0
+        if (lastLat != 0.0 && lastLng != 0.0) {
+            Log.i("DistanceTracking", "📏 Added distance: meters")
+
+            val results = FloatArray(1)
+            Location.distanceBetween(lastLat, lastLng, lat, lon, results)
+            distance = results[0].toDouble() // in meters
+            totalDistanceInMeters += distance
+            Log.i("DistanceTracking", "📏 Added distance: $distance meters, Total: $totalDistanceInMeters meters")
+        }else {
+            Log.i("DistanceTracking", "Last lat/lng are zero, skipping distance calculation")
         }
+
+// Send location update to Flutter
+        sendLocationUpdate(lat, lon, distance)
+
+        if (vehicleNumber.isEmpty() || tripId.isEmpty()) {
+            Log.w("BackgroundDebug", "⚠️ vehicleNumber or tripId missing — skipping save")
+            return
+        }
+
+    Thread {
+            try {
+                val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
+//                val url = URL("http://192.168.0.114:3004/addvehiclelocationUniqueLatlong")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.doOutput = true
+
+                val sdfDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val sdfTime = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                val sdfCreated = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                val now = Date()
+
+                val json = JSONObject()
+                json.put("vehicleno", vehicleNumber)
+                json.put("latitudeloc", lat)
+                json.put("longitutdeloc", lon) // keep typo if backend expects it
+                json.put("Trip_id", tripId)
+                json.put("Runing_Date", sdfDate.format(now))
+                json.put("Runing_Time", sdfTime.format(now))
+                json.put("Trip_Status", tripStatus)
+                json.put("Tripstarttime", sdfTime.format(now))
+                json.put("TripEndTime", sdfTime.format(now))
+                json.put("created_at", sdfCreated.format(now))
+
+                val out = BufferedWriter(OutputStreamWriter(conn.outputStream))
+                out.write(json.toString())
+                out.flush()
+                out.close()
+
+                val responseCode = conn.responseCode
+                 Log.i("BackgroundDebug", "✅ Location successfully sent. Response code: $responseCode")
+                Log.i("BackgroundDebug", "Response code: $responseCode")
+                conn.disconnect()
+
+            } catch (e: Exception) {
+                Log.e("BackgroundDebug", "API request failed: ${e.localizedMessage}")
+            }
+        }.start()
+
+        // ✅ Update last known location after processing
+        lastLat = lat
+        lastLng = lon
     }
+
+
+    private fun sendLocationUpdate(lat: Double, lon: Double, distance: Double) {
+        val locationMap = mapOf(
+            "lat" to lat,
+            "lon" to lon,
+            "distance" to distance,
+            "totalDistance" to totalDistanceInMeters
+        )
+
+        channel.invokeMethod("locationUpdate", locationMap)
+    }
+
+
+
+
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -216,40 +232,122 @@ class MyBackgroundService : Service() {
                 CHANNEL_ID,
                 "Location Tracking",
                 NotificationManager.IMPORTANCE_HIGH
-            )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager?.createNotificationChannel(channel)
+            ).apply { description = "Jessy Cabs tracking location" }
+            getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
         }
     }
 
     private fun createNotification(): Notification {
-        val notificationIntent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-            this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Jessy Cabs Location Service")
-            .setContentText("Tracking your location in the background.")
+            .setContentTitle("Jessy Cabs: Tracking")
+            .setContentText("Tracking your location in background.")
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setOngoing(true)  // Make notification non-dismissible
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
+            .setOngoing(true)
             .build()
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        Log.i("MyBackgroundService", "✅ App was swiped from recents — service still running")
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            try {
+                showFloatingBubble()
+            } catch (e: Exception) {
+                Log.e("MyBackgroundService", "Floating bubble crash: ${e.localizedMessage}")
+            }
+        }, 500)
+    }
+
+    private fun showFloatingBubble() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+                Log.w("MyBackgroundService", "Missing overlay permission")
+                return
+            }
+
+            windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+            val inflater = getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
+            floatingView = inflater.inflate(R.layout.floating_bubble, null)
+
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                else
+                    WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            ).apply {
+                gravity = Gravity.TOP or Gravity.START
+                x = 0
+                y = 100
+            }
+
+            floatingView.setOnTouchListener(FloatingOnTouchListener(params))
+            windowManager.addView(floatingView, params)
+        } catch (e: Exception) {
+            Log.e("MyBackgroundService", "Error showing floating bubble: ${e.localizedMessage}")
+        }
+    }
+
+    inner class FloatingOnTouchListener(private val params: WindowManager.LayoutParams) : View.OnTouchListener {
+        private var initialX = 0
+        private var initialY = 0
+        private var initialTouchX = 0f
+        private var initialTouchY = 0f
+
+        override fun onTouch(v: View?, event: MotionEvent): Boolean {
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    initialX = params.x
+                    initialY = params.y
+                    initialTouchX = event.rawX
+                    initialTouchY = event.rawY
+                    return true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    params.x = initialX + (event.rawX - initialTouchX).toInt()
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(floatingView, params)
+                    return true
+                }
+                MotionEvent.ACTION_UP -> {
+                    val intent = Intent(applicationContext, MainActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        putExtra("fromFloatingIcon", true)
+                    }
+                    startActivity(intent)
+                    return true
+                }
+            }
+            return false
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        locationManager.removeUpdates(locationListener)
+        try {
+            locationTimer?.cancel()
+            if (::floatingView.isInitialized) windowManager.removeView(floatingView)
+        } catch (e: Exception) {
+            Log.e("MyBackgroundService", "Destroy error: $e")
+        }
 
-        // Restart the service if it's killed
-        val restartServiceIntent = Intent(applicationContext, MyBackgroundService::class.java)
-        startService(restartServiceIntent)
+        backgroundTimer?.cancel()
+        backgroundTimer = null
+        Log.i("TimerService", "⛔ Timer stopped")
     }
+
+    override fun onBind(intent: Intent?): IBinder? = null
 }
-
-
