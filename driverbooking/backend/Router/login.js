@@ -27,18 +27,19 @@ router.post('/login', (req, res) => {
     db.query('SELECT * FROM drivercreation WHERE username = ? AND userpassword = ?', [username, userpassword], (err, result) => {
 
         if (err) {
+        console.log(err, "error")
             return res.status(500).json({ error: 'Failed to retrieve user details from MySQL' });
         }
-       
+       console.log(result , "rusults login")
         if(result.length > 0){
       
         // console.log(user,"uuuuuppp",result[0]?.length)
         db.query("UPDATE drivercreation SET active ='yes' WHERE username = ? AND userpassword = ?", [username,userpassword], (err, result1) => {
             if (err) {
-                console.log(err, "error");
+                console.log(err, "update error");
                 return res.status(500).json({ error: 'Failed to update status' });
             }
-            console.log(result, 'result');
+            console.log(result, 'result update');
             return res.status(200).json({ message: 'Login successful', user : result });
 //             return res.status(200).json(result);
         });

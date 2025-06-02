@@ -25,10 +25,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
   emit(LoginLoading());
   try {
+    print('trtr');
     final response = await ApiService.login(
       username: event.username,
       password: event.password,
     );
+    print('tttt $response , ');
 
     if (response.statusCode == 200) {
       // final data = jsonDecode(response.body);
@@ -38,6 +40,8 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
 
       final data = jsonDecode(response.body);
       String driverName = data['user'][0]['drivername']; // Extracting drivername
+      print('${data},akll');
+      print('${driverName},akll');
 
       final id = data['userId'];
       final driverdata = driverName;
@@ -59,10 +63,12 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
       print("User data saved successfully!");
       emit(LoginCompleted('$id'));
     } else {
-      emit(LoginFailure("Login failed, please check your credentials."));
+
+      emit(LoginFailure("Login failed, please check your 4567credentials."));
     }
   } catch (e) {
-    emit(LoginFailure("An error occurred: $e"));
+    print('An Login error occurred: $e');
+    emit(LoginFailure("An Login error occurred: $e"));
   }
 }
 
