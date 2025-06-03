@@ -59,6 +59,10 @@ class MyBackgroundService : Service() {
 
     private var totalDistanceInMeters = 0.0
 
+    private val PREFS_NAME = "tracking_prefs"
+    private val DISTANCE_KEY = "total_distance_m"
+
+
     override fun onCreate() {
         super.onCreate()
         Log.d("MyBackgroundService", "Service created")
@@ -71,6 +75,11 @@ class MyBackgroundService : Service() {
 //        FlutterEngineCache.getInstance().put("tracking_engine", engine)
 //
 //        channel = MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL_NAME)
+
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        totalDistanceInMeters = prefs.getFloat(DISTANCE_KEY, 0f).toDouble()
+        Log.i("MyBackgroundService", "🔁 Restored total distance from prefs: $totalDistanceInMeters meters")
+
         val engine = FlutterEngineCache.getInstance()["my_engine_id"]
         if (engine != null) {
             channel = MethodChannel(engine.dartExecutor.binaryMessenger, "com.example.jessy_cabs/background")
@@ -78,6 +87,8 @@ class MyBackgroundService : Service() {
         } else {
             Log.e("MyBackgroundService", "❌ FlutterEngine 'my_engine_id' not found in cache")
         }
+
+
 
 
         startLocationLoop()
@@ -157,6 +168,11 @@ class MyBackgroundService : Service() {
             distance = results[0].toDouble() // in meters
 
             totalDistanceInMeters += distance
+
+            val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            prefs.edit().putFloat(DISTANCE_KEY, totalDistanceInMeters.toFloat()).apply()
+            Log.i("MyBackgroundService", "💾 Saved total distance to prefs: $totalDistanceInMeters meters")
+
             Log.i("DistanceTracking", "📏 Added distance: $distance meters, Total: $totalDistanceInMeters meters")
 
             // Update last known location

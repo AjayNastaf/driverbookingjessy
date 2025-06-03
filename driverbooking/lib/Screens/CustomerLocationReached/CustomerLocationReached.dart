@@ -1144,6 +1144,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
   static const MethodChannel _channel =
   MethodChannel('com.example.jessy_cabs/tracking');
   static const MethodChannel _distancechannel = MethodChannel('com.example.jessy_cabs/background');
+  static const MethodChannel _trackingChannel = MethodChannel('com.example.jessy_cabs/tracking');
 
   double totalDistanceInKm = 0.0;
 
@@ -1167,24 +1168,24 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     // platform.invokeMethod('startTrackingForCurrentPage');
     NativeTracker.startTracking();
 
-
-    _distancechannel.setMethodCallHandler((call) async {
-      print("inside the distance function");
-      if (call.method == 'locationUpdate') {
-        final Map<dynamic, dynamic> locationMap = call.arguments;
-
-        print('📱 Received from native: $locationMap');
-
-
-        double totalDistanceMeters = locationMap['totalDistance'] ?? 0.0;
-
-        setState(() {
-          totalDistanceInKm = totalDistanceMeters / 1000;
-        });
-
-      }
-    });
-    print("total km by ky $totalDistanceInKm");
+    //
+    // _distancechannel.setMethodCallHandler((call) async {
+    //   print("inside the distance function");
+    //   if (call.method == 'locationUpdate') {
+    //     final Map<dynamic, dynamic> locationMap = call.arguments;
+    //
+    //     print('📱 Received from native: $locationMap');
+    //
+    //
+    //     double totalDistanceMeters = locationMap['totalDistance'] ?? 0.0;
+    //
+    //     setState(() {
+    //       totalDistanceInKm = totalDistanceMeters / 1000;
+    //     });
+    //
+    //   }
+    // });
+    // print("total km by ky $totalDistanceInKm");
 
 
     _initializeCustomerLocationTracking();
@@ -1201,10 +1202,26 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     saveScreenData();
     _setDestinationFromDropLocation();
     _loadTripSheetDetailsByTripId();
-
+    loadSavedDistance();
 
     startLoop();
   }
+
+  Future<void> loadSavedDistance() async {
+    try {
+      final savedDistance = await _trackingChannel.invokeMethod("getSavedDistance");
+      setState(() {
+        totalDistanceInKm = (savedDistance as num?)?.toDouble() ?? 0.0;
+        totalDistanceInKm /= 1000; // convert meters to kilometers
+      });
+      print('✅ Distance loaded from native: $totalDistanceInKm km');
+    } catch (e) {
+      print('❌ Error loading distance: $e');
+    }
+  }
+
+
+
   void startLoop() {
     Timer.periodic(Duration(seconds: 4), (timer) {
       print("total km by ky $totalDistanceInKm");
