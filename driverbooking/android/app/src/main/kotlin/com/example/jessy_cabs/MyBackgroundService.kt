@@ -130,7 +130,7 @@ class MyBackgroundService : Service() {
                         Log.e("LocationLoop", "Failed to get location: ${it.localizedMessage}")
                     }
             }
-        }, 0, 3000)
+        }, 0, 5000)
     }
 
     private fun saveLocationToBackend(lat: Double, lon: Double) {
@@ -145,15 +145,24 @@ class MyBackgroundService : Service() {
 
         var distance = 0.0
         if (lastLat != 0.0 && lastLng != 0.0) {
-            Log.i("DistanceTracking", "📏 Added distance: meters")
+            Log.i("DistanceTracking", "Current Location: $lat, $lon")
+            Log.i("DistanceTracking", "Last Location: $lastLat, $lastLng")
 
             val results = FloatArray(1)
             Location.distanceBetween(lastLat, lastLng, lat, lon, results)
             distance = results[0].toDouble() // in meters
+
             totalDistanceInMeters += distance
             Log.i("DistanceTracking", "📏 Added distance: $distance meters, Total: $totalDistanceInMeters meters")
-        }else {
+
+            // Update last known location
+            lastLat = lat
+            lastLng = lon
+        } else {
             Log.i("DistanceTracking", "Last lat/lng are zero, skipping distance calculation")
+            // First time location capture
+            lastLat = lat
+            lastLng = lon
         }
 
 // Send location update to Flutter
@@ -166,8 +175,10 @@ class MyBackgroundService : Service() {
 
     Thread {
             try {
-                val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
+//                val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
 //                val url = URL("http://192.168.0.114:3004/addvehiclelocationUniqueLatlong")
+                val url = URL("http://http://75.101.215.49:7128/addvehiclelocationUniqueLatlong")
+
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json")

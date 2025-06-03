@@ -1149,6 +1149,24 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
   @override
   void initState() {
     super.initState();
+    // _channel.setMethodCallHandler((call) async {
+    //   if (call.method == 'locationUpdate') {
+    //     final Map<dynamic, dynamic> locationMap = call.arguments;
+    //     double totalDistanceMeters = locationMap['totalDistance'] ?? 0.0;
+    //
+    //     setState(() {
+    //       totalDistanceInKm = totalDistanceMeters / 1000;
+    //     });
+    //   }
+    // });
+
+
+
+    // const platform = MethodChannel('com.example.jessy_cabs/background');
+    // platform.invokeMethod('startTrackingForCurrentPage');
+    NativeTracker.startTracking();
+
+
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'locationUpdate') {
         final Map<dynamic, dynamic> locationMap = call.arguments;
@@ -1157,14 +1175,11 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
         setState(() {
           totalDistanceInKm = totalDistanceMeters / 1000;
         });
+
       }
     });
+    print("total km by ky $totalDistanceInKm");
 
-
-
-    // const platform = MethodChannel('com.example.jessy_cabs/background');
-    // platform.invokeMethod('startTrackingForCurrentPage');
-    NativeTracker.startTracking();
 
     _initializeCustomerLocationTracking();
 
