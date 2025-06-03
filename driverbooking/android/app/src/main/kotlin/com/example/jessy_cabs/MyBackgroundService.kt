@@ -71,10 +71,14 @@ class MyBackgroundService : Service() {
 //        FlutterEngineCache.getInstance().put("tracking_engine", engine)
 //
 //        channel = MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL_NAME)
-        channel = MethodChannel(
-            FlutterEngine(this).dartExecutor.binaryMessenger,
-            "com.example.jessy_cabs/location"
-        )
+        val engine = FlutterEngineCache.getInstance()["my_engine_id"]
+        if (engine != null) {
+            channel = MethodChannel(engine.dartExecutor.binaryMessenger, "com.example.jessy_cabs/background")
+            Log.i("MyBackgroundService", "✅ Channel successfully created with cached engine")
+        } else {
+            Log.e("MyBackgroundService", "❌ FlutterEngine 'my_engine_id' not found in cache")
+        }
+
 
         startLocationLoop()
     }

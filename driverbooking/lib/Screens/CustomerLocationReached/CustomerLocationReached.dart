@@ -1096,7 +1096,7 @@ import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:location/location.dart' as loc;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-
+import 'package:jessy_cabs/Utils/AllImports.dart';
 
 
 class Customerlocationreached extends StatefulWidget {
@@ -1143,6 +1143,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
   // static const platform = MethodChannel('com.example.jessy_cabs/tracking');
   static const MethodChannel _channel =
   MethodChannel('com.example.jessy_cabs/tracking');
+  static const MethodChannel _distancechannel = MethodChannel('com.example.jessy_cabs/background');
 
   double totalDistanceInKm = 0.0;
 
@@ -1167,9 +1168,14 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     NativeTracker.startTracking();
 
 
-    _channel.setMethodCallHandler((call) async {
+    _distancechannel.setMethodCallHandler((call) async {
+      print("inside the distance function");
       if (call.method == 'locationUpdate') {
         final Map<dynamic, dynamic> locationMap = call.arguments;
+
+        print('📱 Received from native: $locationMap');
+
+
         double totalDistanceMeters = locationMap['totalDistance'] ?? 0.0;
 
         setState(() {
@@ -1195,8 +1201,16 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     saveScreenData();
     _setDestinationFromDropLocation();
     _loadTripSheetDetailsByTripId();
-  }
 
+
+    startLoop();
+  }
+  void startLoop() {
+    Timer.periodic(Duration(seconds: 4), (timer) {
+      print("total km by ky $totalDistanceInKm");
+showInfoSnackBar(context, "total km by ky $totalDistanceInKm");
+    });
+  }
   Future<void> _loadTripSheetDetailsByTripId() async {
 
     try {
