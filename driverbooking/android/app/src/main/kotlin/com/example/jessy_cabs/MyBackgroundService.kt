@@ -177,7 +177,7 @@ class MyBackgroundService : Service() {
             try {
 //                val url = URL("https://jessycabs.com:7128/addvehiclelocationUniqueLatlong")
 //                val url = URL("http://192.168.0.114:3004/addvehiclelocationUniqueLatlong")
-                val url = URL("http://http://75.101.215.49:7128/addvehiclelocationUniqueLatlong")
+                val url = URL("http://75.101.215.49:7128/addvehiclelocationUniqueLatlong")
 
                 val conn = url.openConnection() as HttpURLConnection
                 conn.requestMethod = "POST"
