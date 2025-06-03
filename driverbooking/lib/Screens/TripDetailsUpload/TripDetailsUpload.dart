@@ -549,6 +549,7 @@
 
 
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:jessy_cabs/Screens/TripDetailsPreview/TripDetailsPreview.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
@@ -602,8 +603,10 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   late TripUploadBloc _tripUploadBloc;
   bool _isLoading = false; // Add this in your state
   bool _hasLoadedOnce = false;
+  double totalDistanceInKm = 0.0;
 
   String? startkmvalue;
+  static const MethodChannel _trackingChannel = MethodChannel('com.example.jessy_cabs/tracking');
 
 
   String setFormattedDate(String? dateStr) {
@@ -1188,6 +1191,18 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     }
   }
 
+  Future<void> clearSavedDistance() async {
+    try {
+      await _trackingChannel.invokeMethod("clearSavedDistance");
+      print("✅ SharedPreferences cleared");
+      setState(() {
+        totalDistanceInKm = 0.0;
+      });
+    } catch (e) {
+      print("❌ Failed to clear distance: $e");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -1430,7 +1445,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                                 ),
                               );
                             });
-
+                            clearSavedDistance(); //for clearing shared prefence kilometers
                           },
                           // child: Text("Upload Toll and Parking Data"),
                           child:  _isLoading

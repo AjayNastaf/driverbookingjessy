@@ -1202,7 +1202,6 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     saveScreenData();
     _setDestinationFromDropLocation();
     _loadTripSheetDetailsByTripId();
-    loadSavedDistance();
 
     startLoop();
   }
@@ -1224,7 +1223,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
 
   void startLoop() {
     Timer.periodic(Duration(seconds: 4), (timer) {
-      print("total km by ky $totalDistanceInKm");
+      loadSavedDistance();
 showInfoSnackBar(context, "total km by ky $totalDistanceInKm");
     });
   }

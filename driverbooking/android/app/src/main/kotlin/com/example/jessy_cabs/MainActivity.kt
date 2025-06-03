@@ -475,25 +475,49 @@ class MainActivity : FlutterActivity(), LifecycleEventObserver {
 
 
 
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.jessy_cabs/tracking")
+//        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.jessy_cabs/tracking")
+//
+//            .setMethodCallHandler { call, result ->
+//
+//                if (call.method == "getSavedDistance") {
+//
+//                    val prefs = getSharedPreferences("tracking_prefs", Context.MODE_PRIVATE)
+//
+//                    val savedDistance = prefs.getFloat("total_distance_m", 0f)
+//
+//                    result.success(savedDistance.toDouble())
+//
+//                } else {
+//
+//                    result.notImplemented()
+//
+//                }
+//
+//            }
 
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.jessy_cabs/tracking")
             .setMethodCallHandler { call, result ->
 
-                if (call.method == "getSavedDistance") {
+                when (call.method) {
 
-                    val prefs = getSharedPreferences("tracking_prefs", Context.MODE_PRIVATE)
+                    "getSavedDistance" -> {
+                        val prefs = getSharedPreferences("tracking_prefs", Context.MODE_PRIVATE)
+                        val savedDistance = prefs.getFloat("total_distance_m", 0f)
+                        result.success(savedDistance.toDouble())
+                    }
 
-                    val savedDistance = prefs.getFloat("total_distance_m", 0f)
+                    "clearSavedDistance" -> {
+                        val prefs = getSharedPreferences("tracking_prefs", Context.MODE_PRIVATE)
+                        prefs.edit().putFloat("total_distance_m", 0f).apply()
+                        result.success("Distance cleared")
+                    }
 
-                    result.success(savedDistance.toDouble())
-
-                } else {
-
-                    result.notImplemented()
-
+                    else -> result.notImplemented()
                 }
-
             }
+
+
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
