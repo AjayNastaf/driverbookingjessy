@@ -1202,8 +1202,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
     saveScreenData();
     _setDestinationFromDropLocation();
     _loadTripSheetDetailsByTripId();
-
-    startLoop();
+    loadSavedDistance();       // Load pref on screen open
+    listenToDistanceUpdates(); // Listen for real-time updates
   }
 
   Future<void> loadSavedDistance() async {
@@ -1216,6 +1216,36 @@ class _CustomerlocationreachedState extends State<Customerlocationreached>   {
       print('✅ Distance loaded from native: $totalDistanceInKm km');
     } catch (e) {
       print('❌ Error loading distance: $e');
+    }
+  }
+
+  // static const MethodChannel _distanceChannel = MethodChannel('com.example.jessy_cabs/background');
+
+  void listenToDistanceUpdates() {
+    _trackingChannel.setMethodCallHandler((call) async {
+      if (call.method == 'locationUpdate') {
+        final Map<dynamic, dynamic> data = call.arguments;
+        final totalMeters = (data['totalDistance'] as num?)?.toDouble() ?? 0.0;
+
+        setState(() {
+          totalDistanceInKm = totalMeters / 1000;
+        });
+
+        print("📡 Live update: $totalDistanceInKm km");
+      }
+    });
+  }
+
+
+  Future<void> clearSavedDistance() async {
+    try {
+      await _trackingChannel.invokeMethod("clearSavedDistance");
+      print("✅ SharedPreferences cleared");
+      setState(() {
+        totalDistanceInKm = 0.0;
+      });
+    } catch (e) {
+      print("❌ Failed to clear distance: $e");
     }
   }
 
@@ -1662,6 +1692,7 @@ showInfoSnackBar(context, "total km by ky $totalDistanceInKm");
   }
 
   Future<void> _endRide() async {
+    clearSavedDistance();
     final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
     final String signTime = TimeOfDay.now().format(context); // Current time
 

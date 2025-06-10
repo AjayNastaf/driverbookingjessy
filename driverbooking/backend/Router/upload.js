@@ -28,10 +28,12 @@ const axios = require('axios');
 //     },
 // });
 
+
+const uploadDir = path.join(__dirname, '../../../Imagefolder/imagesUploads_doc');
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         // console.log(req,"jj")
-      cb(null, 'uploads',)
+      cb(null, uploadDir,)
     },
     filename: (req, file, cb) => {
          console.log(req,"lllll")

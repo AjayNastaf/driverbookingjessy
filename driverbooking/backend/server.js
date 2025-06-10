@@ -26,9 +26,10 @@ const transporter = nodemailer.createTransport({
 
 app.use('/profile_photos', express.static(path.join(__dirname, 'profile_photos')));
 //app.use('/signature_photos', express.static(path.join(__dirname, 'Router/path_to_save_images')));
-app.use('/signatures', express.static(path.join(__dirname, 'Router/path_to_save_images')));
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+//app.use('/signatures', express.static(path.join(__dirname, 'Router/path_to_save_images')));
+app.use('/signatures', express.static(path.join(__dirname, '../../../Imagefolder/signature_images')));
+app.use('/uploads', express.static(path.join(__dirname, '../../../Imagefolder/imagesUploads_doc')));
+//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // app.use('/images', express.static(path.join(__dirname, 'path_to_save_images')));
 console.log(express.static(path.join(__dirname, 'profile_photos')),"ppp")
 

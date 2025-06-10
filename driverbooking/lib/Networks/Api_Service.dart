@@ -689,46 +689,46 @@ class ApiService {
         print("Successsss sign jessy: ${data['message']}");
 
 
-
-
-        final Uri url = Uri.parse('${AppConstants.baseUrlJessyCabs}/signautureimagedriverapp');
-        print("Successsss sign jessyyyy:");
-
-        try {
-          // Prepare the data to send in the request
-          final Map<String, dynamic> requestBody1 = {
-            'signatureData': signatureData,
-            'imageName': imageName,
-          };
-
-          // Convert the body to JSON
-          final String body = json.encode(requestBody1);
-
-          // Send POST request to save signature
-          final response1 = await http.post(
-            url,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: body,
-          );
-
-          // Print full response details
-          print('Response Status Code (jessy): ${response1.statusCode}');
-          print('Full Response Body (jessy): ${response1.body}');
-
-          // Handle response based on status code
-          if (response1.statusCode == 200) {
-            print('jessy Response Body123 (jessy): ${response1.body}');
-          } else {
-            print('Error Response Body (jessy): ${response1}');
-          }
-        }
-          catch (e){
-            print('Error Response Body (jessy): ${e}');
-          }
-
-
+        //
+        //
+        // final Uri url = Uri.parse('${AppConstants.baseUrlJessyCabs}/signautureimagedriverapp');
+        // print("Successsss sign jessyyyy:");
+        //
+        // try {
+        //   // Prepare the data to send in the request
+        //   final Map<String, dynamic> requestBody1 = {
+        //     'signatureData': signatureData,
+        //     'imageName': imageName,
+        //   };
+        //
+        //   // Convert the body to JSON
+        //   final String body = json.encode(requestBody1);
+        //
+        //   // Send POST request to save signature
+        //   final response1 = await http.post(
+        //     url,
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //     },
+        //     body: body,
+        //   );
+        //
+        //   // Print full response details
+        //   print('Response Status Code (jessy): ${response1.statusCode}');
+        //   print('Full Response Body (jessy): ${response1.body}');
+        //
+        //   // Handle response based on status code
+        //   if (response1.statusCode == 200) {
+        //     print('jessy Response Body123 (jessy): ${response1.body}');
+        //   } else {
+        //     print('Error Response Body (jessy): ${response1}');
+        //   }
+        // }
+        //   catch (e){
+        //     print('Error Response Body (jessy): ${e}');
+        //   }
+        //
+        //
 
 
 
@@ -959,25 +959,25 @@ class ApiService {
             var response = await request.send();
 
             if (response.statusCode == 200) {
-              try {
-                var uri2 = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
-                var request2 = http.MultipartRequest('POST', uri2);
-
-                // Add the file to the second request as well
-                request2.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
-
-                var response2 = await request2.send();
-                var responseBody = await response2.stream.bytesToString();
-
-                print("Response from second upload: $responseBody");
-                if (response2.statusCode == 200) {
-                  print('Toll file uploaded successfully: $fileName');
-                } else {
-                  print("Failed to upload toll file (second request): ${response2.statusCode}");
-                }
-              } catch (e) {
-                print("Error in second upload: $e");
-              }
+              // try {
+              //   var uri2 = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+              //   var request2 = http.MultipartRequest('POST', uri2);
+              //
+              //   // Add the file to the second request as well
+              //   request2.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
+              //
+              //   var response2 = await request2.send();
+              //   var responseBody = await response2.stream.bytesToString();
+              //
+              //   print("Response from second upload: $responseBody");
+              //   if (response2.statusCode == 200) {
+              //     print('Toll file uploaded successfully: $fileName');
+              //   } else {
+              //     print("Failed to upload toll file (second request): ${response2.statusCode}");
+              //   }
+              // } catch (e) {
+              //   print("Error in second upload: $e");
+              // }
             } else {
               print("Failed to upload toll file (first request): ${response.statusCode}");
             }
@@ -1103,25 +1103,25 @@ class ApiService {
             var response = await request.send();
 
             if (response.statusCode == 200) {
-              try {
-                var uri2 = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
-                var request2 = http.MultipartRequest('POST', uri2);
-
-                // Add the file to the second request as well
-                request2.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
-
-                var response2 = await request2.send();
-                var responseBody = await response2.stream.bytesToString();
-
-                print("Response from second upload: $responseBody");
-                if (response2.statusCode == 200) {
-                  print('File uploaded successfully: $fileName');
-                } else {
-                  print("Failed to upload file (second request): ${response2.statusCode}");
-                }
-              } catch (e) {
-                print("Error in second upload: $e");
-              }
+              // try {
+              //   var uri2 = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+              //   var request2 = http.MultipartRequest('POST', uri2);
+              //
+              //   // Add the file to the second request as well
+              //   request2.files.add(await http.MultipartFile.fromPath('file', file.path, filename: fileName));
+              //
+              //   var response2 = await request2.send();
+              //   var responseBody = await response2.stream.bytesToString();
+              //
+              //   print("Response from second upload: $responseBody");
+              //   if (response2.statusCode == 200) {
+              //     print('File uploaded successfully: $fileName');
+              //   } else {
+              //     print("Failed to upload file (second request): ${response2.statusCode}");
+              //   }
+              // } catch (e) {
+              //   print("Error in second upload: $e");
+              // }
             } else {
               print("Failed to upload file (first request): ${response.statusCode}");
             }
@@ -1288,40 +1288,40 @@ class ApiService {
       if (response.statusCode == 200) {
         print("success to upload fileeeeee: ${response.statusCode}");
 
-        try {
-          print('insie api url');
-          // Generate the unique filename based on the current date
-          // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
-
-          var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
-          var request = http.MultipartRequest('POST', uri);
-
-          // request.fields['tripid'] = tripid;
-          // request.fields['documenttype'] = documenttype;
-
-          // Upload the file with the unique name
-          request.files.add(await http.MultipartFile.fromPath('file', startingkilometer.path,
-            // filename: fileName
-          ));
-
-          var response1 = await request.send();
-          var responseBody = await response1.stream.bytesToString();
-
-          print("Full API Response: ${response1.statusCode} - $responseBody");
-          print('${response1},insiee api urlll');
-          print('${responseBody},insie api urlll');
-          if (response1.statusCode == 200) {
-            print("success for starting to upload filee: ${response1.statusCode}");
-
-            return true;
-          } else {
-            print("Failed to upload filee: ${response1.statusCode}");
-            return false;
-          }
-        } catch (e) {
-          print("Error during upload: $e");
-          return false;
-        }
+        // try {
+        //   print('insie api url');
+        //   // Generate the unique filename based on the current date
+        //   // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+        //
+        //   var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+        //   var request = http.MultipartRequest('POST', uri);
+        //
+        //   // request.fields['tripid'] = tripid;
+        //   // request.fields['documenttype'] = documenttype;
+        //
+        //   // Upload the file with the unique name
+        //   request.files.add(await http.MultipartFile.fromPath('file', startingkilometer.path,
+        //     // filename: fileName
+        //   ));
+        //
+        //   var response1 = await request.send();
+        //   var responseBody = await response1.stream.bytesToString();
+        //
+        //   print("Full API Response: ${response1.statusCode} - $responseBody");
+        //   print('${response1},insiee api urlll');
+        //   print('${responseBody},insie api urlll');
+        //   if (response1.statusCode == 200) {
+        //     print("success for starting to upload filee: ${response1.statusCode}");
+        //
+        //     return true;
+        //   } else {
+        //     print("Failed to upload filee: ${response1.statusCode}");
+        //     return false;
+        //   }
+        // } catch (e) {
+        //   print("Error during upload: $e");
+        //   return false;
+        // }
 
         return true;
       } else {
@@ -1361,39 +1361,39 @@ class ApiService {
 
       if (response.statusCode == 200) {
 
-        try {
-          // Generate the unique filename based on the current date
-          // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
-
-          var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
-          var request = http.MultipartRequest('POST', uri);
-
-          // request.fields['tripid'] = tripid;
-          // request.fields['documenttype'] = documenttype;
-
-          // Upload the file with the unique name
-          request.files.add(await http.MultipartFile.fromPath('file', closingkilometer.path,
-            // filename: fileName
-          ));
-
-          var response1 = await request.send();
-
-          var responseBody = await response1.stream.bytesToString();
-
-          print("Full API Response: ${response1.statusCode} - $responseBody");
-          print('${response1},insie api url');
-          print('${responseBody},insie api url');
-          if (response1.statusCode == 200) {
-            print("success for starting to upload filee: ${response1.statusCode}");
-            return true;
-          } else {
-            print("Failed to upload file: ${response1.statusCode}");
-            return false;
-          }
-        } catch (e) {
-          print("Error during upload: $e");
-          return false;
-        }
+        // try {
+        //   // Generate the unique filename based on the current date
+        //   // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
+        //
+        //   var uri = Uri.parse("${AppConstants.baseUrlJessyCabs}/tripsheetdatadriverappimage/$formattedDate");
+        //   var request = http.MultipartRequest('POST', uri);
+        //
+        //   // request.fields['tripid'] = tripid;
+        //   // request.fields['documenttype'] = documenttype;
+        //
+        //   // Upload the file with the unique name
+        //   request.files.add(await http.MultipartFile.fromPath('file', closingkilometer.path,
+        //     // filename: fileName
+        //   ));
+        //
+        //   var response1 = await request.send();
+        //
+        //   var responseBody = await response1.stream.bytesToString();
+        //
+        //   print("Full API Response: ${response1.statusCode} - $responseBody");
+        //   print('${response1},insie api url');
+        //   print('${responseBody},insie api url');
+        //   if (response1.statusCode == 200) {
+        //     print("success for starting to upload filee: ${response1.statusCode}");
+        //     return true;
+        //   } else {
+        //     print("Failed to upload file: ${response1.statusCode}");
+        //     return false;
+        //   }
+        // } catch (e) {
+        //   print("Error during upload: $e");
+        //   return false;
+        // }
 
         return true;
       } else {

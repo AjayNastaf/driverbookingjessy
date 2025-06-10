@@ -7,7 +7,8 @@ const path = require('path');
 const multer=require('multer');
 
 // Define a constant for the base path to save images
-const baseImagePath = path.join(__dirname, 'path_to_save_images');
+//const baseImagePath = path.join(__dirname, 'path_to_save_images');
+const baseImagePath = path.join(__dirname, '../../../Imagefolder/signature_images');
 console.log(baseImagePath , 'path disdf');
 function generateUniqueNumbers() {
     return Math.floor(10000 + Math.random() * 90000);
