@@ -18,7 +18,7 @@ class AppConstants {
 
 
 //local
-  // static const String baseUrl = "http://192.168.0.114:3004";
+//   static const String baseUrl = "http://192.168.0.105:3004";
   // static const String baseUrlJessyCabs = "http://192.168.0.114:8081";
 
 
@@ -29,7 +29,7 @@ class AppConstants {
   // static const String baseUrlJessyCabs = "https://jessycabs.com:54462";
 
 //Aws
-  static const String baseUrl = "http://75.101.215.49:54462";
+  static const String baseUrl = "http://75.101.215.49:7128";
   // static const String baseUrlJessyCabs = "http://54.227.179.97:54462";
   
   static const Color primaryColor = Colors.blue;
