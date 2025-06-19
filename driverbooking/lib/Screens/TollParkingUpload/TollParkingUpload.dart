@@ -58,7 +58,8 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
       // parkingFile = null;
     });
     saveScreenData();
-
+    // If you need to reload trip details or fetch updated data, do it here
+    print("Data refreshed!");
   }
 
 

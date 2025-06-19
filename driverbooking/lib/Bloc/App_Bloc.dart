@@ -25,12 +25,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
   emit(LoginLoading());
   try {
-    print('trtr');
     final response = await ApiService.login(
       username: event.username,
       password: event.password,
     );
-    print('tttt $response , ');
 
     if (response.statusCode == 200) {
       // final data = jsonDecode(response.body);
@@ -40,8 +38,6 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
 
       final data = jsonDecode(response.body);
       String driverName = data['user'][0]['drivername']; // Extracting drivername
-      print('${data},akll');
-      print('${driverName},akll');
 
       final id = data['userId'];
       final driverdata = driverName;
@@ -63,12 +59,10 @@ void _onLoginAtempt(LoginAtempt event, Emitter<LoginState> emit) async {
       print("User data saved successfully!");
       emit(LoginCompleted('$id'));
     } else {
-
-      emit(LoginFailure("Login failed, please check your 4567credentials."));
+      emit(LoginFailure("Login failed, please check your credentials."));
     }
   } catch (e) {
-    print('An Login error occurred: $e');
-    emit(LoginFailure("An Login error occurred: $e"));
+    emit(LoginFailure("An error occurred: $e"));
   }
 }
 
@@ -1250,7 +1244,6 @@ class TripTrackingDetailsBloc extends Bloc<TripTrackingDetailsEvent, TripTrackin
 
 
 
-
   Future<void> _onSaveLocationToDatabase(
       SaveLocationToDatabase event, Emitter<TripTrackingDetailsState> emit) async {
     emit(SaveLocationLoading());
@@ -1266,6 +1259,7 @@ print('yess');
       "Tripstarttime": DateTime.now().toLocal().toString().split(" ")[1],
       "TripEndTime": DateTime.now().toLocal().toString().split(" ")[1],
       "created_at": DateTime.now().toIso8601String(),
+      "reach_30minutes":event.reached_30minutes,
     };
 
     try {
@@ -1576,3 +1570,315 @@ class GettingClosingKilometerBloc extends Bloc<GettingClosingKilometerEvent, Get
 }
 
 //getting dynamic closing kilometer bloc start
+
+
+
+
+class OtpBloc extends Bloc<OtpEvent, OTPState> {
+  OtpBloc() : super(OTPInitial()) {
+    on<OtpEvent>(_onOtpRequested);
+  }
+
+  Future<void> _onOtpRequested(OtpEvent event, Emitter<OTPState> emit) async {
+    print("2 - Bloc processing event"); // Debug
+    print('Bloc Received data ${event.guestEmail}');
+    print('Bloc Received data ${event.guestNumber}');
+    print('Bloc Received data ${event.guestName}');
+    emit(OTPLoading());
+    try {
+      // final response = await ApiService.sendOtp(event.guestNumber, event.guestEmail);
+      final response = await ApiService.sendOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName,  senderEmail: event.senderEmail,senderPass: event.senderPass,);
+      ;
+      if (response['otp'] != null) {
+        emit(OTPSuccess(response['otp'].toString()));
+      } else {
+        emit(OTPFailed('OTP not found in response'));
+      }
+    } catch (e) {
+      emit(OTPFailed(e.toString()));
+    }
+  }
+}
+
+
+
+class LastOtBloc extends Bloc<OtpVerifyEvent, OtpVerifyState>{
+  LastOtBloc():super(LastOtpInitial()){
+    on<OtpVerifyEvent>(_onFetch);
+  }
+
+  Future<void>_onFetch(OtpVerifyEvent event, Emitter<OtpVerifyState> emit) async{
+
+    print('Bloc Received Last Otp info ${event.guestName}');
+    print('Bloc Received Last Otp info ${event.guestEmail}');
+    print('Bloc Received Last Otp info ${event.guestNumber}');
+    emit(LastOtpLoading());
+
+    try{
+      final response = await ApiService.verifyOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName, senderEmail: event.senderEmail, senderPass: event.senderPass);
+      if(response['otp'] != null){
+        emit(LastOtpSuccess(response['otp'].toString()));
+      } else{
+        emit(LastOtpFailed('OTP not found in response'));
+      }
+    } catch(e){
+      emit(LastOtpFailed(e.toString()));
+    }
+  }
+}
+
+
+class EmailBloc extends Bloc<EmailEvent, EmailState> {
+  EmailBloc() : super(EmailInitial()) {
+    on<SendEmailEvent>((event, emit) async {
+      print('📨 SendEmailEvent triggered');
+      emit(EmailSending());
+
+      final success = await ApiService.sendBookingEmail(
+        guestName: event.guestName,
+        guestMobileNo: event.guestMobileNo,
+        email: event.email,
+        startKm: event.startKm,
+        closeKm: event.closeKm,
+        duration: event.duration,
+        senderEmail: event.senderEmail,
+        senderPassword: event.senderPassword,
+        TripId: event.TripId,
+        Vehiclenumber: event.Vechnum,
+        VehicleName: event.Vechname,
+        DutyType: event.dutytype,
+        ReportTime: event.ReportTime,
+        ReleaseTime: event.ReleaseTime,
+        ReportDate: event.ReportDate,
+        ReleaseDate: event.ReleaseDate,
+        Startpoint: event.Startpoint,
+        Endpoint: event.Endpoint,
+      );
+
+      if (success) {
+        print('✅ EmailSent state emitted');
+        emit(EmailSent());
+      } else {
+        print('❌ EmailFailed state emitted');
+        emit(EmailFailed());
+      }
+    });
+  }
+}
+
+
+
+
+
+class SenderInfoBloc extends Bloc<SenderInfoEvent, SenderInfoState> {
+  SenderInfoBloc() : super(SenderInfoIntial()) {
+    on<FetchSenderInfo>(_onFetchSenderInformation);
+  }
+
+  Future<void> _onFetchSenderInformation(
+      FetchSenderInfo event, Emitter<SenderInfoState> emit) async {
+
+    print('SenderInfo Bloc Screen');
+    emit(SenderInfoLoading());
+
+    try {
+      final response = await ApiService.fetchSenderInfo();
+
+      print('response from origi${response}');
+
+      if (response['success']) {
+        emit(SenderInfoSuccess(
+          senderMail: response['senderEmail'],
+          senderPass: response['senderPass'],
+        ));
+      } else {
+        emit(SenderInfoFailed(response['message']));
+      }
+    } catch (e) {
+      emit(SenderInfoFailed("Exception: $e"));
+    }
+  }
+
+}
+
+
+
+
+// For new sign up page created at 09-06-20225
+
+
+
+class GetDurationBloc extends Bloc<GetDurationEvent, GetDurationState> {
+  GetDurationBloc() : super(GetDurationInitial()) {
+    on<FetchDuration>(_onFetchDuration);
+  }
+
+  Future<void> _onFetchDuration(
+      FetchDuration event, Emitter<GetDurationState> emit) async {
+    emit(GetDurationLoading());
+
+    print('bloc screen got tripId for duration time ${event.tripId}');
+    try {
+      final response = await ApiService.fetchDistance(tripId: event.tripId);
+
+      if (response['success'] == true) {
+        print('response from api service ${response}');
+        emit(GetDurationSuccess(data: response['duration']));
+      } else {
+        print('error response from api service ${response}');
+        emit(GetDurationFailed(response['message']));
+      }
+    } catch (e) {
+      print('error response from api service');
+      emit(GetDurationFailed("Error is ${e}"));
+    }
+  }
+}
+
+
+
+
+class SignupBloc extends Bloc<SignupEvent, SignupState> {
+  SignupBloc() : super(SignUpInitial()) {
+    on<SignupRequested>(_onSignupAttepmt);
+    on<OtpverificationRequested>(_onSignupAttepmtTwo);
+  }
+}
+
+void _onSignupAttepmt(SignupRequested event, Emitter<SignupState> emit) async {
+  print('first step values received in bloc ${event.email}');
+  print('first step values received in bloc ${event.name}');
+  print('first step values received in bloc ${event.phone}');
+
+  emit(SignUpLoading());
+  try {
+    final response = await ApiService.signUpStepOne(
+        name: event.name, email: event.email, phone: event.phone);
+
+    print('first step response from Api_Service ${response}');
+
+    if (response['success'] == true) {
+      final otp = response['otp']?.toString() ?? '';
+      final userId = response['userId']?.toString() ?? '';
+      emit(OtpSentForSignup(userId: userId, otp: otp));
+    } else if (response['success'] == false) {
+      emit(SignUpFailed("User Already Exists"));
+    } else {
+      emit(SignUpFailed("Unexpected response: ${response['status']}"));
+    }
+  } catch (e) {
+    emit(SignUpFailed('SignUp Failed ${e}'));
+  }
+}
+
+void _onSignupAttepmtTwo(
+    OtpverificationRequested event, Emitter<SignupState> emit) async {
+  print('second step values received in bloc ${event.phone}');
+
+  emit(SignUpLoading());
+  try {
+    final response = await ApiService.signUpStepTwo(phone: event.phone);
+
+    print('second step response from Api_Service ${response}');
+
+    if (response['success'] == true) {
+      final otp = response['otp']?.toString() ?? '';
+      emit(SignUpSuccess(otp: otp));
+    } else if (response['success'] == false) {
+      emit(SignUpFailed("OTP failed"));
+    } else {
+      emit(SignUpFailed("Unexpected response: ${response['status']}"));
+    }
+  } catch (e) {
+    emit(SignUpFailed('OTP Failed ${e}'));
+  }
+}
+
+// For new Login VIA number page created at 11-06-20225
+
+class LoginViaBloc extends Bloc<LoginViaEvent, LoginViaState> {
+  LoginViaBloc() : super(LoginViaInitial()) {
+    on<LoginRequested>(_onLoginViaAttepmt);
+    on<LoginViaOtpverificationRequested>(_onLoginViaAttepmtTwo);
+  }
+}
+
+void _onLoginViaAttepmt(
+    LoginRequested event, Emitter<LoginViaState> emit) async {
+  print('third step values received in bloc ${event.phone}');
+
+  emit(LoginViaLoading());
+  try {
+    final response = await ApiService.loginViaStepOne(phone: event.phone);
+
+    print('third step response from Api_Service ${response}');
+
+    if (response['success'] == true) {
+      final otp = response['otp']?.toString() ?? '';
+      final name= response['username']?.toString() ?? '';
+      emit(LoginViaOtpSentForSignup(otp: otp, name: name));
+    } else if (response['success'] == false) {
+      print('failed work just now check');
+      emit(LoginViaFailed("Invalid User"));
+    } else {
+      emit(LoginViaFailed("Unexpected response: ${response['status']}"));
+    }
+  } catch (e) {
+    emit(LoginViaFailed('SignUp Failed ${e}'));
+  }
+}
+
+void _onLoginViaAttepmtTwo(
+    LoginViaOtpverificationRequested event, Emitter<LoginViaState> emit) async {
+  print('fourth step values received in bloc ${event.phone}');
+
+  emit(LoginViaInitial());
+  try {
+    final response = await ApiService.LoginViaStepTwo(phone: event.phone);
+
+    print('fourth step response from Api_Service ${response}');
+
+    if (response['success'] == true) {
+      final otp = response['otp']?.toString() ?? '';
+      emit(LoginViaSuccess(otp: otp));
+    } else if (response['success'] == false) {
+      emit(LoginViaFailed("OTP failed"));
+    } else {
+      emit(LoginViaFailed("Unexpected response: ${response['status']}"));
+    }
+  } catch (e) {
+    emit(LoginViaFailed('OTP Failed ${e}'));
+  }
+}
+
+// At the bottom of App_Bloc.dart for user login in no logout
+
+//\
+class GetOkayBloc extends Bloc<GetOkayEvent, GetOkayState>{
+  GetOkayBloc():super(GetOkayInitial()){
+    on<FetchOkaymessage>(_onFetchOkayMessage);
+  }
+
+  Future<void>_onFetchOkayMessage(FetchOkaymessage event, Emitter <GetOkayState> emit) async{
+    print('trip id received in bloc screen for okay message ${event.trip_id}');
+
+    emit(GetOkayLoading());
+    try{
+      final response = await ApiService.fetchOkayMessage(trip_id: event.trip_id);
+
+      print('response in bloc screen from api service for okay message ${response}');
+
+      if(response['success'] == true){
+        print('response from api service for okay message ${response}');
+        emit(GetOkaySuccess(data: response['information']));
+      } else {
+        print('error response from api service for okay message${response}');
+        emit(GetOkayFailed("Fetching Data Failed"));
+      }
+    } catch(e){
+      print('error response from api service for okay message');
+      emit(GetOkayFailed("Error is ${e}"));
+    }
+  }
+}
+//

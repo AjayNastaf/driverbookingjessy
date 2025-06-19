@@ -11,6 +11,15 @@ import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
 import 'package:flutter/services.dart';
+import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+
+import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
+
+import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
+
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 
 class StartingKilometer extends StatefulWidget {
   final String address;
@@ -25,7 +34,9 @@ class StartingKilometer extends StatefulWidget {
 class _StartingKilometerState extends State<StartingKilometer>  {
 
 
+  String guestMobileNumber = '';
 
+  String guestEmail = '';
   // final TextEditingController _startKM = TextEditingController();
   TextEditingController _startKM = TextEditingController(text: "0");
 
@@ -93,6 +104,11 @@ class _StartingKilometerState extends State<StartingKilometer>  {
           var tripIdvalue = tripDetails['tripid'].toString();
           hclhybriddata = tripDetails['Hybriddata'];
           duty = tripDetails['duty'];
+          guestMobileNumber= tripDetails['guestmobileno'];
+          guestEmail= tripDetails['email'];
+
+          print("guest ${guestMobileNumber}");
+          print('guest ${guestEmail}');
           print('Trip details guest: $duty');
         });
 
@@ -192,49 +208,30 @@ class _StartingKilometerState extends State<StartingKilometer>  {
     );
 
 
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => Pickupscreen(
-    //       address: widget.address,
-    //       tripId: widget.tripId,
-    //     ),
-    //   ),
-    // );
-    // Navigator.pushAndRemoveUntil(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (context) =>
-    //           TrackingPage(address: widget.address, tripId: widget.tripId),
-    //     ), (route) => false
-    // );
+    if (hclhybriddata == 1) {
 
-    Navigator.pushAndRemoveUntil(
+      Navigator.pushAndRemoveUntil(
+
         context,
-        MaterialPageRoute(
-          builder: (context) =>
-              TrackingPage(address: widget.address, tripId: widget.tripId),
-        ), (route) => false
-    );
 
-// if (hclhybriddata == 1) {
-//   Navigator.pushAndRemoveUntil(
-//       context,
-//       MaterialPageRoute(
-//         builder: (context) =>
-//             TrackingPage(address: widget.address, tripId: widget.tripId),
-//       ), (route) => false
-//   );
-// }else {
-//   Navigator.pushAndRemoveUntil(
-//       context,
-//       MaterialPageRoute(
-//         builder: (context) =>
-//             TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
-//       ), (route) => false
-//   );
-//
-// }
+        MaterialPageRoute(builder: (_) => TrackingPage(address: widget.address, tripId: widget.tripId)),
+
+            (route) => false,
+
+      );
+
+    }
+
+    else {
+  Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
+      ), (route) => false
+  );
+
+}
   }
 
   @override

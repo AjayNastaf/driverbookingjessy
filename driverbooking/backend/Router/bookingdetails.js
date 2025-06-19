@@ -31,14 +31,14 @@ router.get('/tripsheet/:username/:startdate', async (req, res) => {
   try {
 //    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps = "waiting" ';
 //    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept") and startdate = ? order by tripid desc' ;
-    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept") and startdate = ? order by tripid Asc' ;
-
+//    const query = 'SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept") and startdate = ? order by tripid Asc' ;
+const query = `SELECT * FROM tripsheet WHERE driverName = ? AND apps IN ("Waiting", "On_Going", "Accept") AND startdate = ? ORDER BY STR_TO_DATE(reporttime, '%H:%i') ASC`;
     db.query(query, [username,startdate], (err, results) => {
       if (err) {
         res.status(500).json({ message: 'Internal server error' });
         return;
       }
-console.log(results,"aaaaaaa")
+// console.log(results,"aaaaaaa")
       res.status(200).json(results);
     });
   } catch (err) {
@@ -110,14 +110,14 @@ router.get('/tripsheets/:duty/:tripId', async (req, res) => {
         return;
       }
 
-      console.log('Query results:', results); // Should log the query results
+      // console.log('Query results:', results); // Should log the query results
       if (results.length === 0) {
         console.log('No trip sheet found for tripId:', tripId, 'and duty:', duty);
         res.status(404).json({ message: 'Trip sheet not found' });
         return;
       }
 
-      console.log('Found trip sheet data:', results[0]);  // Should log the found trip sheet data
+      // console.log('Found trip sheet data:', results[0]);  // Should log the found trip sheet data
       res.status(200).json(results[0]);  // Send the first result
     });
   } catch (err) {
@@ -143,14 +143,14 @@ router.get('/tripsheets_fulldetails/:tripId', async (req, res) => {
         return;
       }
 
-      console.log('Query results:', results); // Should log the query results
+      // console.log('Query results:', results); // Should log the query results
       if (results.length === 0) {
         console.log('No trip sheet found for tripId:', tripId,);
         res.status(404).json({ message: 'Trip sheet not found' });
         return;
       }
 
-      console.log('Found trip sheet dataaaa:', results[0]);  // Should log the found trip sheet data
+      // console.log('Found trip sheet dataaaa:', results[0]);  // Should log the found trip sheet data
       res.status(200).json(results[0]);  // Send the first result
     });
   } catch (err) {

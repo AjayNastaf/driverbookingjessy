@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const multer = require('multer');
-const path = require('path');
+// const multer = require('multer');
+// const path = require('path');
 const axios = require('axios');
+// const Imagepathuploads = require('../imageurl')
 
 // const bodyParser=require('body-parser');
 // const app = express();
@@ -27,40 +28,40 @@ const axios = require('axios');
 //         cb(null, `${uniqueSuffix}-${file.originalname}`);
 //     },
 // });
+//const uploadDir = path.join(__dirname, '../../../../NASTAF-upload/NASTAF-IMAGES/imagesUploads_doc');
+// const uploadDir = path.join(__dirname,`${Imagepathuploads}/imagesUploads_doc`);
 
-
-const uploadDir = path.join(__dirname, '../../../../Imagefolder/imagesUploads_doc');
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        // console.log(req,"jj")
-      cb(null, uploadDir,)
-    },
-    filename: (req, file, cb) => {
-         console.log(req,"lllll")
-      cb(null, file.fieldname + "_" + req.params.data + path.extname(file.originalname))
-    }
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         // console.log(req,"jj")
+//       cb(null, uploadDir,)
+//     },
+//     filename: (req, file, cb) => {
+//          console.log(req,"lllll")
+//       cb(null, file.fieldname + "_" + req.params.data + path.extname(file.originalname))
+//     }
   
-  })
-const upload = multer({ storage: storage });
+//   })
+// const upload = multer({ storage: storage });
 
 
 
 //file upload in tripsheet
 
 // jesscabs app stored image from jesscabs------------------------------------------------
-router.post('/uploadfolrderapp/:data', upload.single('image'), (req, res) => {
-    console.log(req.params.data,"kk")
-    const fileData = {
-        name: req.file.originalname,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        path: req.file.path.replace(/\\/g, '/').replace(/^path_to_save_uploads\//, ''),
-        }
-    console.log(fileData,"data")
-   res.send("success upload")
+// router.post('/uploadfolrderapp/:data', upload.single('image'), (req, res) => {
+//     console.log(req.params.data,"kk")
+//     const fileData = {
+//         name: req.file.originalname,
+//         mimetype: req.file.mimetype,
+//         size: req.file.size,
+//         path: req.file.path.replace(/\\/g, '/').replace(/^path_to_save_uploads\//, ''),
+//         }
+//     console.log(fileData,"data")
+//    res.send("success upload")
    
    
-});
+// });
 // -----------------------------------------------------------------------------------------------------------
 //existing and working for single
 //router.post('/uploadsdriverapp/:data', upload.single('file'), (req, res) => {
@@ -102,41 +103,43 @@ router.post('/uploadfolrderapp/:data', upload.single('image'), (req, res) => {
 
 
 
-router.post('/uploadsdriverapp/:data', upload.array('file', 10), (req, res) => {
-  const selectedTripId = req.body.tripid;
-  const documentType = req.body.documenttype;
+// router.post('/uploadsdriverapp/:data', upload.array('file', 10), (req, res) => {
+//   const selectedTripId = req.body.tripid;
+//   const documentType = req.body.documenttype;
 
-  console.log("Request Params:", req.params.data);
-  console.log("Uploaded Files:", req.files);
+//   console.log("Request Params:", req.params.data);
+//   console.log("Uploaded Files:", req.files);
 
-  if (!req.files || req.files.length === 0) {
-    return res.status(400).json({ message: 'No files uploaded' });
-  }
+//   if (!req.files || req.files.length === 0) {
+//     return res.status(400).json({ message: 'No files uploaded' });
+//   }
 
-  const fileDataArray = req.files.map(file => ({
-    name: file.originalname,
-    mimetype: file.mimetype,
-    size: file.size,
-    path: file.path.replace(/\\/g, '/').replace(/^uploads\//, ''),
-    tripid: selectedTripId,
-    documenttype: documentType,
-  }));
+//   const fileDataArray = req.files.map(file => ({
+//     name: file.originalname,
+//     mimetype: file.mimetype,
+//     size: file.size,
+// //    path: file.path.replace(/\\/g, '/').replace(/^uploads\//, ''),
+//   path: file.filename,
 
-  console.log("Processed File Data:", fileDataArray);
+//     tripid: selectedTripId,
+//     documenttype: documentType,
+//   }));
 
-  const updateQuery = 'INSERT INTO tripsheetupload (name, mimetype, size, path, tripid, documenttype) VALUES ?';
+//   console.log("Processed File Data:", fileDataArray);
 
-  // Map file data to the format required for bulk insert
-  const values = fileDataArray.map(file => [file.name, file.mimetype, file.size, file.path, file.tripid, file.documenttype]);
+//   const updateQuery = 'INSERT INTO tripsheetupload (name, mimetype, size, path, tripid, documenttype) VALUES ?';
 
-  db.query(updateQuery, [values], (err, results) => {
-    if (err) {
-      console.error("Database Error:", err);
-      return res.status(500).json({ message: 'Internal server error' });
-    }
-    res.status(200).json({ message: 'Files uploaded successfully', data: results });
-  });
-});
+//   // Map file data to the format required for bulk insert
+//   const values = fileDataArray.map(file => [file.name, file.mimetype, file.size, file.path, file.tripid, file.documenttype]);
+
+//   db.query(updateQuery, [values], (err, results) => {
+//     if (err) {
+//       console.error("Database Error:", err);
+//       return res.status(500).json({ message: 'Internal server error' });
+//     }
+//     res.status(200).json({ message: 'Files uploaded successfully', data: results });
+//   });
+// });
 //end tripsheet file upload
 
 
@@ -331,6 +334,71 @@ router.get('/KMForParticularTrip', async (req, res) => {
 
 //closing kilometer fetching end
 
+
+// calculate start time and end time
+router.get('/calculate_time/:tripId', (req, res) => {
+  const { tripId } = req.params;
+
+  console.log("Id received", tripId);
+
+  const SelectQuery = `
+    SELECT created_at, Trip_Status
+    FROM vehicleaccesslocation
+    WHERE Trip_id = ?
+    AND Trip_Status IN ('Started', 'Reached')
+  `;
+
+  db.query(SelectQuery, [tripId], (err, result) => {
+    if (err) {
+      console.log("Error is", err.message);
+      return res.status(400).send({ message: "Data Fetching Failed", err });
+    }
+    if (result.length === 0) {
+      console.log('Data not found');
+      return res.status(404).send({ message: "No data found" });
+    }
+
+    const startedRow = result.find(row => row.Trip_Status === 'Started');
+    const reachedRow = result.find(row => row.Trip_Status === 'Reached');
+
+    if (!startedRow || !reachedRow) {
+      return res.status(404).send({ message: "Started or Reached status missing" });
+    }
+
+
+    const startedTime = startedRow.created_at.split("T")[1];
+    const reachedTime = reachedRow.created_at.split("T")[1];
+
+    function timeToSeconds(timeStr) {
+      const [hours, minutes, rest] = timeStr.split(":");
+      const seconds = parseFloat(rest);
+      return parseInt(hours) * 3600 + parseInt(minutes) * 60 + seconds;
+    }
+
+    let startSeconds = timeToSeconds(startedTime);
+    let reachedSeconds = timeToSeconds(reachedTime);
+
+    let durationSeconds = reachedSeconds - startSeconds;
+
+    if (durationSeconds < 0) {
+      durationSeconds += 24 * 3600;
+    }
+
+    function secondsToHMS(seconds) {
+      const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+      const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+      const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    const durationHMS = secondsToHMS(durationSeconds);
+
+    console.log("Duration in HH:mm:ss:", durationHMS);
+    console.log("Duration Datatype",typeof durationHMS);
+
+    res.status(200).send({ success : true , durationHMS} );
+  });
+});
 
 
 module.exports = router;

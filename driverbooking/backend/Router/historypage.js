@@ -64,7 +64,7 @@ router.post('/tripsheetfilterdate', (req, res) => {
                 return;
             }
 
-            console.log('Query Results:', results);
+            // console.log('Query Results:', results);
             res.status(200).json(results); // Send filtered data
         });
     } catch (err) {

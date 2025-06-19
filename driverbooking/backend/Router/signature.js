@@ -1,69 +1,80 @@
 const express = require('express');
 const router = express.Router();
-const fs = require('fs'); // signature png
+// const fs = require('fs'); // signature png
 const db = require('../db');
 const nodemailer = require('nodemailer');
-const path = require('path');
-const multer=require('multer');
+// const path = require('path');
+// const multer=require('multer');
+// const imageFolderPath = require('../imageurl');
+// const imageFolderPath = require('../imageurl')
 
-// Define a constant for the base path to save images
-//const baseImagePath = path.join(__dirname, 'path_to_save_images');
-const baseImagePath = path.join(__dirname, '../../../../Imagefolder/signature_images');
-console.log(baseImagePath , 'path disdf');
-function generateUniqueNumbers() {
-    return Math.floor(10000 + Math.random() * 90000);
-  }
-// -------this from jessaycabs signatureimage------------------------------
-router.post('/signatureimagesavedriver/:data', (req, res) => {
-    const { dataurlsign } = req.body;
-    const imageName=req.params.data;
 
-    const base64Data = dataurlsign.replace(/^data:image\/png;base64,/, '');
-    const imageBuffer = Buffer.from(base64Data, 'base64');
-  console.log("sucuess signature image update")
-    const imageName1 = `signature-${imageName}.png`;
-    const imagePath = path.join(baseImagePath, imageName1); // Use the base path
-    console.log(imagePath,"jjjjjj")
+// // Define a constant for the base path to save images
+// //const baseImagePath = path.join(__dirname, 'path_to_save_images');
+// console.log(imageFolderPath,"ppppppppppppppppppppppppppppppppppp")
+// const baseImagePath = path.join(__dirname, `${imageFolderPath}/signature_images`);
+// console.log(path.join(__dirname, `${imageFolderPath}/imagesUploads_doc`),"ppp222222222")
+// console.log(path.join(__dirname, `${imageFolderPath}/signature_images`),"ppp2222222222222")
 
-    fs.writeFile(imagePath, imageBuffer, (error) => {
-        if (error) {
-            res.status(500).json({ error: 'Failed to save signature' });
-        }
-        res.send("saved")
+// console.log(baseImagePath , 'path disdfnnnnnnnnnnnnnnn');
+// function generateUniqueNumbers() {
+//     return Math.floor(10000 + Math.random() * 90000);
+//   }
+// // -------this from jessaycabs signatureimage------------------------------
+// router.post('/signatureimagesavedriver/:data', (req, res) => {
+//     const { dataurlsign } = req.body;
+//     const imageName=req.params.data;
 
-    })
-})
+//     const base64Data = dataurlsign.replace(/^data:image\/png;base64,/, '');
+//     const imageBuffer = Buffer.from(base64Data, 'base64');
+//   console.log("sucuess signature image update")
+//     const imageName1 = `signature-${imageName}.png`;
+//     const imagePath = path.join(baseImagePath, imageName1); // Use the base path
+//     console.log(imagePath,"jjjjjj")
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, './Router/path_to_save_images')
-    },
-    filename: (req, file, cb) => {
-  
-  
-      cb(null, `signature-${req.params.data}.png`);
-    },
-  
-  
-  
-  })
-  
-  
-  const uploadfile = multer({ storage: storage });
+//     fs.writeFile(imagePath, imageBuffer, (error) => {
+//         if (error) {
+//             res.status(500).json({ error: 'Failed to save signature' });
+//         }
+//         res.send("saved")
 
-router.post('/signatureimageuploaddriver/:data',uploadfile.single('signature_image'), (req, res) => {
+//     })
+// })
+
+
+// const signatureImagePath = path.join(__dirname, '../../../../NASTAF-upload/NASTAF-IMAGES/signature_images');
+// const signatureImagePath = path.join(__dirname, `${imageFolderPath}/signature_images`);
+
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//       cb(null, signatureImagePath)
+//     },
+//     filename: (req, file, cb) => {
+  
+  
+//       cb(null, `signature-${req.params.data}.png`);
+//     },
+  
+  
+  
+//   })
+  
+  
+//   const uploadfile = multer({ storage: storage });
+
+// router.post('/signatureimageuploaddriver/:data',uploadfile.single('signature_image'), (req, res) => {
     
-    const signature_image = req.file.filename;
-    const imageName=`signature-${req.params.data}.png`;;
-    console.log(signature_image,"immagge",imageName)
- // const imageName = `signature-${Date.now()}.png`;
-     // Use the base path
+//     const signature_image = req.file.filename;
+//     const imageName=`signature-${req.params.data}.png`;;
+//     console.log(signature_image,"immagge",imageName)
+//  // const imageName = `signature-${Date.now()}.png`;
+//      // Use the base path
 
   
-        res.send("saved")
+//         res.send("saved")
 
     
-})
+// })
 // ---------------------------------------------------------------------------------
 
 
@@ -95,44 +106,44 @@ router.post('/signatureimageuploaddriver/:data',uploadfile.single('signature_ima
 //         }
 //     });
 // });
-
-router.post('/api/saveSignature', (req, res) => {
-    const { tripid, signatureData,imageName,endtrip,endtime} = req.body;
+// console.log(baseImagePath,"papaaa")
+// router.post('/api/saveSignature', (req, res) => {
+//     const { tripid, signatureData,imageName,endtrip,endtime} = req.body;
    
 
-    const base64Data = signatureData.replace(/^data:image\/png;base64,/, '');
-    const imageBuffer = Buffer.from(base64Data, 'base64');
+//     const base64Data = signatureData.replace(/^data:image\/png;base64,/, '');
+//     const imageBuffer = Buffer.from(base64Data, 'base64');
 
-    // const imageName = `signature-${Date.now()}.png`;
-    const imagePath = path.join(baseImagePath, imageName); // Use the base path
+//     // const imageName = `signature-${Date.now()}.png`;
+//     const imagePath = path.join(baseImagePath, imageName); // Use the base path
 
-    fs.writeFile(imagePath, imageBuffer, (error) => {
-        if (error) {
-            res.status(500).json({ error: 'Failed to save signature' });
-        } else {
-            const uniquenumber=generateUniqueNumbers()
-            const relativeImagePath = path.relative(baseImagePath, imagePath); // Calculate relative path
-            const sql = 'INSERT INTO signatures (tripid, signature_path,unique_number) VALUES (?,?,?)';
-              const sql2=" UPDATE tripsheet set closedate=? , closetime = ?,vendorshedInDate = ?, vendorshedintime = ? where  tripid = ?"
-            db.query(sql, [tripid, relativeImagePath,uniquenumber], (dbError, results) => {
-                if (dbError) {
-                    res.status(500).json({ error: 'Failed to save signature' });
-                } else {
-                    db.query(sql2, [endtrip,endtime,endtrip,endtime,tripid], (dbError1, results1) => {
-                        if (dbError1) {
-                            res.status(500).json({ error: 'Failed to save signature' });
-                        } else {
+//     fs.writeFile(imagePath, imageBuffer, (error) => {
+//         if (error) {
+//             res.status(500).json({ error: 'Failed to save signature' });
+//         } else {
+//             const uniquenumber=generateUniqueNumbers()
+//             const relativeImagePath = path.relative(baseImagePath, imagePath); // Calculate relative path
+//             const sql = 'INSERT INTO signatures (tripid, signature_path,unique_number) VALUES (?,?,?)';
+//               const sql2=" UPDATE tripsheet set closedate=? , closetime = ?,vendorshedInDate = ?, vendorshedintime = ? where  tripid = ?"
+//             db.query(sql, [tripid, relativeImagePath,uniquenumber], (dbError, results) => {
+//                 if (dbError) {
+//                     res.status(500).json({ error: 'Failed to save signature' });
+//                 } else {
+//                     db.query(sql2, [endtrip,endtime,endtrip,endtime,tripid], (dbError1, results1) => {
+//                         if (dbError1) {
+//                             res.status(500).json({ error: 'Failed to save signature' });
+//                         } else {
         
                             
-                            res.json({ message: 'Signature saved successfully' });
-                        }
-                    });
-                    // res.json({ message: 'Signature saved successfully' });
-                }
-            });
-        }
-    });
-});
+//                             res.json({ message: 'Signature saved successfully' });
+//                         }
+//                     });
+//                     // res.json({ message: 'Signature saved successfully' });
+//                 }
+//             });
+//         }
+//     });
+// });
 
 
 router.post("/signaturedatatimesdriverapp/:tripid", (req, res) => {

@@ -14,24 +14,27 @@ class AppConstants {
   static const String driver_waiting = 'assets/image/driver-waiting.jpg';
   static const String navigation = 'assets/image/navigation.png';
   static const String cabgif = 'assets/image/cab.gif';
+  static const String signup = 'assets/image/signup.jpg';
 
 
 
-//local
-//   static const String baseUrl = "http://192.168.0.105:3004";
-  // static const String baseUrlJessyCabs = "http://192.168.0.114:8081";
+  //local
+  // static const String baseUrl = "http://192.168.0.120:3003";
+  // static const String baseUrl = "https://192.168.1.145:7128";
 
 
 
+  // static const String baseUrlJessyCabs = "https://jessycabs.com:54462";
+  // static const String baseUrlJessyCabs = "http://192.168.1.11:8081";
 
   //jessycabs
   // static const String baseUrl = "https://jessycabs.com:7128";
-  // static const String baseUrlJessyCabs = "https://jessycabs.com:54462";
 
-//Aws
-  static const String baseUrl = "http://75.101.215.49:7128";
-  // static const String baseUrlJessyCabs = "http://54.227.179.97:54462";
-  
+
+  //aws
+  static const String baseUrl = "http://52.91.161.155:7128";
+
+
   static const Color primaryColor = Colors.blue;
   static const String ApiKey = "AIzaSyCp2ePjsrBdrvgYCQs1d1dTaDe5DzXNjYk";
   static const String mailerEmail = "ravi.vinoth997@gmail.com";

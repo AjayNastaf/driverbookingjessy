@@ -1,5 +1,8 @@
+import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
 import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
+import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
 import 'package:jessy_cabs/Screens/TollParkingUpload/TollParkingUpload.dart';
+import 'package:jessy_cabs/Screens/TrackingPage/TrackingPage.dart';
 import 'package:jessy_cabs/Screens/TripDetailsPreview/TripDetailsPreview.dart';
 import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +20,9 @@ import 'package:provider/provider.dart';
 import '../network_manager.dart';
 
 
+import 'package:jessy_cabs/Screens/VerifyOtp/VerifyOtp.dart';
+import 'package:jessy_cabs/Screens/MenuListScreens/Notifications/NotificationScreen.dart';
+
 class Signatureendride extends StatefulWidget {
   final String tripId; // Accept tripid here
   const Signatureendride({super.key,required this.tripId});
@@ -26,10 +32,20 @@ class Signatureendride extends StatefulWidget {
 }
 
 class _SignatureendrideState extends State<Signatureendride>  {
+  String guestMobileNumber = '';
 
+  String guestEmail = '';
+
+  String guestName = '';
 
   bool _isLoading = false;
   bool isClearDisabled = false;
+  String hybridata = '';
+
+
+
+  String? senderEmail;
+  String?senderPass;
 
   // Controller for the signature pad
   final SignatureController _signatureController = SignatureController(
@@ -42,6 +58,8 @@ class _SignatureendrideState extends State<Signatureendride>  {
   void initState() {
     super.initState();
     saveScreenData();
+    context.read<SenderInfoBloc>().add(FetchSenderInfo());
+    _loadTripDetailsData();
     // Trigger API call when drawing ends
     _signatureController.onDrawEnd = () async {
       if (_signatureController.isNotEmpty) {
@@ -74,6 +92,61 @@ class _SignatureendrideState extends State<Signatureendride>  {
     };
   }
 
+  Future<void> _onRefresh() async{
+
+    _loadTripDetailsData();
+    context.read<SenderInfoBloc>().add(FetchSenderInfo());
+
+
+  }
+
+  Future<void> _loadTripDetailsData() async {
+
+    print('i try trigger 6.00');
+
+    print('i am sender tripID ${widget.tripId}');
+
+    try {
+
+      final tripDetails = await ApiService.fetchTripDetails(widget.tripId);
+
+      print('Trip details values: $tripDetails');
+
+
+
+      if (tripDetails != null) {
+
+        guestMobileNumber = tripDetails['guestmobileno'];
+
+        guestEmail = tripDetails['email'];
+
+        guestName = tripDetails['guestname'];
+
+
+
+
+        hybridata = tripDetails['Hybriddata'].toString();
+
+        print('hybriddata datatype ${hybridata.runtimeType}');
+
+
+        print("guest in signaturepage ${guestMobileNumber}");
+
+        print('guest in signaturepage ${guestEmail}');
+
+        print('guest in signaturepage ${guestName}');
+
+
+      }
+
+    } catch (e) {
+print("${e}");
+
+
+    }
+
+  }
+
   Future<void> saveScreenData() async {
 
     final prefs = await SharedPreferences.getInstance();
@@ -97,7 +170,7 @@ class _SignatureendrideState extends State<Signatureendride>  {
   }
 
   Future<void> _refreshdignatureScreen() async {
-
+    _onRefresh();
     // Trigger API call when drawing ends
     _signatureController.onDrawEnd = () async {
       if (_signatureController.isNotEmpty) {
@@ -207,6 +280,7 @@ class _SignatureendrideState extends State<Signatureendride>  {
 
 
   void _handleSubmit(BuildContext context) async {
+
     handleSubmitclear();
     if (_signatureController.isNotEmpty) {
       final signature = await _signatureController.toPngBytes();
@@ -221,6 +295,10 @@ class _SignatureendrideState extends State<Signatureendride>  {
         setState(() {
           _isLoading = true;
         });
+
+        if(hybridata == '1'){
+          context.read<LastOtBloc>().add(OtpVerifyEvent(guestNumber: guestMobileNumber, guestEmail: guestEmail, guestName: guestName, senderEmail: senderEmail!, senderPass: senderPass!,));
+        }
 
         // Dispatch first API call
         BlocProvider.of<TripSignatureBloc>(context).add(
@@ -261,11 +339,21 @@ class _SignatureendrideState extends State<Signatureendride>  {
   }
 
 
-  void _handleNavNextpage(){
-    // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
-    // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)));
-    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
+  void _handleNavNextpage() {
+    if (hybridata == '0') {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => TripDetailsUpload(tripId: widget.tripId)),
+            (route) => false,
+      );
+      return;
+    }
 
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => VerifyDeBoardimgOtp(tripId: widget.tripId)),
+          (route) => false,
+    );
   }
 
   void _handleSubmitModal() {
@@ -298,7 +386,7 @@ class _SignatureendrideState extends State<Signatureendride>  {
             ElevatedButton(
               onPressed: () {
                 // _handleUpload();
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
+                // Navigator.push(context, MaterialPageRoute(builder: (context)=>TripDetailsPreview(tripId: widget.tripId,)));
                 // Navigator.of(context).pop(); // Close the dialog
               },
               style: ElevatedButton.styleFrom(
@@ -315,129 +403,169 @@ class _SignatureendrideState extends State<Signatureendride>  {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
-    return BlocListener<TripSignatureBloc, TripSignatureState>(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<TripSignatureBloc, TripSignatureState>(
         listener: (context, state) {
-      if (state is SaveSignatureSuccess) {
-        final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
-        // final String signTime = TimeOfDay.now().format(context);
-        final DateTime now = DateTime.now();
-        final String signTime = '${now.hour.toString().padLeft(2, '0')}:'
-            '${now.minute.toString().padLeft(2, '0')}:'
-            '${now.second.toString().padLeft(2, '0')}';
+    if (state is SaveSignatureSuccess) {
+    final String dateSignature = DateTime.now().toIso8601String().split('T')[0] + ' ' + DateTime.now().toIso8601String().split('T')[1].split('.')[0];
+    // final String signTime = TimeOfDay.now().format(context);
+    final DateTime now = DateTime.now();
+    final String signTime = '${now.hour.toString().padLeft(2, '0')}:'
+    '${now.minute.toString().padLeft(2, '0')}:'
+    '${now.second.toString().padLeft(2, '0')}';
 
-        // Dispatch second API call after first one succeeds
-        BlocProvider.of<TripSignatureBloc>(context).add(
-          SendSignatureDetailsEvent(
-            tripId: widget.tripId,
-            dateSignature: dateSignature,
-            signTime: signTime,
-            status: "Updated",
-          ),
-        );
-      } else if (state is SendSignatureDetailsSuccess) {
-        // Dispatch third API call after second one succeeds
-        BlocProvider.of<TripSignatureBloc>(context).add(
-          UpdateTripStatusEvent(
-            tripId: widget.tripId,
-            apps: "Closed",
-          ),
-        );
-        showSuccessSnackBar(context, 'Trip Closed Successfully');
-      } else if (state is UpdateTripStatusSuccess) {
-        showSuccessSnackBar(context, "Signature and ride data uploaded successfully!");
-        setState(() {
-          _isLoading = false;
-        });
-        _handleClear();
-        // _handleSubmitModal();
-        _handleNavNextpage();
-      } else if (state is TripSignatureFailure) {
-        showFailureSnackBar(context, state.error);
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    },
-
-
-     child:  Scaffold(
-      appBar: AppBar(
-        title: Text("End Ride"),
-        automaticallyImplyLeading: false, // 👈 disables the default back icon
-
-      ),
-      body:Stack(
-        children: [
-
-      RefreshIndicator(
-        onRefresh: _refreshdignatureScreen,
-        child:SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              "Please sign below to End ride:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Container(
-              height: 500,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey, width: 2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Signature(
-                controller: _signatureController,
-                backgroundColor: Colors.white,
-              ),
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed:  isClearDisabled ? null : _handleClear ,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                  child: Text("Clear" ,style: TextStyle(color: Colors.white, fontSize: 18.0),),
-                ),
-
-
-                ElevatedButton(
-                  onPressed: _isLoading ? null : () => _handleSubmit(context),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                  child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text("Submit", style: TextStyle(color: Colors.white, fontSize: 18.0)),
-                ),
-
-
-                // ElevatedButton(
-                //   onPressed: (){},
-                //   // onPressed: _handleSubmit,
-                //   style: ElevatedButton.styleFrom(backgroundColor: Colors.green, ),
-                //   child: Text("Submit & End Ride", style: TextStyle(color: Colors.white, fontSize: 18.0),),
-                // ),
-              ],
-            ),
-          ],
-        ),
-      ),),),
-          Positioned(
-            top: 15,
-            left: 0,
-            right: 0,
-            child: NoInternetBanner(isConnected: isConnected),
-          ),
-        ],
-      )
+    // Dispatch second API call after first one succeeds
+    BlocProvider.of<TripSignatureBloc>(context).add(
+    SendSignatureDetailsEvent(
+    tripId: widget.tripId,
+    dateSignature: dateSignature,
+    signTime: signTime,
+    status: "Updated",
     ),
     );
+    } else if (state is SendSignatureDetailsSuccess) {
+    // Dispatch third API call after second one succeeds
+    BlocProvider.of<TripSignatureBloc>(context).add(
+    UpdateTripStatusEvent(
+    tripId: widget.tripId,
+    apps: "Closed",
+    ),
+    );
+    showSuccessSnackBar(context, 'Trip Closed Successfully');
+    } else if (state is UpdateTripStatusSuccess) {
+    showSuccessSnackBar(context, "Signature and ride data uploaded successfully!");
+    setState(() {
+    _isLoading = false;
+    });
+    _handleClear();
+    // _handleSubmitModal();
+    _handleNavNextpage();
+    } else if (state is TripSignatureFailure) {
+    showFailureSnackBar(context, state.error);
+    setState(() {
+    _isLoading = false;
+    });
+    }
+    },
+        ),
+
+
+        BlocListener<SenderInfoBloc, SenderInfoState>(
+          listener: (context, state) {
+            if (state is SenderInfoSuccess) {
+              setState(() {
+                senderEmail = state.senderMail;
+                senderPass = state.senderPass;
+              });
+            }
+          },
+        ),
+
+        ],
+
+
+       child:  Scaffold(
+        appBar: AppBar(
+          title: Text("End Ride"),
+          automaticallyImplyLeading: false, // 👈 disables the default back icon
+
+        ),
+        body:Stack(
+          children: [
+
+        RefreshIndicator(
+          onRefresh: _refreshdignatureScreen,
+          child:SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                "Please sign below to End ride:",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Container(
+                height: 500,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Signature(
+                  controller: _signatureController,
+                  backgroundColor: Colors.white,
+                ),
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed:  isClearDisabled ? null : _handleClear ,
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    child: Text("Clear" ,style: TextStyle(color: Colors.white, fontSize: 18.0),),
+                  ),
+
+
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : () => _handleSubmit(context),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    child: _isLoading
+                        ? CircularProgressIndicator(color: Colors.white)
+                        : Text("Submit", style: TextStyle(color: Colors.white, fontSize: 18.0)),
+                  ),
+
+
+                  // ElevatedButton(
+                  //   onPressed: (){},
+                  //   // onPressed: _handleSubmit,
+                  //   style: ElevatedButton.styleFrom(backgroundColor: Colors.green, ),
+                  //   child: Text("Submit & End Ride", style: TextStyle(color: Colors.white, fontSize: 18.0),),
+                  // ),
+                ],
+              ),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: ElevatedButton(
+              //
+              //     onPressed: () {
+              //       _showLogoutDialog(context);
+              //
+              //     },
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Colors.red,
+              //       padding: EdgeInsets.symmetric(vertical: 16),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(8),
+              //       ),
+              //     ),
+              //     child: Text(
+              //       'logout',
+              //       style: TextStyle(fontSize: 20.0, color: Colors.white),
+              //     ),
+              //   ),
+              // ),
+            ],
+          ),
+        ),),),
+            Positioned(
+              top: 15,
+              left: 0,
+              right: 0,
+              child: NoInternetBanner(isConnected: isConnected),
+            ),
+          ],
+        )
+      ),
+      );
   }
 }

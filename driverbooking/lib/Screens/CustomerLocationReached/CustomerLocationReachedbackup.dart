@@ -312,6 +312,8 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
           vehicleNo: vehicleNumber,
           tripId: widget.tripId,
           tripStatus: tripStatus,
+          reached_30minutes: "null",
+
         ),
       );
     } else {
@@ -353,6 +355,7 @@ class _CustomerlocationreachedState extends State<Customerlocationreached> {
           vehicleNo: vehicleNumber,
           tripId: widget.tripId,
           tripStatus: 'waypoint',
+          reached_30minutes: 'null',
         ),
       );
     } else {

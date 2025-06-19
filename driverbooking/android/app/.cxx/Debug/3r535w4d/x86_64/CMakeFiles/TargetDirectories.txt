@@ -1,0 +1,2 @@
+C:/mergingforanandhotp/workingcodeajay/appjessybackgroundtest2/driverappgit/NASTAF-Driver-Application/driverbooking/android/app/.cxx/Debug/3r535w4d/x86_64/CMakeFiles/edit_cache.dir
+C:/mergingforanandhotp/workingcodeajay/appjessybackgroundtest2/driverappgit/NASTAF-Driver-Application/driverbooking/android/app/.cxx/Debug/3r535w4d/x86_64/CMakeFiles/rebuild_cache.dir

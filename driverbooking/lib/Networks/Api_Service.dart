@@ -40,8 +40,7 @@ class ApiService {
     // } else {
     //   return false; // Login failed
     // }
-    print('$response, suresh kitty');
-    print( 'suresh kitty');
+    print(response);
     return response;
 
   }
@@ -688,7 +687,7 @@ class ApiService {
         final Map<String, dynamic> data = json.decode(response.body);
         print("Successsss sign jessy: ${data['message']}");
 
-
+        //
         //
         //
         // final Uri url = Uri.parse('${AppConstants.baseUrlJessyCabs}/signautureimagedriverapp');
@@ -1286,8 +1285,8 @@ class ApiService {
       var response= await request.send();
 
       if (response.statusCode == 200) {
-        print("success to upload fileeeeee: ${response.statusCode}");
-
+        // print("success to upload fileeeeee: ${response.statusCode}");
+        //
         // try {
         //   print('insie api url');
         //   // Generate the unique filename based on the current date
@@ -1360,7 +1359,7 @@ class ApiService {
       var response = await request.send();
 
       if (response.statusCode == 200) {
-
+        //
         // try {
         //   // Generate the unique filename based on the current date
         //   // String formattedDate = DateTime.now().millisecondsSinceEpoch.toString();;
@@ -2276,6 +2275,466 @@ class ApiService {
 
 
 
+
+//for testing latlong for g map data
+  static Future<http.Response> addVehicleLocation({
+    required String vehicleno,
+    required double latitudeloc,
+    required double longitutdeloc,
+    required String gpsPointAddrress,
+    required String tripId,
+    required String runingDate,
+    required String runingTime,
+    required String tripStatus,
+    required String tripStartTime,
+    required String tripEndTime,
+    required String createdAt,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/addvehiclelocationUniqueLatlongTest');
+
+    final body = {
+      "vehicleno": vehicleno,
+      "latitudeloc": latitudeloc,
+      "longitutdeloc": longitutdeloc,
+      "gpsPointAddrress": gpsPointAddrress,
+
+      "Trip_id": tripId,
+      "Runing_Date": runingDate,
+      "Runing_Time": runingTime,
+      "Trip_Status": tripStatus,
+      "Tripstarttime": tripStartTime,
+      "TripEndTime": tripEndTime,
+      "created_at": createdAt,
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      );
+
+      return response;
+    } catch (e) {
+      throw Exception("Failed to connect to the server: $e");
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+//for sending otp started
+  static Future<Map<String, dynamic>> sendOtp({
+    required String number,
+    required String email,
+    required String name,
+    required String senderEmail,
+    required String senderPass,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/send-otp');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "mobile": number,
+          "email": email,
+          'name':name,
+          'senderEmail': senderEmail,
+          'senderPass': senderPass,
+
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('resposne ${response.body}');
+        return {"success": true, "message": jsonDecode(response.body)["message"]};
+      } else {
+        print('resposne2 ${response.body}');
+        return {"success": false, "message": jsonDecode(response.body)["message"]};
+      }
+    } catch (e) {
+      return {"success": false, "message": "Something went wrong: $e"};
+    }
+  }
+//for sending otp completed
+
+//for verify otp started
+
+  static Future<Map<String, dynamic>> verifyOtp({
+    required String number,
+    required String email,
+    required String name,
+    required String senderEmail,
+    required String senderPass,
+
+  }) async {
+    print('verifyOtp received to APi service${name}');
+
+    final url = Uri.parse('${AppConstants.baseUrl}/verifyotp');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "mobile": number,
+          "email": email,
+          'name':name,
+          'senderEmail': senderEmail,
+          'senderPass': senderPass,
+
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('resposne ${response.body}');
+        return {"success": true, "message": jsonDecode(response.body)["message"]};
+      } else {
+        print('resposne2 ${response.body}');
+        return {"success": false, "message": jsonDecode(response.body)["message"]};
+      }
+    } catch (e) {
+      return {"success": false, "message": "Something went wrong: $e"};
+    }
+  }
+
+//for verify otp completed
+
+
+  //organization data  get api started
+
+  static Future<Map<String, dynamic>> fetchSenderInfo() async {
+    print("ready to fetch in API_SERVICE");
+    final url = Uri.parse('${AppConstants.baseUrl}/organizationdata');
+
+    try {
+      print('urllll${url}');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        return {
+          'success': true,
+          'senderEmail': data[0]['Sender_Mail'],
+          'senderPass': data[0]['EmailApp_Password'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to load sender info',
+        };
+      }
+    } catch (e) {
+      return {"success": false, "message": "Something went wrong: $e"};
+    }
+  }
+  //organization data  get api completed
+
+
+
+
+//for mail sent to the hybrid customer details started
+
+  static Future<bool> sendBookingEmail({
+    required String guestName,
+    required String guestMobileNo,
+    required String email,
+    required String startKm,
+    required String closeKm,
+    required String duration,
+    required String senderEmail,
+    required String senderPassword,
+    required String TripId,
+    required String Vehiclenumber,
+    required String VehicleName,
+    required String DutyType,
+    required String ReportTime,
+    required String ReleaseTime,
+    required String ReportDate,
+    required String ReleaseDate,
+
+    required String Startpoint,
+    required String Endpoint,
+
+
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/send-email1');
+
+    print('📤 Sending email request to $url');
+    print('📦 Payload: $guestName, $guestMobileNo, $email, $startKm, $closeKm, $duration, $senderEmail, $senderPassword, $TripId, $Vehiclenumber, $VehicleName,$DutyType, $ReportTime, $ReleaseTime  ,$ReportDate, $Startpoint, $Endpoint');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          "guestname": guestName,
+          "guestmobileno": guestMobileNo,
+          "email": email,
+          "Startkm": startKm,
+          "closekm": closeKm,
+          "duration": duration,
+          "Sender_Mail": senderEmail,
+          "EmailApp_Password": senderPassword,
+          "TripId": TripId,
+          "Vechicle_Number": Vehiclenumber,
+          "Vechicl_Name": VehicleName,
+          "Duty_type": DutyType,
+          "Report_time": ReportTime,
+          "Release_time": ReleaseTime,
+          "Report_date": ReportDate,
+          "Release_date": ReleaseDate,
+          "StartPoint": Startpoint,
+          "EndPoint": Endpoint,
+        }),
+      );
+      print('📦 Payload: $guestName, $guestMobileNo, $email, $startKm, $closeKm, $duration, $senderEmail, $senderPassword, $TripId, $Vehiclenumber, $VehicleName,$DutyType, $ReportTime, $ReleaseTime  ,$ReportDate, $Startpoint, $Endpoint');
+
+      print('📬 Response Status boo email: ${response.statusCode}');
+      print('📬 Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('✅ Email sent successfully');
+        return true;
+      } else {
+        print('❌ Error sending email: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('❌ Exception occurred while sending email: $e');
+      return false;
+    }
+  }
+
+//for mail sent to the hybrid customer details started
+
+
+
+
+
+
+  static Future<Map<String, dynamic>>signUpStepOne ({
+    required String name,
+    required String email,
+    required String phone,
+
+  }) async{
+
+    print('first step values received in Api_Service ${email}');
+    print('first step values received in Api_Service ${name}');
+    print('first step values received in Api_Service ${phone}');
+
+    String uri = "${AppConstants.baseUrl}/signup";
+
+    try{
+      final response = await http.post(Uri.parse(uri),
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body: jsonEncode({
+            'name':name,
+            'email':email,
+            'phone':phone,
+          })
+      );
+      print('first step response from backend in Api_Service ${response}');
+
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        final Map<String, dynamic> resBody = jsonDecode(response.body);
+        print('response else statements in Api_Service $resBody');
+        return resBody;
+      }
+    } catch (e) {
+      throw Exception('Sign up error: $e');
+    }
+  }
+
+
+
+  static Future<Map<String, dynamic>>signUpStepTwo ({
+    required String phone,
+  }) async{
+
+    print('second step values received in Api_Service ${phone}');
+
+    String uri = "${AppConstants.baseUrl}/signup_again_otp";
+
+    try{
+      final response = await http.post(Uri.parse(uri),
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body: jsonEncode({
+            'phone':phone,
+          })
+      );
+      print('second step response from backend in Api_Service ${response}');
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to sign up: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Sign up error: $e');
+    }
+  }
+
+//new for Login VIA mobile number
+
+
+  static Future<Map<String, dynamic>>loginViaStepOne ({
+    required String phone,
+  }) async{
+
+    print('third step values received in Api_Service ${phone}');
+
+    String uri = "${AppConstants.baseUrl}/loginVia";
+
+    try{
+      final response = await http.post(Uri.parse(uri),
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body: jsonEncode({
+            'phone':phone,
+          })
+      );
+      print('third step response from backend in Api_Service ${response}');
+
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        final Map<String, dynamic> resBody = jsonDecode(response.body);
+        print('third response else statements in Api_Service $resBody');
+        return resBody;
+      }
+    } catch (e) {
+      throw Exception('Sign up error: $e');
+    }
+  }
+
+
+
+  static Future<Map<String, dynamic>>LoginViaStepTwo ({
+    required String phone,
+  }) async{
+
+    print('fourth step values received in Api_Service ${phone}');
+
+    String uri = "${AppConstants.baseUrl}/loginVia_again_otp";
+
+    try{
+      final response = await http.post(Uri.parse(uri),
+          headers: {
+            'Content-Type':'application/json'
+          },
+          body: jsonEncode({
+            'phone':phone,
+          })
+      );
+      print('fourth step response from backend in Api_Service ${response}');
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        final Map<String, dynamic> resBody = jsonDecode(response.body);
+        print('fourth response else statements in Api_Service $resBody');
+        return resBody;
+      }
+    } catch (e) {
+      throw Exception('Sign up error: $e');
+    }
+  }
+
+
+
+  static Future<Map<String, dynamic>>fetchDistance({
+    required String tripId
+  }) async{
+
+    final url = Uri.parse("${AppConstants.baseUrl}/calculate_time/${tripId}");
+    print('api service screen got tripId for duration time ${tripId}');
+    try{
+      final response = await http.get(url);
+
+      if(response.statusCode == 200){
+        final data = jsonDecode(response.body);
+
+        print("Decoded backend response: $data");
+        return {
+          'success': true,
+          'duration':data['durationHMS'],
+        };
+      } else {
+        print("Else condition: backend for distance");
+
+        return {
+
+          'success': false,
+          'message': 'Backend returned failure',
+        };
+      }
+
+    } catch(e){
+      print("Catch block: backend for distance $e");
+      return {"success": false, "message": "Something went wrong: $e"};
+    }
+
+  }
+
+
+
+  static Future<Map<String, dynamic>>fetchOkayMessage({ required  String trip_id}) async{
+
+    final url = Uri.parse("${AppConstants.baseUrl}/getokaymessage/${trip_id}");
+
+    print('api service page received trip_id for okay message ${trip_id}');
+    try{
+      final response =await http.get(url);
+
+      if(response.statusCode == 200){
+
+        final data = jsonDecode(response.body);
+        print(" reponse from backend for okay message ${jsonDecode(response.body)}");
+        print("Decoded backend response for get okay message: $data");
+
+        final startTime = data['TripStartTime'];
+
+        print("eeeeeeee ${startTime}");
+
+        return {
+          'success': true,
+          'information':startTime
+        };
+      } else {
+        print("Else condition: backend for okay message");
+        return {
+          'success': false,
+          'message': 'Backend returned failure',
+        };
+      }
+    } catch(e){
+      print("Catch block: backend for okay message $e");
+      return {"success": false, "message": "Something went wrong: $e"};
+    }
+  }
 
 
 

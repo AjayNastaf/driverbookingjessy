@@ -855,3 +855,158 @@ class ClosingKilometerError extends GettingClosingKilometerState {
 }
 
 //getting dynamic closing kilometer state completed
+
+abstract class OTPState {}
+class OTPInitial extends OTPState {}
+class OTPLoading extends OTPState {}
+class OTPSuccess extends OTPState {
+  final String otp;
+  OTPSuccess(this.otp);
+}
+class OTPFailed extends OTPState {
+  final String error;
+  OTPFailed(this.error);
+}
+
+
+abstract class OtpVerifyState{}
+
+class LastOtpInitial extends OtpVerifyState{}
+class LastOtpLoading extends OtpVerifyState{}
+
+class LastOtpSuccess extends OtpVerifyState{
+  final String otp;
+  LastOtpSuccess(this.otp);
+}
+class LastOtpFailed extends OtpVerifyState{
+  final String error;
+  LastOtpFailed(this.error);
+}
+
+
+
+
+abstract class EmailState {}
+
+class EmailInitial extends EmailState {}
+
+class EmailSending extends EmailState {}
+
+class EmailSent extends EmailState {}
+
+class EmailFailed extends EmailState {}
+
+
+
+abstract class SenderInfoState {}
+
+class SenderInfoIntial extends SenderInfoState {}
+
+class SenderInfoLoading extends SenderInfoState {}
+
+class SenderInfoFailed extends SenderInfoState {
+  final String error;
+  SenderInfoFailed(this.error);
+}
+
+class SenderInfoSuccess extends SenderInfoState {
+  final String senderMail;
+  final String senderPass;
+
+  SenderInfoSuccess({required this.senderMail, required this.senderPass});
+}
+
+
+
+
+
+
+
+
+
+abstract class GetDurationState{}
+
+class GetDurationInitial  extends GetDurationState{}
+class GetDurationLoading  extends GetDurationState{}
+
+class GetDurationFailed  extends GetDurationState{
+  final String error;
+  GetDurationFailed(this.error);
+}
+
+class GetDurationSuccess extends GetDurationState{
+  final String data;
+
+  GetDurationSuccess({ required this.data});
+}
+
+
+
+// For Sign up page neww one
+
+abstract class  SignupState {}
+
+class SignUpInitial extends SignupState{}
+class SignUpLoading extends SignupState{}
+
+class OtpSentForSignup extends SignupState {
+  final String userId;
+  final String otp;
+  OtpSentForSignup({ required this.userId, required this.otp});
+}
+
+class SignUpFailed extends SignupState{
+  final String error;
+  SignUpFailed(this.error);
+}
+class SignUpSuccess extends SignupState{
+  final String otp;
+
+  SignUpSuccess({ required this.otp});
+}
+
+//---------------------\
+
+
+
+// Login VIA number State start
+
+abstract class  LoginViaState {}
+
+class LoginViaInitial extends LoginViaState{}
+class LoginViaLoading extends LoginViaState{}
+
+class LoginViaOtpSentForSignup extends LoginViaState {
+  final String otp;
+  final String name;
+  LoginViaOtpSentForSignup({required this.otp, required this.name});
+}
+
+class LoginViaFailed extends LoginViaState{
+  final String error;
+  LoginViaFailed(this.error);
+}
+class LoginViaSuccess extends LoginViaState{
+  final String otp;
+
+  LoginViaSuccess({ required this.otp});
+}
+//----------
+
+
+
+// Get which column has okay message State Start
+
+abstract class GetOkayState{}
+
+class GetOkayInitial extends GetOkayState{}
+class GetOkayLoading extends GetOkayState{}
+class GetOkayFailed extends GetOkayState{
+  final String error;
+  GetOkayFailed(this.error);
+}
+class GetOkaySuccess extends GetOkayState{
+  final String data;
+  GetOkaySuccess({ required this.data});
+}
+// End

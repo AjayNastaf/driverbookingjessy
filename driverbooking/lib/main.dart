@@ -258,7 +258,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 void main()async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.initializeNotifications();
-  requestPermissions();
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
   String? lastScreen = prefs.getString('last_screen');
@@ -349,7 +348,33 @@ void main()async {
           //   create: (context) => GettingClosingKilometerBloc(),
           // ),
 
+          //For OTP
+
+          //------------------------------------------------
+
+          BlocProvider(create: (context) => OtpBloc()),
+
+          BlocProvider(create: (context)=>LastOtBloc()),
+          BlocProvider(create: (context) => EmailBloc()),
+          BlocProvider(create: (context) => SenderInfoBloc()),
+
+          BlocProvider(create: (context)=>SignupBloc()),
+          BlocProvider(create: (context)=>LoginViaBloc()),
+
+          BlocProvider(create: (context)=> GetDurationBloc()),
+          BlocProvider(create: (context)=> GetOkayBloc()),
+
+
+
+
+
+
+
           BlocProvider(create: (_) => AuthenticationBloc()..add(AppStarted())), // 👈 Add this
+
+
+//-------------------------------------------------------------
+
 
 
         ],
@@ -649,8 +674,8 @@ class BackgroundServiceHelper {
   static const MethodChannel _notificationChannel = MethodChannel("com.example.jessy_cabs/notification");
   static Future<void> startBackgroundService() async {
     try {
-      // final result = await _channel.invokeMethod("startService");
-      // print("Background service result: $result");
+      final result = await _channel.invokeMethod("startService");
+      print("Background service result: $result");
     } on PlatformException catch (e) {
       print("Error starting background service: ${e.message}");
     }

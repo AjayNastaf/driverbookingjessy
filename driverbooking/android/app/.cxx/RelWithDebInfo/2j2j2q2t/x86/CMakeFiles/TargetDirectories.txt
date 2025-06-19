@@ -1,0 +1,2 @@
+C:/New folder/driverbooking/NASTAF-Driver-Application/driverbooking/android/app/.cxx/RelWithDebInfo/2j2j2q2t/x86/CMakeFiles/edit_cache.dir
+C:/New folder/driverbooking/NASTAF-Driver-Application/driverbooking/android/app/.cxx/RelWithDebInfo/2j2j2q2t/x86/CMakeFiles/rebuild_cache.dir

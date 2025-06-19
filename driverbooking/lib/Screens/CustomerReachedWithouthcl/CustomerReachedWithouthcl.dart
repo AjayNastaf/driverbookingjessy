@@ -65,8 +65,7 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
   String? Tripdestination;
   String? Testvehinum;
   String? Testtripstatus;
-
-
+  String desti = '';
 
 
   @override
@@ -100,7 +99,7 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
 
 
 
-        var desti = tripDetails['useage'].toString();
+         desti = tripDetails['useage'].toString();
 
         var vechnum = tripDetails['vehRegNo'].toString();
         var tripstatetest = tripDetails['apps'].toString();
@@ -356,33 +355,117 @@ class _CustomerReachedWithouthclState extends State<CustomerReachedWithouthcl> {
 
 
       body: AnimatedCustomerPage(),
+    //   bottomNavigationBar: BottomAppBar(
+    //     height: 120.00,
+    //   color: Colors.white,
+    //   elevation: 8.0,
+    //   child: Padding(
+    //     padding: const EdgeInsets.all(16.0),
+    //     child: SizedBox(
+    //       width: double.infinity,
+    //       child: ElevatedButton(
+    //         onPressed: () {
+    //           _showEndRideConfirmationDialog(context);
+    //         },
+    //         style: ElevatedButton.styleFrom(
+    //           backgroundColor: Colors.red,
+    //           padding: const EdgeInsets.symmetric(vertical: 16),
+    //           shape: RoundedRectangleBorder(
+    //             borderRadius: BorderRadius.circular(8),
+    //           ),
+    //         ),
+    //         child: const Text(
+    //           'End Ride',
+    //           style: TextStyle(fontSize: 20.0, color: Colors.white),
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    // ),
+
       bottomNavigationBar: BottomAppBar(
-        height: 120.00,
-      color: Colors.white,
-      elevation: 8.0,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              _showEndRideConfirmationDialog(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        height: 245.0,
+        color: Colors.white,
+        elevation: 8.0,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Green icon + Current Location
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.person_pin_circle, color: Colors.green, size: 30),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Current Location',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            child: const Text(
-              'End Ride',
-              style: TextStyle(fontSize: 20.0, color: Colors.white),
-            ),
+
+              const SizedBox(height: 8),
+
+              // Vertical line
+              Padding(
+                padding: const EdgeInsets.only(left: 14), // aligns under icon
+                child: Container(
+                  width: 2,
+                  height: 30,
+                  color: Colors.grey.shade400,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Red icon + qqqqqqqq
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.location_on, color: Colors.red, size: 30),
+                  const SizedBox(width: 12),
+                  Text(
+                    desti,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // End Ride Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _showEndRideConfirmationDialog(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'End Ride',
+                    style: TextStyle(fontSize: 20.0, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    ),
     );
   }
 

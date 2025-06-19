@@ -2,11 +2,19 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const multer = require('multer');
+require("dotenv").config();
+// const path = require('path');
+const axios= require("axios")
+const imageFolderPath = require('../imageurl');
+
 // const path = require('path'); // Import path module
+// console.log(`${imageFolderPath}/user_profile`)
+// const baseImagePath = path.join(`${imageFolderPath}/user_profile`);
+// console.log(baseImagePath,"kkjkjkkk")
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './profile_photos'); // Store uploaded files in the 'uploads' directory
+        cb(null, `${imageFolderPath}/user_profile`); // Store uploaded files in the 'uploads' directory
     },
     filename: (req, file, cb) => {
         // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -27,19 +35,18 @@ router.post('/login', (req, res) => {
     db.query('SELECT * FROM drivercreation WHERE username = ? AND userpassword = ?', [username, userpassword], (err, result) => {
 
         if (err) {
-        console.log(err, "error")
             return res.status(500).json({ error: 'Failed to retrieve user details from MySQL' });
         }
-       console.log(result , "rusults login")
+       
         if(result.length > 0){
       
         // console.log(user,"uuuuuppp",result[0]?.length)
         db.query("UPDATE drivercreation SET active ='yes' WHERE username = ? AND userpassword = ?", [username,userpassword], (err, result1) => {
             if (err) {
-                console.log(err, "update error");
+                console.log(err, "error");
                 return res.status(500).json({ error: 'Failed to update status' });
             }
-            console.log(result, 'result update');
+            console.log(result, 'result');
             return res.status(200).json({ message: 'Login successful', user : result });
 //             return res.status(200).json(result);
         });
@@ -52,6 +59,330 @@ router.post('/login', (req, res) => {
    
     });
 });
+
+
+
+router.post("/signup", async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+
+    console.log('first step phone number received', name, email, phone);
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const mobile = phone;
+
+    const selectQuery = 'SELECT * FROM drivercreation WHERE username = ?';
+    console.log(selectQuery,'ddddddddd');
+
+    db.query(selectQuery, [name], (selectErr, selectResult) => {
+      if (selectErr) {
+        console.error("Database select error:", selectErr);
+        return res.status(500).json({ message: "Database error", success: false });
+      }
+
+      console.log(selectResult,'rrrrrrrrrr');
+
+      if (selectResult.length > 0) {
+        console.log('user already exists');
+
+        return res.status(409).json({
+          message: "User Already Exists",
+          success: false
+        });
+      }
+
+      const insertQuery = 'INSERT INTO drivercreation (username, Drivername, Email, Mobileno, driverhiretype) VALUES (?, ?, ?, ?, "Outside Driver")';
+      db.query(insertQuery, [name, name, email, phone], async (insertErr, insertResult) => {
+        console.log('insert successfully');
+
+        if (insertErr) {
+          console.error("Database insert error:", insertErr);
+          return res.status(500).json({ message: "Database error", success: false });
+        }
+
+        const userId = insertResult.insertId;
+        console.log('insert Id is', userId);
+
+        const smsBody = {
+          SenderId: process.env.SMS_SENDERID,
+
+          // Don't remove and add anything here
+
+          Message:`Your JESSYCABS Driver verification code is: ${otp}
+Please enter this OTP to verify your phone number.
+Do not share this code with anyone.
+
+- JESSYCABS PVT LTD`,
+
+//
+
+//          Message:`Your JESSYCABS Driver verification code is: 4343
+// Please enter this OTP to verify your phone number.
+// Do not share this code with anyone.
+
+// - JESSYCABS PVT LTD`,
+
+          MobileNumbers: mobile,
+          TemplateId: process.env.SMS_TEMPLATEID_SIGNUP,
+          ApiKey: process.env.SMS_APIKEY,
+          ClientId: process.env.SMS_CLIENTID,
+        };
+            console.log('sms body from first', smsBody);
+
+
+        try {
+          const smsResponse = await axios.post(process.env.SMS_APIURL, smsBody);
+          console.log('sms response', smsResponse);
+
+          const smsData = smsResponse.data.Data?.[0];
+
+          console.log('sms data', smsData);
+
+          if (!smsData) {
+            return res.status(500).json({
+              message: "SMS API error",
+              success: false
+            });
+          }
+
+          const { MessageErrorCode, MessageErrorDescription } = smsData;
+
+          if (MessageErrorCode !== 0) {
+            return res.status(500).json({
+              message: "SMS sending failed",
+              smsError: MessageErrorDescription,
+              success: false,
+            });
+          }
+
+          console.log('otp send from first');
+          console.log('otp send from first', otp);
+
+          return res.status(200).json({
+            message: "OTP sent successfully",
+            otp,
+            userId,
+            success: true,
+          });
+
+        } catch (smsError) {
+          console.log("SMS API error:", smsError);
+          return res.status(500).json({ message: "Failed to send OTP", success: false });
+        }
+      });
+    });
+
+  } catch (error) {
+    console.error("Signup error:", error);
+    return res.status(500).json({
+      message: "Server Error",
+      success: false
+    });
+  }
+});
+
+
+router.post("/signup_again_otp", async (req, res) => {
+
+    const {phone} = req.body;
+
+    console.log('second step phone number received', phone);
+
+
+  try {
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const mobile = phone;
+
+    const smsBody = {
+      SenderId: process.env.SMS_SENDERID,
+          Message:`Your JESSYCABS Driver verification code is: ${otp}
+Please enter this OTP to verify your phone number.
+Do not share this code with anyone.
+
+- JESSYCABS PVT LTD`,
+      MobileNumbers: mobile,
+      TemplateId: process.env.SMS_TEMPLATEID_SIGNUP,
+      ApiKey: process.env.SMS_APIKEY,
+      ClientId: process.env.SMS_CLIENTID,
+    };
+
+    console.log('sms body from second', smsBody);
+
+
+    const smsResponse = await axios.post(process.env.SMS_APIURL, smsBody);
+    const smsData = smsResponse.data.Data?.[0];
+
+    if (!smsData) {
+      return res.status(500).json({
+        message: "SMS API error",
+        success: false
+      });
+    }
+
+    const { MessageErrorCode, MessageErrorDescription } = smsData;
+
+    if (MessageErrorCode !== 0) {
+      return res.status(500).json({
+        message: "SMS sending failed",
+        smsError: MessageErrorDescription,
+        success: false,
+      });
+    }
+
+        console.log('otp send from second');
+        console.log('otp send from second', otp);
+
+    return res.status(200).json({
+      message: "OTP sent successfully",
+      otp,
+      success: true,
+    });
+
+  } catch (error) {
+    console.error("OTP send error:", error);
+    return res.status(500).json({
+      message: "Server Error",
+      success: false
+    });
+  }
+});
+
+// Login VIA number backend code
+router.post("/loginVia", async (req, res) => {
+  const { phone } = req.body;
+  console.log('third step phone number received', phone);
+
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+  const mobile = phone;
+
+  const selectQuery = 'SELECT * FROM drivercreation WHERE Mobileno = ?';
+
+  db.query(selectQuery, [phone], async (selectErr, selectResult) => {
+    if (selectErr) {
+      console.error("Database select error:", selectErr);
+      return res.status(500).json({ message: "Database error", success: false });
+    }
+
+
+    console.log(selectResult, 'rrrrrr');
+
+    if (selectResult.length === 0) {
+      console.log('Invalid User');
+      return res.status(409).json({ message: "Invalid User", success: false });
+    }
+
+     const username = selectResult[0].username;
+
+    console.log(username, 'wwwwwwwwwwwww');
+
+    const smsBody = {
+      SenderId: process.env.SMS_SENDERID,
+          Message:`Your JESSYCABS Driver verification code is: ${otp}
+Please enter this OTP to verify your phone number.
+Do not share this code with anyone.
+
+- JESSYCABS PVT LTD`,
+      MobileNumbers: mobile,
+      TemplateId: process.env.SMS_TEMPLATEID_SIGNUP,
+      ApiKey: process.env.SMS_APIKEY,
+      ClientId: process.env.SMS_CLIENTID,
+    };
+
+    try {
+      const smsResponse = await axios.post(process.env.SMS_APIURL, smsBody);
+      const smsData = smsResponse.data.Data?.[0];
+
+      if (!smsData || smsData.MessageErrorCode !== 0) {
+        return res.status(500).json({
+          message: "SMS sending failed",
+          smsError: smsData?.MessageErrorDescription || "Unknown SMS error",
+          success: false,
+        });
+      }
+
+      return res.status(200).json({
+        message: "OTP sent successfully",
+        otp,
+        username,
+        success: true,
+      });
+
+    } catch (smsError) {
+      console.log("SMS API error:", smsError);
+      return res.status(500).json({ message: "Failed to send OTP", success: false });
+    }
+  });
+});
+
+router.post("/loginVia_again_otp", async (req, res) => {
+
+    const {phone} = req.body;
+
+    console.log('fourth step phone number received', phone);
+
+
+  try {
+
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    const mobile = phone;
+
+    const smsBody = {
+      SenderId: process.env.SMS_SENDERID,
+          Message:`Your JESSYCABS Driver verification code is: ${otp}
+Please enter this OTP to verify your phone number.
+Do not share this code with anyone.
+
+- JESSYCABS PVT LTD`,
+      MobileNumbers: mobile,
+      TemplateId: process.env.SMS_TEMPLATEID_SIGNUP,
+      ApiKey: process.env.SMS_APIKEY,
+      ClientId: process.env.SMS_CLIENTID,
+    };
+
+    console.log('sms body from second', smsBody);
+
+
+    const smsResponse = await axios.post(process.env.SMS_APIURL, smsBody);
+    const smsData = smsResponse.data.Data?.[0];
+
+    if (!smsData) {
+      return res.status(500).json({
+        message: "SMS API error",
+        success: false
+      });
+    }
+
+    const { MessageErrorCode, MessageErrorDescription } = smsData;
+
+    if (MessageErrorCode !== 0) {
+      return res.status(500).json({
+        message: "SMS sending failed",
+        smsError: MessageErrorDescription,
+        success: false,
+      });
+    }
+
+        console.log('otp send from fourth');
+        console.log('otp send from fourth', otp);
+
+    return res.status(200).json({
+      message: "OTP sent successfully",
+      otp,
+      success: true,
+    });
+
+  } catch (error) {
+    console.error("OTP send error:", error);
+    return res.status(500).json({
+      message: "Server Error",
+      success: false
+    });
+  }
+});
+
+
+
 
 router.post('/logoutDriver',(req,res)=>{
     const { username, userpassword } = req.body;

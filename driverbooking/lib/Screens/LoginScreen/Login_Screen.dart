@@ -11,13 +11,15 @@ import 'package:jessy_cabs/Screens/HomeScreen/MapScreen.dart';
 import 'package:jessy_cabs/Screens/IntroScreens/IntroScreenMain.dart';
 import 'package:jessy_cabs/Screens/ListScreen/listviewpage.dart';
 import 'package:jessy_cabs/Screens/Registeration/Register.dart';
+import 'package:jessy_cabs/Screens/SignUpScreen/SignUp_Screen.dart';
 import 'package:jessy_cabs/models/login_dats.dart'; // Import the UserInfo model
 import '../../Networks/Api_Service.dart';
 import '../../Utils/AppConstants.dart';
 import '../../Utils/AppTheme.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:jessy_cabs/Screens/LoginViaMobileScreen/LoginViaMobile.dart';
+import 'package:jessy_cabs/Screens/SignUpScreen/SignUp_Screen.dart';
 
 class Login_Screen extends StatefulWidget {
   const Login_Screen({super.key});
@@ -175,7 +177,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                    height: 350.0,
+                    height: 380.0,
                     color: Colors.white.withOpacity(
                         0.8), // Set your desired background color with opacity
                     // color: AppTheme.white1, // Set your desired background color with opacity
@@ -262,7 +264,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                                 return null;
                               },
                             ),
-                            SizedBox(height: 24.0),
+                            SizedBox(height: 20.0),
 
                             // Password Field
                             TextFormField(
@@ -290,9 +292,51 @@ class _Login_ScreenState extends State<Login_Screen> {
                                 return null;
                               },
                             ),
-                            SizedBox(height: 54.0),
 
+
+                            SizedBox(height: 5.0),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              Loginviamobile()),
+                                    );
+                                  },
+                                  child: Text(
+                                    'Login Via Phone Number',
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                      color: AppTheme.Navblue1,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                             // Login Button
+
+
+                            Center(
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => SignUp()));
+                                },
+                                child: Text(
+                                  "Don't have an account? Sign Up",
+                                  style: TextStyle(
+                                    fontSize: 14.0,
+                                    color: AppTheme.Navblue1,
+                                  ),
+                                ),
+                              ),
+                            ),
                             ElevatedButton(
                               // onPressed: () {
                               //   if (_formKey.currentState!.validate()) {
@@ -350,10 +394,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                                 backgroundColor: AppTheme.Navblue1,
                               ),
                             ),
-                            SizedBox(
-                              height: 20.0,
-                            ),
-                            // Center(
+
                             //   child: Row(
                             //     mainAxisAlignment: MainAxisAlignment.center,
                             //     children: [

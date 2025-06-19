@@ -1,0 +1,2 @@
+C:/New folder/driverbooking/NASTAF-Driver-Application/driverbooking/android/app/.cxx/Debug/334a5k6b/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/New folder/driverbooking/NASTAF-Driver-Application/driverbooking/android/app/.cxx/Debug/334a5k6b/armeabi-v7a/CMakeFiles/rebuild_cache.dir

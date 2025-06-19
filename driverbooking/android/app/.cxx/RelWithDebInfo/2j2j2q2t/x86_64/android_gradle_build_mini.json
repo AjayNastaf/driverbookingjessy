@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\New folder\\Flutter\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\NASTAF_14\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\New folder\\driverbooking\\NASTAF-Driver-Application\\driverbooking\\android\\app\\.cxx\\RelWithDebInfo\\2j2j2q2t\\x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\NASTAF_14\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\New folder\\driverbooking\\NASTAF-Driver-Application\\driverbooking\\android\\app\\.cxx\\RelWithDebInfo\\2j2j2q2t\\x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

@@ -70,8 +70,6 @@ dependencies:
   flutter_local_notifications: ^16.3.2
   google_fonts: ^4.0.3
   lottie: ^2.3.2
-  flutter_overlay_window: ^0.5.0
-  android_intent_plus: ^4.0.1
 
 
 
@@ -122,7 +120,8 @@ flutter:
     - assets/animations/Animation.json
     - assets/animations/Animationed.json
     - assets/animations/Animationtrack.json
-
+    - assets/animations/otpverify.json
+    - assets/animations/Animationss.json
 
   #    - assets/image/bg-Main.png
 

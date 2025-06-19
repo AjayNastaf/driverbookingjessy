@@ -1,17 +1,21 @@
 const express = require("express");
 const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
-// const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const db = require('./db');
 const cors = require("cors");
+ const multer=require('multer');
 require("dotenv").config();
+const Imagepathuploads = require('./imageurl')
+
 
 const app = express();
 // app.use(cors());
 // app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
+//app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Nodemailer setup
@@ -24,14 +28,15 @@ const transporter = nodemailer.createTransport({
 });
 
 
-app.use('/profile_photos', express.static(path.join(__dirname, 'profile_photos')));
+app.use('/profile_photos', express.static(path.join(__dirname, `${Imagepathuploads}/user_profile`)));
 //app.use('/signature_photos', express.static(path.join(__dirname, 'Router/path_to_save_images')));
 //app.use('/signatures', express.static(path.join(__dirname, 'Router/path_to_save_images')));
-app.use('/signatures', express.static(path.join(__dirname, '../../../Imagefolder/signature_images')));
-app.use('/uploads', express.static(path.join(__dirname, '../../../Imagefolder/imagesUploads_doc')));
+app.use('/signatures', express.static(path.join(__dirname, `${Imagepathuploads}/signature_images`)));
+app.use('/uploads', express.static(path.join(__dirname, `${Imagepathuploads}/imagesUploads_doc`)));
 //app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // app.use('/images', express.static(path.join(__dirname, 'path_to_save_images')));
-console.log(express.static(path.join(__dirname, 'profile_photos')),"ppp")
+console.log(path.join(__dirname, `${Imagepathuploads}/signature_images`),"ppp")
+console.log(path.join(__dirname, `${Imagepathuploads}/imagesUploads_doc`),"ppp")
 
 const loginRoutes = require('./Router/login');
 const bookingdetails = require('./Router/bookingdetails');
@@ -42,6 +47,11 @@ const closedutyrouter = require('./Router/closeduty');
 const uploadbill = require('./Router/upload');
 const Mailer = require('./Router/mailer');
 const vehcileloc = require('./Router/vehicle');
+
+
+//for OTP
+
+const otp=require('./Router/otp');
 
 
 
@@ -55,6 +65,9 @@ app.use('/', closedutyrouter);
 app.use('/', uploadbill);
 app.use('/',Mailer);
 app.use('/',vehcileloc);
+
+//For OTP
+app.use('/',otp)
 
 // Create a MySQL connection
 // const db = mysql.createConnection({
@@ -142,8 +155,104 @@ app.use('/',vehcileloc);
 //     });
 //   });
 // });
+const baseImagePath = path.join(__dirname, `${Imagepathuploads}/signature_images`);
 
 
+console.log(baseImagePath , 'path disdfssssssssssssssssss');
+function generateUniqueNumbers() {
+    return Math.floor(10000 + Math.random() * 90000);
+  }
+
+app.post('/api/saveSignature', (req, res) => {
+    const { tripid, signatureData,imageName,endtrip,endtime} = req.body;
+   
+
+    const base64Data = signatureData.replace(/^data:image\/png;base64,/, '');
+    const imageBuffer = Buffer.from(base64Data, 'base64');
+
+    // const imageName = `signature-${Date.now()}.png`;
+    const imagePath = path.join(baseImagePath, imageName); // Use the base path
+
+    fs.writeFile(imagePath, imageBuffer, (error) => {
+        if (error) {
+            res.status(500).json({ error: 'Failed to save signature' });
+        } else {
+            const uniquenumber=generateUniqueNumbers()
+            const relativeImagePath = path.relative(baseImagePath, imagePath); // Calculate relative path
+            const sql = 'INSERT INTO signatures (tripid, signature_path,unique_number) VALUES (?,?,?)';
+              const sql2=" UPDATE tripsheet set closedate=? , closetime = ?,vendorshedInDate = ?, vendorshedintime = ? where  tripid = ?"
+            db.query(sql, [tripid, relativeImagePath,uniquenumber], (dbError, results) => {
+                if (dbError) {
+                    res.status(500).json({ error: 'Failed to save signature' });
+                } else {
+                    db.query(sql2, [endtrip,endtime,endtrip,endtime,tripid], (dbError1, results1) => {
+                        if (dbError1) {
+                            res.status(500).json({ error: 'Failed to save signature' });
+                        } else {
+        
+                            
+                            res.json({ message: 'Signature saved successfully' });
+                        }
+                    });
+                    // res.json({ message: 'Signature saved successfully' });
+                }
+            });
+        }
+    });
+});
+
+const uploadDir =path.join(__dirname, `${Imagepathuploads}/imagesUploads_doc`);
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        // console.log(req,"jj")
+      cb(null, uploadDir,)
+    },
+    filename: (req, file, cb) => {
+         console.log(req,"lllll")
+      cb(null, file.fieldname + "_" + req.params.data + path.extname(file.originalname))
+    }
+  
+  })
+const upload = multer({ storage: storage });
+
+app.post('/uploadsdriverapp/:data', upload.array('file', 10), (req, res) => {
+  const selectedTripId = req.body.tripid;
+  const documentType = req.body.documenttype;
+
+  console.log("Request Params:", req.params.data);
+  console.log("Uploaded Files:", req.files);
+
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ message: 'No files uploaded' });
+  }
+
+  const fileDataArray = req.files.map(file => ({
+    name: file.originalname,
+    mimetype: file.mimetype,
+    size: file.size,
+//    path: file.path.replace(/\\/g, '/').replace(/^uploads\//, ''),
+  path: file.filename,
+
+    tripid: selectedTripId,
+    documenttype: documentType,
+  }));
+
+  console.log("Processed File Data:", fileDataArray);
+
+  const updateQuery = 'INSERT INTO tripsheetupload (name, mimetype, size, path, tripid, documenttype) VALUES ?';
+
+  // Map file data to the format required for bulk insert
+  const values = fileDataArray.map(file => [file.name, file.mimetype, file.size, file.path, file.tripid, file.documenttype]);
+
+  db.query(updateQuery, [values], (err, results) => {
+    if (err) {
+      console.error("Database Error:", err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    res.status(200).json({ message: 'Files uploaded successfully', data: results });
+  });
+});
 
 // Register a new user with OTP
 app.post("/registerotp", (req, res) => {
@@ -885,15 +994,14 @@ app.get('/getAllUploadsByTripId', (req, res) => {
 
 
 //local
-//app.listen(3004, () => {
-//  console.log("Server started on ports 30059");
-//});
+// app.listen(3003, () => {
+//   console.log("Server started on port 30059");
+// });
 
 
 
 //jessycabs
-
 app.listen(7128, () => {
-  console.log("Server started on port 710000");
+ console.log("Server started on port 7100000p0");
 });
 

@@ -90,7 +90,7 @@ class _PickUpWithoutHclState extends State<PickUpWithoutHcl> with TickerProvider
           "Pick Up",
           style: TextStyle(color: Colors.white, fontSize: AppTheme.appBarFontSize),
         ),
-        // automaticallyImplyLeading: false, // 👈 disables the default back icon
+        automaticallyImplyLeading: false, // 👈 disables the default back icon
 
         backgroundColor: AppTheme.Navblue1,
       ),
@@ -223,7 +223,7 @@ class _PickUpWithoutHclState extends State<PickUpWithoutHcl> with TickerProvider
                         ),
                         const SizedBox(height: 45),
                         Text(
-                          'qqqqqqqqqqqqqqq',
+                          '${widget.address}',
                           style: TextStyle(
                             color: Colors.grey.shade800,
                             fontSize: 14,

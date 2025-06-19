@@ -726,6 +726,7 @@ class SaveLocationToDatabase extends TripTrackingDetailsEvent {
   final String vehicleNo;
   final String tripId;
   final String tripStatus;
+  final String reached_30minutes;
 
   SaveLocationToDatabase({
     required this.latitude,
@@ -733,10 +734,11 @@ class SaveLocationToDatabase extends TripTrackingDetailsEvent {
     required this.vehicleNo,
     required this.tripId,
     required this.tripStatus,
+    required this.reached_30minutes
   });
 
   @override
-  List<Object?> get props => [latitude, longitude, vehicleNo, tripId, tripStatus];
+  List<Object?> get props => [latitude, longitude, vehicleNo, tripId, tripStatus, reached_30minutes];
 }
 
 
@@ -858,3 +860,166 @@ class FetchClosingKilometer extends GettingClosingKilometerEvent {
 
 //getting dynamic closing kilometer Event completed
 
+//sending otp0 events starts
+class OtpEvent {
+  final String guestNumber;
+  final String guestEmail;
+  final String guestName;
+  final String senderEmail;
+  final String senderPass;
+
+  OtpEvent({
+    required this.guestNumber,
+    required this.guestEmail,
+    required this.guestName,
+    required this.senderEmail,
+    required this.senderPass,
+  });
+}
+//sending otp events completed
+
+
+
+//verify otp events completed
+
+class OtpVerifyEvent{
+  final String guestNumber;
+  final String guestEmail;
+  final String guestName;
+  final String senderEmail;
+  final String senderPass;
+
+  OtpVerifyEvent(
+      {required this.guestNumber, required this.guestEmail, required this.guestName, required this.senderEmail, required this.senderPass});
+
+}
+//verify otp events completed
+
+
+
+
+//for mail sent to the hybrid customer details  events started
+@immutable
+abstract class EmailEvent {}
+
+class SendEmailEvent extends EmailEvent {
+  final String guestName;
+  final String guestMobileNo;
+  final String email;
+  final String startKm;
+  final String closeKm;
+  final String duration;
+  final String senderEmail;
+  final String senderPassword;
+
+  final String TripId;
+  final String Vechname;
+  final String Vechnum;
+  final String dutytype;
+  final String ReportTime;
+  final String ReleaseTime;
+  final String ReportDate;
+  final String ReleaseDate;
+  final String Startpoint;
+  final String Endpoint;
+
+
+  SendEmailEvent({
+    required this.guestName,
+    required this.guestMobileNo,
+    required this.email,
+    required this.startKm,
+    required this.closeKm,
+    required this.duration,
+    required this.senderEmail,
+    required this.senderPassword,
+    required this.TripId,
+    required this.dutytype,
+    required this.Vechnum,
+    required this.Endpoint,
+    required this.ReleaseDate,
+    required this.ReleaseTime,
+    required this.ReportDate,
+    required this.ReportTime,
+    required this.Startpoint,
+    required this.Vechname,
+  });
+}
+
+
+
+
+abstract class SenderInfoEvent {}
+class FetchSenderInfo extends SenderInfoEvent {}
+
+
+
+
+
+
+
+
+
+abstract class GetDurationEvent {}
+
+class FetchDuration extends GetDurationEvent {
+  final String  tripId;
+  FetchDuration({required this.tripId});
+}
+
+
+
+
+// For Sign up page neww one
+
+abstract class SignupEvent {}
+
+class SignupRequested extends SignupEvent {
+
+  final String name;
+  final String email;
+  final String phone;
+
+  SignupRequested({ required this.name, required this.email, required this.phone});
+}
+
+class OtpverificationRequested extends SignupEvent {
+  final String phone;
+
+  OtpverificationRequested({ required this.phone});
+}
+
+// end------------
+
+// Login VIA number event start
+
+abstract class LoginViaEvent {}
+
+class LoginRequested extends LoginViaEvent {
+
+  final String phone;
+
+  LoginRequested({required this.phone});
+}
+
+class LoginViaOtpverificationRequested extends LoginViaEvent {
+  final String phone;
+
+  LoginViaOtpverificationRequested({ required this.phone});
+}
+
+//end
+
+
+// Get which column has okay message Event start
+
+abstract class GetOkayEvent{}
+
+class FetchOkaymessage  extends GetOkayEvent{
+  final String trip_id;
+
+  FetchOkaymessage({ required this.trip_id});
+}
+
+
+// End

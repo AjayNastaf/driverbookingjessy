@@ -549,7 +549,6 @@
 
 
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:jessy_cabs/Screens/TripDetailsPreview/TripDetailsPreview.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
@@ -565,7 +564,7 @@ import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:jessy_cabs/GlobalVariable/global_variable.dart' as globals;
-
+import 'package:jessy_cabs/Utils/AllImports.dart';
 
 class TripDetailsUpload extends StatefulWidget {
   final String tripId;
@@ -579,6 +578,9 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
   bool isStartKmEnabled = true; // Only Start KM and Close KM are enabled
   bool isCloseKmEnabled = true;
+
+  double? distance;
+  String? timeDuration;
 
   final TextEditingController startKmController = TextEditingController();
   // final TextEditingController closeKmController = TextEditingController();
@@ -603,10 +605,20 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
   late TripUploadBloc _tripUploadBloc;
   bool _isLoading = false; // Add this in your state
   bool _hasLoadedOnce = false;
-  double totalDistanceInKm = 0.0;
-
+  String? fetchedHybridData;
   String? startkmvalue;
-  static const MethodChannel _trackingChannel = MethodChannel('com.example.jessy_cabs/tracking');
+  String? fetchdestination;
+  String? fetchGuestEail;
+  String? senderEmail;
+  String? senderPass;
+  String? fetchVechName;
+  String? fetchVechNum;
+  String? fetchdutyType;
+  String? fetchaddress;
+  String? fetchStart;
+  String? fetchClose;
+
+
 
 
   String setFormattedDate(String? dateStr) {
@@ -624,11 +636,11 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     super.initState();
     _fetchTripDetails();
     closeKmController = TextEditingController();
-
+    context.read<SenderInfoBloc>().add(FetchSenderInfo());
     _tripUploadBloc = TripUploadBloc();
     BlocProvider.of<GettingClosingKilometerBloc>(context).add(FetchClosingKilometer(widget.tripId));
     _loadTripSheetDetailsByTripId();
-
+    context.read<GetDurationBloc>().add(FetchDuration(tripId: widget.tripId));
     saveScreenData();
 
     _reloadScreen();
@@ -727,11 +739,12 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     try {
       // Fetch trip details from the API
       final tripDetails = await ApiService.fetchTripDetails(widget.tripId);
-      print('Trip details fetchedd: $tripDetails');
+      print('Trip details fetchedddd: $tripDetails');
       if (tripDetails != null) {
 
-
+        fetchedHybridData = tripDetails['Hybriddata'].toString();
         var fetchedStartkmvalue = tripDetails['startkm'].toString();
+        var fetcheddestination = tripDetails['useage'].toString();
         var fetchedtripid = tripDetails['tripid'].toString();
 
         var fetchedguestname = tripDetails['guestname'].toString();
@@ -745,10 +758,64 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
         var fetchedClosedate = tripDetails['closedate'].toString();
 
         var fetchedClosedkm = tripDetails['closekm'].toString();
+        var fetchedGuestemail = tripDetails['email'].toString();
+        var fetchedVechName = tripDetails['vehicleName'].toString();
+        var fetchedVechNum = tripDetails['vehRegNo'].toString();
+        var fetchedDutyType = tripDetails['duty'].toString();
+        var fetchedAddress = tripDetails['address1'].toString();
+        var fetchedstarttime = tripDetails['starttime'].toString();
+        var fetchedclosetime = tripDetails['closetime'].toString();
+
 
         print('Fetched startkmvalue: $fetchedStartkmvalue');
+        if (!mounted) return;
         setState(() {
-           startkmvalue = fetchedStartkmvalue;
+          print('aaaaaaaaaaaaaaaaaaaaa');
+
+
+           // startkmvalue = fetchedStartkmvalue;
+           //
+           // double startKm = double.parse(fetchedStartkmvalue);
+           // double endKm = double.parse(fetchedClosedkm);
+           //
+           // distance = startKm - endKm;
+
+          try {
+            double startKm = double.tryParse(fetchedStartkmvalue) ?? 0;
+            double endKm = double.tryParse(fetchedClosedkm) ?? 0;
+            distance = startKm - endKm;
+            print('Distance: $distance');
+          } catch (e) {
+            print('❌ Error parsing km values: $e');
+          }
+
+
+
+
+          // print('between distance${distance}');
+
+
+            fetchGuestEail = fetchedGuestemail ?? '';
+            fetchdestination = fetcheddestination ?? '';
+            fetchVechName = fetchedVechName ?? '';
+           fetchVechNum = fetchedVechNum ?? '';
+           fetchdutyType = fetchedDutyType ?? '';
+           fetchaddress = fetchedAddress ?? '';
+           fetchStart = fetchedstarttime ?? '';
+           fetchClose = fetchedclosetime ?? '';
+
+           print('between distance${fetchGuestEail}');
+           print('between distance${fetchdestination}');
+           print('between distance${fetchVechName}');
+           print('between distance${fetchVechNum}');
+           print('between distance${fetchdutyType}');
+
+           print('between distance${fetchaddress}');
+           print('between distance${fetchStart}');
+           print('between distance${fetchClose}');
+
+
+
            tripIdController.text = fetchedtripid ?? '';
 
            guestNameController.text = fetchedguestname ?? '';
@@ -757,14 +824,34 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
 
            vehicleTypeController.text = fetchedvechtype ?? '';
 
-           startDateController.text = fetchedStartdate ?? '';
+           // startDateController.text = fetchedStartdate ?? '';
 
-           closeDateController.text = fetchedguestmobile ?? '';
+           // closeDateController.text = fetchedguestmobile ?? '';
 
            closeKmController.text = fetchedClosedkm ?? '';
           // Populate the form fields with the fetched data
 
           // startKmController.text = startkmvalue ?? '';
+
+           var fetchStartDate = fetchedStartdate ?? '';
+
+           List<String> parts = fetchStartDate.split('-');
+
+           final formStartDate = "${parts[2]}-${parts[1]}-${parts[0]}";
+
+           startDateController.text = formStartDate;
+
+           print("FormDate Start $formStartDate");
+
+           var fetchCloseDate = fetchedClosedate ?? '';
+
+           List<String> partss = fetchCloseDate.split('-');
+
+           final formCloseDate = "${partss[2]}-${partss[1]}-${partss[0]}";
+
+           closeDateController.text = formCloseDate;
+
+
 
         });
         _StartCloseKm();
@@ -1191,18 +1278,6 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
     }
   }
 
-  Future<void> clearSavedDistance() async {
-    try {
-      await _trackingChannel.invokeMethod("clearSavedDistance");
-      print("✅ SharedPreferences cleared");
-      setState(() {
-        totalDistanceInKm = 0.0;
-      });
-    } catch (e) {
-      print("❌ Failed to clear distance: $e");
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -1210,7 +1285,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
       create: (context) => _tripUploadBloc,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Uploading Closing Kilometer"),
+          title: const Text("Uploading Closing Kilometers"),
           automaticallyImplyLeading: false,
 
         ),
@@ -1235,6 +1310,41 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                 }
               },
             ),
+            BlocListener<EmailBloc, EmailState>(
+              listener: (context, state) {
+                if (state is EmailSent) {
+                  print("yeeeee");
+                  showSuccessSnackBar(context, "✅ Email Sent Successfully");
+                } else if (state is EmailFailed) {
+                  print("neeeee");
+
+                  showFailureSnackBar(context, "❌ Email Sending Failed");
+                }
+              },
+            ),
+            BlocListener<SenderInfoBloc, SenderInfoState>(
+              listener: (context, state) {
+                if (state is SenderInfoSuccess) {
+                  setState(() {
+                    senderEmail = state.senderMail;
+                    senderPass = state.senderPass;
+                    print('In tracking page setState ${state.senderMail}');
+                    print('In tracking page setState ${state.senderPass}');
+                  });
+                }
+                },
+            ),
+
+            BlocListener<GetDurationBloc, GetDurationState>(
+                listener: (context, state){
+                  if(state is GetDurationSuccess){
+                    print("Duration is: ${state.data}");
+                    setState(() {
+                      timeDuration = state.data;
+                    });
+                  }
+                })
+
           ],
           child: RefreshIndicator(
             onRefresh: _fetchTripDetails, // Calls the function to reload data
@@ -1248,6 +1358,9 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                       controller: tripIdController,
                       enabled: false,
                       decoration: const InputDecoration(
+                        labelText: "Trip Id",
+
+
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -1298,16 +1411,16 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                         border: OutlineInputBorder(),
                       ),
                     ),
-                     Text(
-                      "Stored Distance: ${globals.savedTripDistance.toStringAsFixed(2)} km",
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-
-                    Text(
-                      "Rounded Distance : ${globals.savedTripDistance.round()} km",
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    //  Text(
+                    //   "Stored Distance: ${globals.savedTripDistance.toStringAsFixed(2)} km",
+                    //   style: TextStyle(fontSize: 18),
+                    // ),
+                    // const SizedBox(height: 16),
+                    //
+                    // Text(
+                    //   "Rounded Distance : ${globals.savedTripDistance.round()} km",
+                    //   style: TextStyle(fontSize: 18),
+                    // ),
 
 
                     const SizedBox(height: 16),
@@ -1316,8 +1429,8 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                       children: [
                         Expanded(
                           child: TextField(
-                            readOnly: true,
-                            enabled: false,
+                            readOnly: fetchedHybridData !='1' ? false : true,  // is this value will be 0 we can write
+                            enabled: fetchedHybridData != '1',  // expected : enable = 0;
                             controller: closeKmController,
                             // enabled: isCloseKmEnabled,
                             decoration: const InputDecoration(
@@ -1417,6 +1530,27 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                             //   hcl: hclValue,
                             // ));
 
+                            context.read<EmailBloc>().add(SendEmailEvent(
+                              guestName: "${guestNameController.text}",
+                              guestMobileNo: "${fetchdestination}",
+                              email: "${fetchGuestEail}",
+                              startKm: "${startkmvalue}",
+                              closeKm: "${globals.savedTripDistance.round()}",
+                              duration: "${timeDuration}",
+                              senderEmail: '${senderEmail}',
+                              senderPassword: '${senderPass}',
+                              TripId: '${widget.tripId}',
+                              dutytype: '${fetchdutyType}',
+                              Vechnum: '${fetchVechNum}',
+                              Endpoint: '${fetchdestination}',
+                              ReleaseDate: '${closeDateController.text}',
+                              ReleaseTime: '${fetchClose}',
+                              ReportDate: '${startDateController.text}',
+                              ReportTime: '${fetchStart}',
+                              Startpoint: '${fetchaddress}',
+                              Vechname: '${fetchVechName}', // Gmail App Password
+                            ));
+
                             _tripUploadBloc.add(UploadClosingKmText(tripId: widget.tripId));
 
                             if (_selectedImage2 != null) {
@@ -1445,7 +1579,7 @@ class _TripDetailsUploadState extends State<TripDetailsUpload> {
                                 ),
                               );
                             });
-                            clearSavedDistance(); //for clearing shared prefence kilometers
+
                           },
                           // child: Text("Upload Toll and Parking Data"),
                           child:  _isLoading

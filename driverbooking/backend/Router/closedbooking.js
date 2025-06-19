@@ -98,7 +98,7 @@ console.log('ajay4',typeof(duty));
         console.log('Error updating tripsheet:', err);
         return res.status(500).send('Failed to update');
       }
-      console.log(result, "data of the tripsheet data of the tripsheettttt")
+      // console.log(result, "data of the tripsheet data of the tripsheettttt")
 //      return res.status(200).send('Successfully updated');
       return res.status(200).json({ success: true, message: 'Successfully updated' });
 
@@ -150,7 +150,7 @@ console.log('ajay4',typeof(duty));
         console.log('Error updating tripsheet:', err);
         return res.status(500).send('Failed to update');
       }
-      console.log(result, "data of the tripsheet data of the tripsheet")
+      // console.log(result, "data of the tripsheet data of the tripsheet")
       return res.status(200).send('Successfully updated');
     }
   );
