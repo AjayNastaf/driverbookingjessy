@@ -1393,6 +1393,11 @@ String? TripStartTime;
             reached_30minutes:"null",
           ),
         );
+SharedPreferences pref = await SharedPreferences.getInstance();
+
+          await pref.remove("updated_start_time");
+
+
       } else {
         print("Trip details are not yet loaded. Cannot save location.");
       }
@@ -1763,7 +1768,7 @@ String? TripStartTime;
         parsedTime.millisecond,
       );
 
-      DateTime updatedTimeD = fullTime.add(Duration(minutes: 5));
+      DateTime updatedTimeD = fullTime.add(Duration(minutes: 2));
       print('inside functionnnn ${DateFormat("HH:mm:ss.SSS").format(updatedTimeD)}');
 
       return DateFormat("HH:mm:ss.SSS").format(updatedTimeD);
