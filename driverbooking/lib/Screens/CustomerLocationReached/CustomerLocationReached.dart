@@ -1393,9 +1393,7 @@ String? TripStartTime;
             reached_30minutes:"null",
           ),
         );
-SharedPreferences pref = await SharedPreferences.getInstance();
 
-          await pref.remove("updated_start_time");
 
 
       } else {
