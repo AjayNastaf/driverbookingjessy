@@ -1766,7 +1766,7 @@ String? TripStartTime;
         parsedTime.millisecond,
       );
 
-      DateTime updatedTimeD = fullTime.add(Duration(minutes: 2));
+      DateTime updatedTimeD = fullTime.add(Duration(minutes: 10));
       print('inside functionnnn ${DateFormat("HH:mm:ss.SSS").format(updatedTimeD)}');
 
       return DateFormat("HH:mm:ss.SSS").format(updatedTimeD);
