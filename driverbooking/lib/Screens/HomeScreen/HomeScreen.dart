@@ -300,6 +300,7 @@ import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Screens/BookingDetails/BookingDetails.dart';
 import 'package:jessy_cabs/Screens/CustomerLocationReached/CustomerLocationReached.dart';
+import 'package:jessy_cabs/Screens/CustomerReachedWithouthcl/CustomerReachedWithouthcl.dart';
 import 'package:jessy_cabs/Screens/LoginScreen/Login_Screen.dart';
 import 'package:jessy_cabs/Screens/MenuListScreens/Contacts/ContactScreen.dart';
 import 'package:jessy_cabs/Screens/MenuListScreens/Faq/FaqScreen.dart';
@@ -311,8 +312,10 @@ import 'package:jessy_cabs/Screens/MenuListScreens/Settings/Settings.dart';
 import 'package:jessy_cabs/Screens/MenuListScreens/Wallet/WalletScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:jessy_cabs/Networks/Api_Service.dart';
+import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -321,6 +324,12 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
 import '../network_manager.dart';
+import 'package:flutter/services.dart';
+
+import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:flutter/services.dart';
 
 class Homescreen extends StatefulWidget {
   final String userId;
@@ -345,6 +354,7 @@ class _HomescreenState extends State<Homescreen> {
   String? email;
   Map<String, dynamic>? userData;
   String? driverName;
+  bool isToggleOn = false; // default: toggle is off
 
 
   @override
@@ -354,6 +364,9 @@ class _HomescreenState extends State<Homescreen> {
     // _getUserDetailsDriver();
     /// Dispatch the event when the screen loads
     saveScreenData();
+    _loadUsernameFromPrefs();
+    loadDutyStatus();
+
 
     print('Userhone: ${widget.userId}, Usernameddd: ${widget.username}');
     _loadUserData();
@@ -371,15 +384,66 @@ class _HomescreenState extends State<Homescreen> {
   }
 
   Future<void> _refreshData() async {
-    BlocProvider.of<TripSheetValuesBloc>(context).add(
-      FetchTripSheetValues(
-        userid: widget.userId,
-        drivername: userData?['drivername'] ?? 'Not Found',
-      ),
-    );
+
+
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    username = pref.getString('username');
+
+    print("geted username in home page from local storage ${username}");
+
+    // if (username != null) {
+    //   BlocProvider.of<TripSheetValuesBloc>(context).add(
+    //     FetchTripSheetValues(
+    //       userid: widget.userId,
+    //       drivername: username!,
+    //     ),
+    //   );
+    //   print('dispatched with help of refresh data of username');
+    // }
+    loadDutyStatus();
+
+
+
+    if (userData?['drivername'] != null) {
+      BlocProvider.of<TripSheetValuesBloc>(context).add(
+        FetchTripSheetValues(
+          userid: widget.userId,
+          drivername: userData!['drivername'],
+        ),
+      );
+      print('dispatched with help of refresh data of userData');
+
+    }
+    else if (username != null) {
+      BlocProvider.of<TripSheetValuesBloc>(context).add(
+        FetchTripSheetValues(
+          userid: widget.userId,
+          drivername: username!,
+        ),
+      );
+      print('dispatched with help of refresh data of username');
+    }
+
+
+    // BlocProvider.of<TripSheetValuesBloc>(context).add(
+    //   FetchTripSheetValues(
+    //     userid: widget.userId,
+    //     drivername: userData?['drivername'] ?? 'not found',
+    //   ),
+    // );
+
     context.read<DrawerDriverDataBloc>().add(DrawerDriverData(widget.username));
 
   }
+
+  void _loadUsernameFromPrefs() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      username = pref.getString('username');
+    });
+    print("geted username in home page from initState $username");
+  }
+
 
   Future<void> saveScreenData() async {
 
@@ -402,6 +466,70 @@ class _HomescreenState extends State<Homescreen> {
 
 
   }
+
+
+  static const platform = MethodChannel('com.example.jessy_cabs/background');
+
+  Future<void> requestOverlayPermission() async {
+    const intent = AndroidIntent(
+      action: 'android.settings.action.MANAGE_OVERLAY_PERMISSION',
+      data: 'package:com.example.jessy_cabs',
+    );
+
+    await intent.launch();
+  }
+
+  // Function to start background service + floating icon
+
+
+
+
+  Future<void> onDuty() async {
+
+    try {
+      final isGranted = await Permission.systemAlertWindow.isGranted;
+
+      if (!isGranted) {
+        await requestOverlayPermission(); // Only ask if not granted
+        return; // Optional: stop further calls until permission is granted
+      }
+
+      // await requestOverlayPermission(); // Ask permission before showing overlay
+      await platform.invokeMethod("startBackgroundService");
+      await platform.invokeMethod("startFloatingIcon");
+    } catch (e) {
+      print("Error in onDuty: $e");
+    }
+  }
+
+
+  // Function to stop background service + floating icon
+  Future<void> offDuty() async {
+    try {
+      await platform.invokeMethod("stopBackgroundService");
+      await platform.invokeMethod("stopFloatingIcon");
+
+    } catch (e) {
+      print("Error in offDuty: $e");
+
+    }
+
+  }
+
+
+  // Toggle handler
+  Future<void> toggleFloatingService(bool value) async {
+
+    if (value) {
+      await onDuty();
+
+    } else {
+      await offDuty();
+
+    }
+
+  }
+
 
 
 
@@ -588,6 +716,20 @@ class _HomescreenState extends State<Homescreen> {
   //   }
   // }
 
+  void loadDutyStatus() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final storedValue = prefs.getBool('isOnDuty') ?? false;
+
+    // setState(() => isOnDuty = storedValue);
+    setState(() {
+      isToggleOn = storedValue;
+      isOnDuty = storedValue;
+    });
+  }
+
+
 
   Future<void> clearSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -620,6 +762,7 @@ class _HomescreenState extends State<Homescreen> {
             TextButton(
               onPressed: ()  {
                  clearSharedPreferences();
+                 removeAllFloatingIcons();
                 context.read<AuthenticationBloc>().add(LoggedOut());
 
                 Navigator.of(context).pop(); // Close the popup
@@ -637,12 +780,95 @@ class _HomescreenState extends State<Homescreen> {
   }
 
 
+
+
+
+  bool _wasOffline = false;
+  bool _registeredOnce = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!_registeredOnce) {
+      final network = Provider.of<NetworkManager>(context, listen: false);
+
+      network.onReconnect(() async {
+        if (_wasOffline) {
+          print("🟢 Internet came back after refresh — fetching now...");
+
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          String? userDataString = prefs.getString('userData');
+
+          print("Retrievedwww userData String: $userDataString");
+
+          if (userDataString != null && userDataString.isNotEmpty) {
+            try {
+              Map<String, dynamic> decodedData = jsonDecode(userDataString);
+
+              if (mounted) {
+                setState(() {
+                  userData = decodedData;
+                });
+              }
+
+              print("After setState, userData: $userData");
+
+              context.read<TripSheetValuesBloc>().add(
+                FetchTripSheetValues(
+                  userid: widget.userId,
+                  drivername: userData?['drivername'] ?? 'Not Found',
+                ),
+              );
+            } catch (e) {
+              print("Error decoding userData: $e");
+            }
+          } else {
+            print("No userData found or it's empty in SharedPreferences.");
+          }
+
+          context.read<DrawerDriverDataBloc>().add(
+            DrawerDriverData(widget.username),
+          );
+
+          _wasOffline = false;
+        }
+      });
+
+      _registeredOnce = true;
+    }
+  }
+
+
+
+ // static const platform = MethodChannel('com.example.jessy_cabs/background');
+
+  Future<void> removeAllFloatingIcons() async {
+    try {
+      final result = await platform.invokeMethod("removeAllFloatingIcons");
+      print("✅ $result");
+    } catch (e) {
+      print("❌ Failed to remove floating icons: $e");
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     print("Building UI with userData: $userData"); // Debugging
-    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+    // bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
-    return Scaffold(
+    final isConnected = Provider.of<NetworkManager>(context).isConnected;
+
+    // Set offline state so we know user was offline before
+    if (!isConnected && !_wasOffline) {
+      _wasOffline = true;
+    }
+
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       key: _scaffoldKey,
       //   drawer: Drawer(
       //   child: ListView(
@@ -1210,7 +1436,74 @@ class _HomescreenState extends State<Homescreen> {
     children: [
     RefreshIndicator(
     onRefresh: _refreshData,
-      child: BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
+      child:Column(
+
+      children: [
+
+      // 🔄 On Duty / Off Duty Toggle Switch
+
+      Padding(
+
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+
+        child: Row(
+
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+          children: [
+            const Text(
+              "Duty Status",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+
+            Flexible(
+
+              child: SwitchListTile(
+
+                title: Text(isOnDuty ? "On Duty" : "Off Duty"),
+                value: isToggleOn,
+
+                // value: isOnDuty,
+
+                onChanged: (value) async {
+
+                  // setState(() => isOnDuty = value);
+                  // setState(() { isToggleOn = value; });
+                  setState(() {
+                    isOnDuty = value;
+                    isToggleOn = value;
+
+                  });
+                  final prefs = await SharedPreferences.getInstance();
+
+                  await prefs.setBool('isOnDuty', value);
+
+                  await toggleFloatingService(value);
+                  // setState(() {
+                  // isOnDuty = value;
+                  // isToggleOn = value;
+                  //
+                  // });
+                  if (!value) {
+                    await removeAllFloatingIcons(); // 👈 remove bubble if toggled off
+                  }
+
+                },
+
+                contentPadding: EdgeInsets.zero,
+              ),
+
+            ),
+          ],
+
+        ),
+
+      ),
+
+
+
+        Expanded(
+          child: BlocBuilder<TripSheetValuesBloc, TripSheetValuesState>(
         builder: (context, state) {
           if (state is FetchingTripSheetValuesLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -1283,17 +1576,20 @@ class _HomescreenState extends State<Homescreen> {
 
                   // Check if the current item is the first one
                   final isFirstItem = (index == 0);
-
+                  final isItemEnabled = isOnDuty && isFirstItem;
                   return buildSection(
                     context,
                     title: '${trip['duty']}',
                     dateTime: '${trip['tripid']}',
                     buttonText: '${trip['apps']}',
-                    isEnabled: isFirstItem,  // Pass enabled status
+                    // buttonText: '${trip['Hybriddata']}',
+                    // isEnabled: isFirstItem,  // Pass enabled status
+                    isEnabled: isItemEnabled,  // Pass enabled status
 
-                    onTap: isFirstItem
+                    // onTap: isFirstItem
+                    onTap: isItemEnabled
                         ? () {
-                      if (trip['apps'] == 'On_Going') {
+                      if ((trip['apps'] == 'On_Going' ) && (trip['Hybriddata'] == 1)) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -1301,7 +1597,18 @@ class _HomescreenState extends State<Homescreen> {
                                 tripId: trip['tripid'].toString()),
                           ),
                         );
-                      } else {
+                      } else if ((trip['apps'] == 'On_Going' ) && (trip['Hybriddata'] == 0)) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CustomerReachedWithouthcl(
+                                tripId: trip['tripid'].toString()),
+                          ),
+                        );
+
+
+
+                      }else {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -1312,7 +1619,22 @@ class _HomescreenState extends State<Homescreen> {
                               duty: trip['duty'].toString(),
                             ),
                           ),
+
+
                         );
+
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => TripDetailsUpload(
+                        //       tripId: trip['tripid'].toString(),
+                        //     ),
+                        //   ),
+                        //
+                        //
+                        // );
+
+
                       }
                     }
                         : null,  // Disable onTap if not the first item
@@ -1320,25 +1642,15 @@ class _HomescreenState extends State<Homescreen> {
                 },
               );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
             }
           }
           return const SizedBox(); // Fallback empty widget
         },
-      ),
-    ),
+       ),
+       )
+
+      ]),
+     ),
 
     Positioned(
     top: 15,
@@ -1349,6 +1661,6 @@ class _HomescreenState extends State<Homescreen> {
     ],
     ),
 
-    );
+    ),);
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:lottie/lottie.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../HomeScreen/HomeScreen.dart';
 
 class Loginviamobile extends StatefulWidget {
@@ -85,7 +85,7 @@ class _LoginviamobileState extends State<Loginviamobile> with SingleTickerProvid
       body: MultiBlocListener(
         listeners: [
           BlocListener<LoginViaBloc, LoginViaState>(
-            listener: (context, state) {
+            listener: (context, state) async {
               if (state is LoginViaOtpSentForSignup) {
                 setState(() {
                   changeState = false;
@@ -93,6 +93,24 @@ class _LoginviamobileState extends State<Loginviamobile> with SingleTickerProvid
                   name = state.name;
                   print('username received in LoginViaPage${name}');
                 });
+
+
+                // Dispatch event to another Bloc
+                BlocProvider.of<TripSheetValuesBloc>(context).add(
+                  FetchTripSheetValues(
+                    userid: '',
+                    drivername: name!,
+                  ),
+                );
+                print("➡️ TripSheetValuesBloc event dispatched");
+
+                // Save to SharedPreferences
+                if (name != null) {
+
+                  SharedPreferences pref = await SharedPreferences.getInstance();
+                  await pref.setString('username', name!);
+                }
+
                 _startOtpTimer();
               } else if (state is LoginViaSuccess) {
                 setState(() {
@@ -270,78 +288,80 @@ class _LoginviamobileState extends State<Loginviamobile> with SingleTickerProvid
                             ),
                           ],
                           
-                          SizedBox(height: 32.0),
-                          
-                          // Submit Button
-                          Material(
-                            borderRadius: BorderRadius.circular(12),
-                            elevation: 5,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppTheme.Navblue1,
-                                    Color(0xFF1976D2),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                              ),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  if (changeState) {
-                                    if (_formKey.currentState!.validate()) {
-                                      number = _phoneController.text;
-                                      BlocProvider.of<LoginViaBloc>(context).add(
-                                        LoginRequested(phone: number!)
-                                      );
-                                    }
-                                  } else {
-                                    final enteredOtp = otpControllers.map((c) => c.text).join();
-                                    if (enteredOtp.length < 4) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text("Please enter the full 4-digit OTP")),
-                                      );
-                                      return;
-                                    }
-                                    if (enteredOtp != otp) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text("Incorrect OTP. Please try again")),
-                                      );
-                                      return;
-                                    }
-                                    if(enteredOtp == otp){
-                                      Navigator.push(context, MaterialPageRoute(
-                                        builder: (context)=>Homescreen(userId: "", username: name!)));
-                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text("OTP Verification Success")),
-                                      );
-                                      return;
-                                    }
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  minimumSize: Size(double.infinity, 56),
-                                  backgroundColor: AppTheme.Navblue1,
-                                  shadowColor: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text(
-                                  changeState ? 'Send OTP' : 'Verify OTP',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          
-                          SizedBox(height: 16.0),
+                          // SizedBox(height: 32.0),
+                          //
+                          // // Submit Button
+                          // Material(
+                          //   borderRadius: BorderRadius.circular(12),
+                          //   elevation: 5,
+                          //   child: Container(
+                          //     decoration: BoxDecoration(
+                          //       borderRadius: BorderRadius.circular(12),
+                          //       gradient: LinearGradient(
+                          //         colors: [
+                          //           AppTheme.Navblue1,
+                          //           Color(0xFF1976D2),
+                          //         ],
+                          //         begin: Alignment.topLeft,
+                          //         end: Alignment.bottomRight,
+                          //       ),
+                          //     ),
+                          //     child: ElevatedButton(
+                          //       onPressed: () async {
+                          //         if (changeState) {
+                          //           if (_formKey.currentState!.validate()) {
+                          //             number = _phoneController.text;
+                          //             BlocProvider.of<LoginViaBloc>(context).add(
+                          //               LoginRequested(phone: number!)
+                          //             );
+                          //           }
+                          //         } else {
+                          //           final enteredOtp = otpControllers.map((c) => c.text).join();
+                          //           if (enteredOtp.length < 4) {
+                          //             ScaffoldMessenger.of(context).showSnackBar(
+                          //               SnackBar(content: Text("Please enter the full 4-digit OTP")),
+                          //             );
+                          //             return;
+                          //           }
+                          //           if (enteredOtp != otp) {
+                          //             ScaffoldMessenger.of(context).showSnackBar(
+                          //               SnackBar(content: Text("Incorrect OTP. Please try again")),
+                          //             );
+                          //             return;
+                          //           }
+                          //           if(enteredOtp == otp) {
+                          //             SharedPreferences pref = await SharedPreferences.getInstance();
+                          //             await pref.setString('username', name!);
+                          //
+                          //             print('i saved in localstrong from loginviaotp page ${name}');
+                          //             Navigator.push(context, MaterialPageRoute(
+                          //               builder: (context)=>Homescreen(userId: "", username: name!)));
+                          //
+                          //             return;
+                          //           }
+                          //         }
+                          //       },
+                          //       style: ElevatedButton.styleFrom(
+                          //         minimumSize: Size(double.infinity, 56),
+                          //         backgroundColor: AppTheme.Navblue1,
+                          //         shadowColor: Colors.transparent,
+                          //         shape: RoundedRectangleBorder(
+                          //           borderRadius: BorderRadius.circular(12),
+                          //         ),
+                          //       ),
+                          //       child: Text(
+                          //         changeState ? 'Send OTP' : 'Verify OTP',
+                          //         style: TextStyle(
+                          //           fontSize: 18.0,
+                          //           fontWeight: FontWeight.bold,
+                          //           color: Colors.white,
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                          //
+                          // SizedBox(height: 16.0),
                         ],
                       ),
                     ),
@@ -352,6 +372,93 @@ class _LoginviamobileState extends State<Loginviamobile> with SingleTickerProvid
           ],
         ),
       ),
+
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        height: 100.0,
+        elevation: 16.0,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Material(
+              borderRadius: BorderRadius.circular(12),
+              elevation: 5,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: AppTheme.Navblue1, // 💡 Solid background
+                  // gradient: LinearGradient(
+                  //   colors: [
+                  //     AppTheme.Navblue1,
+                  //     Color(0xFF1976D2),
+                  //   ],
+                  //   begin: Alignment.topLeft,
+                  //   end: Alignment.bottomRight,
+                  // ),
+                ),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (changeState) {
+                      if (_formKey.currentState!.validate()) {
+                        number = _phoneController.text;
+                        BlocProvider.of<LoginViaBloc>(context).add(
+                          LoginRequested(phone: number!),
+                        );
+                      }
+                    } else {
+                      final enteredOtp = otpControllers.map((c) => c.text).join();
+                      if (enteredOtp.length < 4) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Please enter the full 4-digit OTP")),
+                        );
+                        return;
+                      }
+                      if (enteredOtp != otp) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Incorrect OTP. Please try again")),
+                        );
+                        return;
+                      }
+                      if (enteredOtp == otp) {
+                        SharedPreferences pref = await SharedPreferences.getInstance();
+                        await pref.setString('username', name!);
+
+                        print('i saved in localstrong from loginviaotp page $name');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                Homescreen(userId: "", username: name!),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(double.infinity, 56),
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    surfaceTintColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    changeState ? 'Send OTP' : 'Verify OTP',
+                    style: TextStyle(
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+
     );
   }
 }

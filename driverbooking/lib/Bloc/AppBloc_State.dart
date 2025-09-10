@@ -1010,3 +1010,22 @@ class GetOkaySuccess extends GetOkayState{
   GetOkaySuccess({ required this.data});
 }
 // End
+
+
+abstract class CheckTripStatusState{}
+
+class CheckTripStatusInitial extends CheckTripStatusState{}
+class CheckTripStatusLoading extends CheckTripStatusState{}
+class CheckTripStatusFailed extends  CheckTripStatusState{
+  String? error;
+
+  CheckTripStatusFailed(this.error);
+}
+class CheckTripStatusSuccess extends CheckTripStatusState{
+
+  String? status;
+  String? name;
+
+  CheckTripStatusSuccess(this.status, this.name);
+}
+

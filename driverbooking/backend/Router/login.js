@@ -62,19 +62,30 @@ router.post('/login', (req, res) => {
 
 
 
+
+
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, phone } = req.body;
+    const { name, email = "", phone, vechiNo= "" } = req.body;
 
-    console.log('first step phone number received', name, email, phone);
+       const now = new Date();
+
+       const formattedDate = now.getFullYear() +
+         '/' + String(now.getMonth() + 1).padStart(2, '0') +
+         '/' + String(now.getDate()).padStart(2, '0');
+
+       console.log('date format',formattedDate); // Example: "2025/06/23"
+
+    console.log('first step phone number received', name, email, phone, vechiNo);
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const mobile = phone;
 
-    const selectQuery = 'SELECT * FROM drivercreation WHERE username = ?';
+//    const selectQuery = 'SELECT * FROM drivercreation WHERE username = ?';
+    const selectQuery = 'SELECT * FROM drivercreation WHERE Mobileno = ?';
     console.log(selectQuery,'ddddddddd');
 
-    db.query(selectQuery, [name], (selectErr, selectResult) => {
+    db.query(selectQuery, [phone], (selectErr, selectResult) => {
       if (selectErr) {
         console.error("Database select error:", selectErr);
         return res.status(500).json({ message: "Database error", success: false });
@@ -91,8 +102,8 @@ router.post("/signup", async (req, res) => {
         });
       }
 
-      const insertQuery = 'INSERT INTO drivercreation (username, Drivername, Email, Mobileno, driverhiretype) VALUES (?, ?, ?, ?, "Outside Driver")';
-      db.query(insertQuery, [name, name, email, phone], async (insertErr, insertResult) => {
+      const insertQuery = 'INSERT INTO drivercreation (username, Drivername, Email, Mobileno, driverhiretype, vegRegNo) VALUES (?, ?, ?, ?, "Outside Driver", ?)';
+      db.query(insertQuery, [name, name, email, phone, vechiNo], async (insertErr, insertResult) => {
         console.log('insert successfully');
 
         if (insertErr) {
@@ -145,7 +156,7 @@ Do not share this code with anyone.
             });
           }
 
-          const { MessageErrorCode, MessageErrorDescription } = smsData;
+    const { MessageErrorCode, MessageErrorDescription, MessageId } = smsData;
 
           if (MessageErrorCode !== 0) {
             return res.status(500).json({
@@ -157,29 +168,36 @@ Do not share this code with anyone.
 
           console.log('otp send from first');
           console.log('otp send from first', otp);
+          console.log("messageId", MessageId);
 
+        const insertQuery = `INSERT INTO SmsReport (SmsMessageid, smsDate) VALUES (?, ?)`;
+
+       db.query(insertQuery, [MessageId, formattedDate], (err) => {
+                if(err){
+                return res.status(400).send({ message : "Server Error"});
+                }
+                    console.log("inserted messageId and Date");
           return res.status(200).json({
             message: "OTP sent successfully",
             otp,
             userId,
             success: true,
           });
-
+        })
         } catch (smsError) {
           console.log("SMS API error:", smsError);
           return res.status(500).json({ message: "Failed to send OTP", success: false });
         }
       });
-    });
-
-  } catch (error) {
-    console.error("Signup error:", error);
-    return res.status(500).json({
-      message: "Server Error",
-      success: false
-    });
-  }
-});
+       });
+     } catch (error) {
+       console.error("Signup error:", error);
+       return res.status(500).json({
+         message: "Server Error",
+         success: false
+       });
+     }
+   });
 
 
 router.post("/signup_again_otp", async (req, res) => {
@@ -272,7 +290,7 @@ router.post("/loginVia", async (req, res) => {
       return res.status(409).json({ message: "Invalid User", success: false });
     }
 
-     const username = selectResult[0].username;
+     const username = selectResult[0].drivername;
 
     console.log(username, 'wwwwwwwwwwwww');
 
@@ -534,6 +552,61 @@ router.get('/profile_photos', (req, res) => {
         res.status(200).json({ profileImagePath });
     });
 });
+
+
+
+
+
+
+router.get("/fetchtripstatus/:tripId",(req,res)=>{
+
+  const {tripId} = req.params;
+
+ const selectQuery ="SELECT status, driverName FROM tripsheet WHERE tripid = ?";
+
+  db.query(selectQuery,[tripId],(err, result)=>{
+
+    if(err){
+
+      console.log("Fetching Error", err);
+      return res.status(404).send({ message : "Server Error"});
+    }
+
+    if(result.length == 0){
+
+      console.log("No result found");
+      return res.status(400).send({ message : "Data Not Found"});
+    }
+
+    const status = result[0].status;
+    const drivername = result[0].driverName;
+
+      if(status === "Cancelled"){
+
+      const updateQuery = "UPDATE tripsheet SET apps = 'Closed' WHERE tripid = ?";
+
+      db.query(updateQuery,[tripId],(err)=>{
+
+        if(err){
+          console.log('Update Error',err);
+          return res.status(404).send({ message : "Failed to update"});
+        }
+
+          console.log('Status changed to Cancelled and apps closed');
+
+          return res.status(200).send({ status : 'Cancelled', name : drivername});
+      })
+    } else {
+
+      console.log("Status is not Cancelled:", status);
+      return res.status(200).send({ status: status});
+
+    }
+
+  })
+
+})
+
 
 
 module.exports = router;

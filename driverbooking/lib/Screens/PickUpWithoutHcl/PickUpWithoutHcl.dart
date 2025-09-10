@@ -4,6 +4,7 @@ import 'package:jessy_cabs/Screens/PickUpWithoutHcl/AnimatedCabHeader.dart';
 import 'package:jessy_cabs/Screens/StartingKilometer/StartingKilometer.dart';
 import 'package:flutter/material.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
+import 'package:jessy_cabs/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
@@ -43,6 +44,7 @@ class _PickUpWithoutHclState extends State<PickUpWithoutHcl> with TickerProvider
 
     _textController.repeat(reverse: true);  // Start the text animation
 
+    TripStatusManager().start(context, widget.tripId);
 
 
   }
@@ -185,13 +187,16 @@ class _PickUpWithoutHclState extends State<PickUpWithoutHcl> with TickerProvider
        body: AnimatedCabHeader(),
 
       bottomNavigationBar: BottomAppBar(
-        height: 220.0,
+        height: 240.0,
         elevation: 8.0,
         color: Colors.white,
+        // color: Colors.red,
+
         shape: const CircularNotchedRectangle(),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+
             mainAxisSize: MainAxisSize.min,
             children: [
               // Address Information
@@ -202,7 +207,7 @@ class _PickUpWithoutHclState extends State<PickUpWithoutHcl> with TickerProvider
                       Icon(Icons.person_pin_circle, color: Colors.green, size: 30),
                       Container(
                         width: 2,
-                        height: 30,
+                        height: 50,
                         color: Colors.grey.shade400,
                       ),
                       Icon(Icons.location_on, color: Colors.red, size: 30),
@@ -224,6 +229,8 @@ class _PickUpWithoutHclState extends State<PickUpWithoutHcl> with TickerProvider
                         const SizedBox(height: 45),
                         Text(
                           '${widget.address}',
+                          maxLines: 2, // show up to 3 lines
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Colors.grey.shade800,
                             fontSize: 14,

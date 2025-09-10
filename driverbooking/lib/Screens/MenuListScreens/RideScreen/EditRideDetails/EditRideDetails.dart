@@ -107,7 +107,8 @@ class _EditRideDetailsState extends State<EditRideDetails> {
       if (tripDetails != null) {
 
         var tripIdvalue = tripDetails['tripid'].toString();
-        var tripdatevalue = setFormattedDate(tripDetails['tripsheetdate']).toString();
+        // var tripdatevalue = setFormattedDate(tripDetails['tripsheetdate']).toString();
+        var tripdatevalue = setFormattedDate(tripDetails['starttime']).toString();
         var reporttimevalue = tripDetails['reporttime'].toString();;
         var dutyvalue = tripDetails['duty'].toString();
         var vectypeValue = tripDetails['vehicleName2'].toString();
@@ -487,7 +488,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
                     print("📸 Start KM Image in UI: ${state.startKmImage}");
                     print("📸 Closing KM Image in UI: ${state.closingKmImage}");
                     print("📸 toll KM Image in UI: ${state.TollImage}");
-                    print("📸 parking KM Image in UI: ${state.ParkingImage}");
+                    print("📸 parking KM Image in UhinI: ${state.ParkingImage}");
                     return Column(
                       children: [
                         // Start KM Image
@@ -525,7 +526,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
                               buildSectionTitle("Toll image"),
                               // state.TollImage != null
                               //     ? Image.network(state.TollImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
-                              state.TollImage != null && state.TollImage!.isNotEmpty
+                              state.TollImage !=null && state.TollImage!.isNotEmpty
                                   ? Column(
                                 children: state.TollImage!.toSet().map((url) {  // Convert to Set to remove duplicates
                                   return Padding(
@@ -553,7 +554,7 @@ class _EditRideDetailsState extends State<EditRideDetails> {
                               //     ? Image.network(state.ParkingImage!, width: double.infinity, height: 200, fit: BoxFit.cover)
                               state.ParkingImage != null && state.ParkingImage!.isNotEmpty
                                   ? Column(
-                                children: state.ParkingImage!.toSet().map((url) {
+                                children: state.ParkingImage!.toSet().map((url){
                                   return Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Image.network(

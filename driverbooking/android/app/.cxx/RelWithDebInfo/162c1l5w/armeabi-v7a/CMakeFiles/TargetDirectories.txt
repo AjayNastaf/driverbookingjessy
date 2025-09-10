@@ -1,2 +1,0 @@
-C:/awsserverrepo/driverbookingjessy/driverbooking/android/app/.cxx/RelWithDebInfo/162c1l5w/armeabi-v7a/CMakeFiles/edit_cache.dir
-C:/awsserverrepo/driverbookingjessy/driverbooking/android/app/.cxx/RelWithDebInfo/162c1l5w/armeabi-v7a/CMakeFiles/rebuild_cache.dir

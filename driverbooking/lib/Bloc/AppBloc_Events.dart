@@ -400,10 +400,27 @@ class UpdateSignatureStatus extends TripUploadEvent {
   final String closeKm;
   final String duty;
   final int hcl;
+  final String finalkilometers;
 
   UpdateSignatureStatus({
     required this.tripId,
     required this.closeKm,
+    required this.duty,
+    required this.hcl,
+    required this.finalkilometers
+  });
+}
+
+
+class UpdateClosingkm extends TripUploadEvent {
+  final String tripId;
+  final String finalcloseKm;
+  final String duty;
+  final int hcl;
+
+  UpdateClosingkm({
+    required this.tripId,
+    required this.finalcloseKm,
     required this.duty,
     required this.hcl,
   });
@@ -867,13 +884,14 @@ class OtpEvent {
   final String guestName;
   final String senderEmail;
   final String senderPass;
-
+  final String tripId;
   OtpEvent({
     required this.guestNumber,
     required this.guestEmail,
     required this.guestName,
     required this.senderEmail,
     required this.senderPass,
+    required this.tripId,
   });
 }
 //sending otp events completed
@@ -888,9 +906,14 @@ class OtpVerifyEvent{
   final String guestName;
   final String senderEmail;
   final String senderPass;
+  final String tripId;
 
   OtpVerifyEvent(
-      {required this.guestNumber, required this.guestEmail, required this.guestName, required this.senderEmail, required this.senderPass});
+      {required this.guestNumber, required this.guestEmail, required this.guestName, required this.senderEmail,
+        required this.senderPass,
+        required this.tripId
+
+      });
 
 }
 //verify otp events completed
@@ -922,7 +945,8 @@ class SendEmailEvent extends EmailEvent {
   final String ReleaseDate;
   final String Startpoint;
   final String Endpoint;
-
+  final String CustomerEmail;
+  final String RequestId;
 
   SendEmailEvent({
     required this.guestName,
@@ -943,6 +967,8 @@ class SendEmailEvent extends EmailEvent {
     required this.ReportTime,
     required this.Startpoint,
     required this.Vechname,
+    required this.CustomerEmail,
+    required this.RequestId,
   });
 }
 
@@ -979,8 +1005,9 @@ class SignupRequested extends SignupEvent {
   final String name;
   final String email;
   final String phone;
+  final String vechiNo;
 
-  SignupRequested({ required this.name, required this.email, required this.phone});
+  SignupRequested({ required this.name, required this.email, required this.phone, required this.vechiNo});
 }
 
 class OtpverificationRequested extends SignupEvent {
@@ -1023,3 +1050,15 @@ class FetchOkaymessage  extends GetOkayEvent{
 
 
 // End
+
+
+// For check trip sheet status ;
+
+abstract class checkTripStatusEvent{}
+
+class checkTripEvent extends checkTripStatusEvent{
+  final String TripId;
+
+  checkTripEvent({ required this.TripId});
+
+}

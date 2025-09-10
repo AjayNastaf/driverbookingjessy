@@ -208,10 +208,16 @@ const storage = multer.diskStorage({
         // console.log(req,"jj")
       cb(null, uploadDir,)
     },
-    filename: (req, file, cb) => {
-         console.log(req,"lllll")
-      cb(null, file.fieldname + "_" + req.params.data + path.extname(file.originalname))
-    }
+//    filename: (req, file, cb) => {
+//         console.log(req,"lllll")
+//      cb(null, file.fieldname + "_" + req.params.data + path.extname(file.originalname))
+//    }
+ filename: (req, file, cb) => {
+  const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+  const finalName = file.fieldname + "_" + uniqueSuffix + path.extname(file.originalname);
+  console.log("Generated unique filename:", finalName);
+  cb(null, finalName);
+}
   
   })
 const upload = multer({ storage: storage });
@@ -993,15 +999,16 @@ app.get('/getAllUploadsByTripId', (req, res) => {
 
 
 
-//local
-// app.listen(3003, () => {
-//   console.log("Server started on port 30059");
-// });
+
+//localc
+//app.listen(3009, () => {
+//  console.log("Server started on port 3009");
+//});
 
 
 
 //jessycabs
-app.listen(7128, () => {
- console.log("Server started on port 7100000p0");
-});
+ app.listen(7128, () => {
+  console.log("Server started on port 7128");
+ });
 

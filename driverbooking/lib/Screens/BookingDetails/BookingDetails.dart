@@ -1,17 +1,21 @@
+import 'package:flutter/services.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:jessy_cabs/Screens/CustomerReachedWithouthcl/CustomerReachedWithouthcl.dart';
 import 'package:jessy_cabs/Screens/HomeScreen/HomeScreen.dart';
 import 'package:jessy_cabs/Screens/PickUpWithoutHcl/PickUpWithoutHcl.dart';
 
 import 'package:jessy_cabs/Screens/PickupScreen/PickupScreen.dart';
 import 'package:jessy_cabs/Screens/StartingKilometer/StartingKilometer.dart';
+import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:jessy_cabs/Utils/AppTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:jessy_cabs/GlobalVariable/global_variable.dart' as globals;
 import 'package:jessy_cabs/Networks/Api_Service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jessy_cabs/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../NoInternetBanner/NoInternetBanner.dart';
@@ -54,6 +58,8 @@ class _BookingdetailsState extends State<Bookingdetails>  {
     globals.dropLocation = Dropaddress; // Set the global variable
     BlocProvider.of<GettingTripSheetDetailsByUseridBloc>(context).add(Getting_TripSheet_Details_By_Userid(userId: widget.userId, username: widget.username, tripId: widget.tripId, duty: widget.duty));
     saveScreenData();
+    TripStatusManager().start(context, widget.tripId);
+
   }
 
   Future<void> saveScreenData() async {
@@ -67,11 +73,11 @@ class _BookingdetailsState extends State<Bookingdetails>  {
 
 
   }
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _initializeData();
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   _initializeData();
+  // }
   Future<void> _initializeData() async {
     try {
       print("Calling API with tripId: ${widget.tripId} and duty: ${widget.duty}");
@@ -158,9 +164,60 @@ class _BookingdetailsState extends State<Bookingdetails>  {
 
 
 
+  bool _wasOffline = false;
+  bool _registeredOnce = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _initializeData();
+
+    if (!_registeredOnce) {
+      final network = Provider.of<NetworkManager>(context, listen: false);
+
+      network.onReconnect(() {
+        if (_wasOffline) {
+          print("🟢 Internet came back — Dispatching BLoC event...");
+
+          context.read<GettingTripSheetDetailsByUseridBloc>().add(
+            Getting_TripSheet_Details_By_Userid(
+              userId: widget.userId,
+              username: widget.username,
+              tripId: widget.tripId,
+              duty: widget.duty,
+            ),
+          );
+
+          _wasOffline = false;
+        }
+      });
+
+      _registeredOnce = true;
+    }
+  }
+  static const MethodChannel _trackingChannel = MethodChannel('com.example.jessy_cabs/tracking');
+
+  Future<void> resetNativeTracking() async {
+    try {
+      // await platform.invokeMethod("resetTrackingData");
+      await _trackingChannel.invokeMethod("resetTrackingData");
+      // showFailureSnackBar(context, 'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd');
+
+      print("✅ Native tracking reset");
+    } catch (e) {
+      print("❌ Failed to reset native tracking: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+    // bool isConnected = Provider.of<NetworkManager>(context).isConnected;
+    final isConnected = Provider.of<NetworkManager>(context).isConnected;
+
+    if (!isConnected && !_wasOffline) {
+      _wasOffline = true;
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -358,16 +415,23 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                           //       (route) => false,
                           // );
                           print("hcl inside, ${tripDetails['Hybriddata'].toString()}");
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Pickupscreen(
-                                address: tripDetails['address1'],
-                                tripId: widget.tripId,
-                              ),
-                            ),
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => Pickupscreen(
+                          //       address: tripDetails['address1'],
+                          //       tripId: widget.tripId,
+                          //     ),
+                          //   ),
+                          //
+                          // );
+                          
+                       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                           builder:(context)=> Pickupscreen(
+                               address:tripDetails['address1'],
+                               tripId: widget.tripId)),(route)=>false);
 
-                          );
+
                         } else if(tripDetails['Hybriddata'].toString() == '0') {
                           // Navigator.pushAndRemoveUntil(
                           //   context,
@@ -389,6 +453,10 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                             ),
 
                           );
+
+
+
+
                         }
 
 
@@ -423,6 +491,7 @@ class _BookingdetailsState extends State<Bookingdetails>  {
                         onPressed: state is UpdateTripStatusInTripsheetLoading
                             ? null // Disable button when loading
                             : () {
+                          resetNativeTracking();
                           context.read<UpdateTripStatusInTripsheetBloc>().add(
                             UpdateTripStatusEventClass(
                               tripId: widget.tripId,

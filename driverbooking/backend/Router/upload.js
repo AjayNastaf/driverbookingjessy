@@ -401,4 +401,32 @@ router.get('/calculate_time/:tripId', (req, res) => {
 });
 
 
+
+
+
+
+// ✅ CREATE (Insert new record)
+router.post("/networkConnection", (req, res) => {
+console.log('networkConnection');
+  const { Trip_id, Offline_Start, Offline_end,Offline_StartDate,Offline_endDate, status } = req.body;
+
+  if (!Trip_id || !Offline_Start || !Offline_end || !Offline_StartDate|| !Offline_endDate|| !status) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const sql = `
+    INSERT INTO networkConnection (Trip_id, Offline_Start, Offline_end,Offline_StartDate,Offline_endDate, status)
+    VALUES (?, ?, ?, ?,?,?)
+  `;
+
+  db.query(sql, [Trip_id, Offline_Start, Offline_end,Offline_StartDate,Offline_endDate, status], (err, result) => {
+    if (err) {
+      console.error("Error inserting data:", err);
+      return res.status(500).json({  success: false, error: "Database error" });
+    }
+    res.json({ success: true, insertedId: result.insertId });
+  });
+});
+
+
 module.exports = router;

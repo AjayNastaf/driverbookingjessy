@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
 import 'package:jessy_cabs/Bloc/App_Bloc.dart';
+import 'package:jessy_cabs/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../NoInternetBanner/NoInternetBanner.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +27,7 @@ class TollParkingUpload extends StatefulWidget {
   State<TollParkingUpload> createState() => _TollParkingUploadState();
 }
 
-class _TollParkingUploadState extends State<TollParkingUpload> {
+class _TollParkingUploadState extends State<TollParkingUpload> with WidgetsBindingObserver{
 
 
   final TextEditingController tollController = TextEditingController();
@@ -44,8 +45,12 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+
     // _loadLoginDetailss();
     saveScreenData();
+    TripStatusManager().start(context, widget.tripId);
 
   }
 
@@ -165,35 +170,65 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
 
 
 
+  // void _showUploadOptions(bool isToll) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Wrap(
+  //         children: [
+  //           ListTile(
+  //             leading: Icon(Icons.upload_file),
+  //             title: Text('Upload from device'),
+  //             onTap: () {
+  //               Navigator.pop(context);
+  //               _pickFile(isToll);
+  //             },
+  //           ),
+  //           ListTile(
+  //             leading: Icon(Icons.camera_alt),
+  //             title: Text('Open Camera'),
+  //             onTap: () {
+  //               Navigator.pop(context);
+  //               _openCamera(isToll);
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+
   void _showUploadOptions(bool isToll) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
       builder: (BuildContext context) {
-        return Wrap(
-          children: [
-            ListTile(
-              leading: Icon(Icons.upload_file),
-              title: Text('Upload from device'),
-              onTap: () {
-                Navigator.pop(context);
-                _pickFile(isToll);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.camera_alt),
-              title: Text('Open Camera'),
-              onTap: () {
-                Navigator.pop(context);
-                _openCamera(isToll);
-              },
-            ),
-          ],
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.upload_file),
+                title: Text('Upload from device'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickFile(isToll);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.camera_alt),
+                title: Text('Open Camera'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _openCamera(isToll);
+                },
+              ),
+            ],
+          ),
         );
       },
     );
   }
-
-
 
   void _loadLoginDetails() async {
     final prefs = await SharedPreferences.getInstance();
@@ -213,7 +248,20 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
     );
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('App lifecycle state: $state');
+  }
 
+
+  @override
+  void dispose() {
+
+    WidgetsBinding.instance.removeObserver(this);
+
+    // Dispose the controller when the widget is disposed
+    super.dispose();
+  }
 
   void _handleSubmit(BuildContext context) {
     final tripId = widget.tripId;
@@ -294,325 +342,376 @@ class _TollParkingUploadState extends State<TollParkingUpload> {
   Widget build(BuildContext context) {
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
-    return  BlocListener<TollParkingDetailsBloc, TollParkingDetailsState>(
-        listener: (context, state) {
-      if (state is TollParkingUpdated) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text("Toll & Parking updated successfully!")),
-        // );
-        showSuccessSnackBar(context, "Toll & Parking updated successfully!");
+    return  WillPopScope(
+      onWillPop: ()async=> false,
+      child: BlocListener<TollParkingDetailsBloc, TollParkingDetailsState>(
+          listener: (context, state) {
+        if (state is TollParkingUpdated) {
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text("Toll & Parking updated successfully!")),
+          // );
+          showSuccessSnackBar(context, "Toll & Parking updated successfully!");
 
-      } else if (state is ParkingFileUploaded) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text("Parking file uploaded successfully!")),
-        // );
-        showSuccessSnackBar(context, "Parking file uploaded successfully!");
+        } else if (state is ParkingFileUploaded) {
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text("Parking file uploaded successfully!")),
+          // );
+          showSuccessSnackBar(context, "Parking file uploaded successfully!");
 
-      } else if (state is TollFileUploaded) {
+        } else if (state is TollFileUploaded) {
 
-        showSuccessSnackBar(context, "Toll file uploaded successfully!");
-
-
-
-      } else if (state is TollParkingDetailsError) {
-
-        showFailureSnackBar(context, state.message);
-      }
-    },
-    child: Scaffold(
-      appBar: AppBar(
-        title: Text('Toll and Parking'),
-      ),
-      // appBar: AppBar(title: Text("Welcome, $username")),
-
-      body:Stack(
-        children: [
-          Positioned(
-            top: 15,
-            left: 0,
-            right: 0,
-            child: NoInternetBanner(isConnected: isConnected),
-          ),
-      RefreshIndicator( onRefresh: _refreshDataTollParking,
-        child:  SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Enter Toll Amount Section
-              const SizedBox(height: 18),
-              Text(
-                "Enter Toll Amount",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: tollController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter toll amount',
-                ),
-              ),
-              SizedBox(height: 16),
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _showUploadOptions(true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.upload_file, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text(
-                              'Upload Toll',
-                              style: TextStyle(color: Colors.white, fontSize: 18.0),
-                            ),
-
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                      // ElevatedButton(
-                      //   onPressed: _handleTollSubmit,
-                      //   child: Text("Submit Toll"),
-                      // ),
-                    ],
-                  ),
-                  // Image Preview inside a card
+          showSuccessSnackBar(context, "Toll file uploaded successfully!");
 
 
 
+        } else if (state is TollParkingDetailsError) {
 
-
-
-
-                  // if (tollFile != null)
-                  // if (tollFiles != null)
-                  //   Card(
-                  //     elevation: 4,
-                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  //     child: Padding(
-                  //       padding: const EdgeInsets.all(8.0),
-                  //       child: Column(
-                  //         children: [
-                  //           ClipRRect(
-                  //             borderRadius: BorderRadius.circular(12),
-                  //             child: Image.file(
-                  //               // tollFile!,
-                  //               tollFiles! ,
-                  //
-                  //               height: 200,
-                  //               width: 200,
-                  //               fit: BoxFit.cover,
-                  //             ),
-                  //           ),
-                  //           SizedBox(height: 10),
-                  //           Text(
-                  //             "Selected Image",
-                  //             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     ),
-                  //   )
-
-
-
-                  if (tollFiles != null && tollFiles.isNotEmpty)
-                    Column(
-                      children: tollFiles.map((file) => Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  file,  // Use individual file
-                                  height: 200,
-                                  width: 200,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Selected Image",
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )).toList(),
-                    )
-
-                  else
-                    Center(
-                      child: Text(
-                        "No file selected",
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    ),
-
-                ],
-              ),
-
-              SizedBox(height: 32),
-
-              // Enter Parking Amount Section
-              const Text(
-                "Enter Parking Amount",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              TextField(
-                controller: parkingController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Enter parking amount',
-                ),
-              ),
-              SizedBox(height: 16),
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _showUploadOptions(false),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.upload_file, color: Colors.white),
-                            SizedBox(width: 8),
-                            Text(
-                              'Upload Parking',
-                              style: TextStyle(color: Colors.white, fontSize: 18.0),
-                            ),
-                            SizedBox(height: 24),
-
-
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                      // ElevatedButton(
-                      //   onPressed: _handleParkingSubmit,
-                      //   child: Text("Submit Parking"),
-                      // ),
-                    ],
-                  ),
-                  // Image Preview inside a card
-                  // if (parkingFile != null)
-                  //   Card(
-                  //     elevation: 4,
-                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  //     child: Padding(
-                  //       padding: const EdgeInsets.all(8.0),
-                  //       child: Column(
-                  //         children: [
-                  //           ClipRRect(
-                  //             borderRadius: BorderRadius.circular(12),
-                  //             child: Image.file(
-                  //               parkingFile!,
-                  //               height: 200,
-                  //               width: 200,
-                  //               fit: BoxFit.cover,
-                  //             ),
-                  //           ),
-                  //           SizedBox(height: 10),
-                  //           Text(
-                  //             "Selected Image",
-                  //             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     ),
-                  //   )
-
-
-                  if (parkingFiles != null && parkingFiles.isNotEmpty)
-                    Column(
-                      children: parkingFiles.map((file) => Card(
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  file,  // Use individual file
-                                  height: 200,
-                                  width: 200,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                "Selected Image",
-                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )).toList(),
-                    )
-
-                  else
-                    Center(
-                      child: Text(
-                        "No file selected",
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    ),
-
-                ],
-              ),
-              SizedBox(height: 30.0,),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Add your button action here
-                    // _handleSubmitButton();
-                    _handleSubmit(context);
-                  },
-                  child: Text(
-                    'Upload Details',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.white, // Text color
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green, // Background color
-                    padding: EdgeInsets.symmetric(horizontal: 60.0, vertical: 12.0), // Button padding
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0), // Border radius
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
+          showFailureSnackBar(context, state.message);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Toll and Parking'),
         ),
-      ),),
-        ],
-      )
-    ),
+        // appBar: AppBar(title: Text("Welcome, $username")),
+
+        body:Stack(
+          children: [
+            Positioned(
+              top: 15,
+              left: 0,
+              right: 0,
+              child: NoInternetBanner(isConnected: isConnected),
+            ),
+        RefreshIndicator( onRefresh: _refreshDataTollParking,
+          child:  SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Enter Toll Amount Section
+                const SizedBox(height: 18),
+                Text(
+                  "Enter Toll Amount",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: tollController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter toll amount',
+                  ),
+                ),
+                SizedBox(height: 16),
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => _showUploadOptions(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.upload_file, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                'Upload Toll',
+                                style: TextStyle(color: Colors.white, fontSize: 18.0),
+                              ),
+
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        // ElevatedButton(
+                        //   onPressed: _handleTollSubmit,
+                        //   child: Text("Submit Toll"),
+                        // ),
+                      ],
+                    ),
+                    // Image Preview inside a card
+
+
+
+
+
+
+
+                    // if (tollFile != null)
+                    // if (tollFiles != null)
+                    //   Card(
+                    //     elevation: 4,
+                    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    //     child: Padding(
+                    //       padding: const EdgeInsets.all(8.0),
+                    //       child: Column(
+                    //         children: [
+                    //           ClipRRect(
+                    //             borderRadius: BorderRadius.circular(12),
+                    //             child: Image.file(
+                    //               // tollFile!,
+                    //               tollFiles! ,
+                    //
+                    //               height: 200,
+                    //               width: 200,
+                    //               fit: BoxFit.cover,
+                    //             ),
+                    //           ),
+                    //           SizedBox(height: 10),
+                    //           Text(
+                    //             "Selected Image",
+                    //             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   )
+
+
+
+                    if (tollFiles != null && tollFiles.isNotEmpty)
+                      Column(
+                        children: tollFiles.map((file) => Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 200,
+                                  width: 300,
+                                  child: Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.file(
+                                          file,
+                                          height: 200,
+                                          width: 300,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              tollFiles.remove(file);
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.cancel_outlined,
+                                            color: Colors.red,
+                                            size: 32,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  "Selected Image",
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )).toList(),
+                      )
+
+                    else
+                      Center(
+                        child: Text(
+                          "No file selected",
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      ),
+
+                  ],
+                ),
+
+                SizedBox(height: 32),
+
+                // Enter Parking Amount Section
+                const Text(
+                  "Enter Parking Amount",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: parkingController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter parking amount',
+                  ),
+                ),
+                SizedBox(height: 16),
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => _showUploadOptions(false),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.upload_file, color: Colors.white),
+                              SizedBox(width: 8),
+                              Text(
+                                'Upload Parking',
+                                style: TextStyle(color: Colors.white, fontSize: 18.0),
+                              ),
+                              SizedBox(height: 24),
+
+
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        // ElevatedButton(
+                        //   onPressed: _handleParkingSubmit,
+                        //   child: Text("Submit Parking"),
+                        // ),
+                      ],
+                    ),
+                    // Image Preview inside a card
+                    // if (parkingFile != null)
+                    //   Card(
+                    //     elevation: 4,
+                    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    //     child: Padding(
+                    //       padding: const EdgeInsets.all(8.0),
+                    //       child: Column(
+                    //         children: [
+                    //           ClipRRect(
+                    //             borderRadius: BorderRadius.circular(12),
+                    //             child: Image.file(
+                    //               parkingFile!,
+                    //               height: 200,
+                    //               width: 200,
+                    //               fit: BoxFit.cover,
+                    //             ),
+                    //           ),
+                    //           SizedBox(height: 10),
+                    //           Text(
+                    //             "Selected Image",
+                    //             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   )
+
+
+                    if (parkingFiles != null && parkingFiles.isNotEmpty)
+                      Column(
+                        children: parkingFiles.map((file) => Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: 200,
+                                  width: 300,
+                                  child: Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Image.file(
+                                          file,
+                                          height: 200,
+                                          width: 300,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              parkingFiles.remove(file);
+                                            });
+                                          },
+                                          icon: Icon(
+                                            Icons.cancel_outlined,
+                                            color: Colors.red,
+                                            size: 32,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  "Selected Image",
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )).toList(),
+                      )
+
+                    else
+                      Center(
+                        child: Text(
+                          "No file selected",
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      ),
+
+                  ],
+                ),
+                SizedBox(height: 30.0,),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Add your button action here
+                      // _handleSubmitButton();
+                      _handleSubmit(context);
+                    },
+                    child: Text(
+                      'Upload Details',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.white, // Text color
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green, // Background color
+                      padding: EdgeInsets.symmetric(horizontal: 60.0, vertical: 12.0), // Button padding
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0), // Border radius
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),),
+          ],
+        )
+      ),
+      ),
     );
   }
 }

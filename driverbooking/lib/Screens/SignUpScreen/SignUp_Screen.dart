@@ -323,10 +323,12 @@ class _SignUpState extends State<SignUp> {
   String? number;
   String? name;
   String? email;
+  String? vechiclenumber;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _vehicleController = TextEditingController();
 
   final List<TextEditingController> otpControllers =
   List.generate(4, (_) => TextEditingController());
@@ -373,13 +375,19 @@ class _SignUpState extends State<SignUp> {
     _emailController.dispose();
     _phoneController.dispose();
     _usernameController.dispose();
+    _vehicleController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      backgroundColor: Colors.white,
+
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+
+      ),
       body: MultiBlocListener(
         listeners: [
           BlocListener<SignupBloc, SignupState>(
@@ -391,7 +399,11 @@ class _SignUpState extends State<SignUp> {
                   otp = state.otp;
                 });
                 _startOtpTimer();
-              }
+              } else if(state is SignUpFailed){
+
+                // showFailureSnackBar(context, 'User Already Existsesssssssssssssssss');
+                showFailureSnackBar(context, 'User Already ${changeState}');
+              };
             },
           ),
           BlocListener<SignupBloc, SignupState>(
@@ -408,15 +420,24 @@ class _SignUpState extends State<SignUp> {
         ],
         child: Stack(
           children: [
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(AppConstants.signup),
-                    fit: BoxFit.contain,
-                    alignment: Alignment.topCenter,
-                  ),
-                ),
+            // Positioned.fill(
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       image: DecorationImage(
+            //         image: AssetImage(AppConstants.signup),
+            //         fit: BoxFit.contain,
+            //         alignment: Alignment.topCenter,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            Align(
+              alignment: Alignment.topCenter,
+              child: Image.asset(
+                AppConstants.signupnew,
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.28, // 30% of screen height
+                fit: BoxFit.contain,
               ),
             ),
             Align(
@@ -483,6 +504,15 @@ class _SignUpState extends State<SignUp> {
                                 }
                                 return null;
                               },
+                            ),
+                            SizedBox(height: 16.0),
+                            TextFormField(
+                              controller: _vehicleController,
+                              decoration: InputDecoration(
+                                  labelText: 'Vehicle Number',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(Icons.directions_car)
+                              ),
                             ),
                           ] else ...[
                             SizedBox(height: 12.0),
@@ -554,13 +584,14 @@ class _SignUpState extends State<SignUp> {
                                   name = _usernameController.text;
                                   email = _emailController.text;
                                   number = _phoneController.text;
-
+                                  vechiclenumber = _vehicleController.text;
                                   print('first dispatch completed');
                                   BlocProvider.of<SignupBloc>(context).add(
                                       SignupRequested(
                                           name: name!,
                                           email: email!,
-                                          phone: number!
+                                          phone: number!,
+                                          vechiNo:vechiclenumber!
                                       )
                                   );
                                 }
@@ -581,7 +612,13 @@ class _SignUpState extends State<SignUp> {
                                   return;
                                 }
                                 if(enteredOtp == otp){
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>Homescreen(userId: "", username: name!)));
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => Homescreen(userId: "", username: name!),
+                                    ),
+                                        (route) => false,
+                                  );
                                 }
 
                                 // BlocProvider.of<SignupBloc>(context).add(

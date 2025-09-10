@@ -1561,11 +1561,13 @@ class ApiService {
     required String closeKm,
     required int hcl,
     required String duty,
+    required String finalkilometers,
   }) async {
-    final url = Uri.parse('${AppConstants.baseUrl}/closekmupdatetripsheet');
+    // final url = Uri.parse('${AppConstants.baseUrl}/closekmupdatetripsheet');
+    final url = Uri.parse('${AppConstants.baseUrl}/manualclosekmupdatetripsheet');
     try {
       print('Sending data to API: $url');
-      print('Payload: {tripId: $tripId,  closekm: $closeKm, Hcl: $hcl, duty: $duty}');
+      print('Payload:manualclosekmupdatetripsheet {tripId: $tripId,  closekm: $closeKm, Hcl: $hcl, duty: $duty}');
 
       final response = await http.put(
         url,
@@ -1575,6 +1577,8 @@ class ApiService {
           'closekm': closeKm,
           'Hcl': hcl.toString(),
           'duty': duty,
+          'finalkilometers':finalkilometers,
+
         }),
       );
 
@@ -1593,6 +1597,62 @@ class ApiService {
   }
 
 // uploading closing kilometr to the Trip details upload screen completed
+
+
+
+
+
+
+  // uploading starting kilometr to the Trip details upload starts
+  static Future<void> finalupdateCloseKMToTripDetailsUploadScreen({
+    required String tripId,
+    required String finalcloseKm,
+    required int hcl,
+    required String duty,
+  }) async {
+    final url = Uri.parse('${AppConstants.baseUrl}/finalclosekmupdatetripsheet');
+    try {
+      print('Sending data to API: $url');
+      print('Payload Ajay: {tripId: $tripId,  closekm: $finalcloseKm, Hcl: $hcl, duty: $duty}');
+
+      final response = await http.put(
+        url,
+        headers: {'Content-Type': 'application/json'}, // Set JSON header
+        body: jsonEncode({
+          'tripId': tripId,
+          'closekm': finalcloseKm,
+          'Hcl': hcl.toString(),
+          'duty': duty,
+
+        }),
+      );
+
+      print('Response status code Ajay: ${finalcloseKm}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('Successfully updated Closing KM details');
+      } else {
+        throw Exception('Failed to update KM details: ${response.body}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+      throw Exception('Error occurred: $e');
+    }
+  }
+
+// uploading closing kilometr to the Trip details upload screen completed
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1626,6 +1686,40 @@ class ApiService {
       return null; // Handle network or parsing errors
     }
   }
+
+
+
+
+  static Future<Map<String, dynamic>?> fetchTripDuration(String tripId) async {
+    final String url = '${AppConstants.baseUrl}/tripduration/$tripId';
+
+    // Log the URL being called for debugging
+    print('URL being called: $url');
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      // Log the status code and response body for debugging
+      print('Response statusede code: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print("Success: Objects fetched");
+        final data = json.decode(response.body);
+        return data; // Return the trip details if successful
+      } else if (response.statusCode == 404) {
+        print('Data not found');
+        return null; // Handle not found
+      } else {
+        print('Error: Failed to fetch trip details. Status Code: ${response.statusCode}');
+        return null; // Handle other status codes
+      }
+    } catch (e) {
+      print('Error occurred while fetching trip details: $e');
+      return null; // Handle network or parsing errors
+    }
+  }
+
 
 
 
@@ -2339,6 +2433,7 @@ class ApiService {
     required String name,
     required String senderEmail,
     required String senderPass,
+    required String tripId,
   }) async {
     final url = Uri.parse('${AppConstants.baseUrl}/send-otp');
 
@@ -2349,27 +2444,85 @@ class ApiService {
         body: jsonEncode({
           "mobile": number,
           "email": email,
-          'name':name,
+          'name': name,
           'senderEmail': senderEmail,
           'senderPass': senderPass,
-
+          'tripId': tripId,
         }),
       );
 
       if (response.statusCode == 200) {
-        print('resposne ${response.body}');
-        return {"success": true, "message": jsonDecode(response.body)["message"]};
+        final responseData = jsonDecode(response.body);
+        print('resposnettt $responseData');
+        return {
+          "success": true,
+          "message": responseData["message"],
+          "otp": responseData["otp"], // ✅ Include OTP here
+        };
       } else {
-        print('resposne2 ${response.body}');
-        return {"success": false, "message": jsonDecode(response.body)["message"]};
+        final responseData = jsonDecode(response.body);
+        print('resposne2 $responseData');
+        return {
+          "success": false,
+          "message": responseData["message"]
+        };
       }
     } catch (e) {
       return {"success": false, "message": "Something went wrong: $e"};
     }
   }
+
+//for sending otp completed
 //for sending otp completed
 
 //for verify otp started
+//
+//   static Future<Map<String, dynamic>> verifyOtp({
+//     required String number,
+//     required String email,
+//     required String name,
+//     required String senderEmail,
+//     required String senderPass,
+//     required String tripId,
+//
+//   }) async {
+//     print('verifyOtp received to APi service${name}');
+//
+//     final url = Uri.parse('${AppConstants.baseUrl}/verifyotp');
+//
+//     try {
+//       final response = await http.post(
+//         url,
+//         headers: {"Content-Type": "application/json"},
+//         body: jsonEncode({
+//           "mobile": number,
+//           "email": email,
+//           'name':name,
+//           'senderEmail': senderEmail,
+//           'senderPass': senderPass,
+//           'tripId': tripId,
+//
+//         }),
+//       );
+//
+//       if (response.statusCode == 200) {
+//         final decoded = jsonDecode(response.body);
+//         print('resposne for verify otp ${response.body}');
+//         return {
+//           "success": true,
+//           "message": decoded["message"],
+//           "otp": decoded["otp"],
+//           "messageId": decoded["messageId"],
+//         };
+//       } else {
+//         print('resposne2 ${response.body}');
+//         return {"success": false, "message": jsonDecode(response.body)["message"]};
+//       }
+//     } catch (e) {
+//       return {"success": false, "message": "Something went wrong: $e"};
+//     }
+//   }
+
 
   static Future<Map<String, dynamic>> verifyOtp({
     required String number,
@@ -2377,6 +2530,7 @@ class ApiService {
     required String name,
     required String senderEmail,
     required String senderPass,
+    required String tripId,
 
   }) async {
     print('verifyOtp received to APi service${name}');
@@ -2393,13 +2547,20 @@ class ApiService {
           'name':name,
           'senderEmail': senderEmail,
           'senderPass': senderPass,
+          'tripId': tripId,
 
         }),
       );
 
       if (response.statusCode == 200) {
-        print('resposne ${response.body}');
-        return {"success": true, "message": jsonDecode(response.body)["message"]};
+        final decoded = jsonDecode(response.body);
+        print('resposne for verify otp ${response.body}');
+        return {
+          "success": true,
+          "message": decoded["message"],
+          "otp": decoded["otp"],
+          "messageId": decoded["messageId"],
+        };
       } else {
         print('resposne2 ${response.body}');
         return {"success": false, "message": jsonDecode(response.body)["message"]};
@@ -2467,6 +2628,8 @@ class ApiService {
 
     required String Startpoint,
     required String Endpoint,
+    required String CustomerEmail,
+    required String RequestId,
 
 
   }) async {
@@ -2498,6 +2661,8 @@ class ApiService {
           "Release_date": ReleaseDate,
           "StartPoint": Startpoint,
           "EndPoint": Endpoint,
+          "CustomerEmail":CustomerEmail,
+          "RequestId":RequestId,
         }),
       );
       print('📦 Payload: $guestName, $guestMobileNo, $email, $startKm, $closeKm, $duration, $senderEmail, $senderPassword, $TripId, $Vehiclenumber, $VehicleName,$DutyType, $ReportTime, $ReleaseTime  ,$ReportDate, $Startpoint, $Endpoint');
@@ -2529,12 +2694,14 @@ class ApiService {
     required String name,
     required String email,
     required String phone,
+    required String vechiNo,
 
   }) async{
 
     print('first step values received in Api_Service ${email}');
     print('first step values received in Api_Service ${name}');
     print('first step values received in Api_Service ${phone}');
+    print('first step values received in Api_Service ${vechiNo}');
 
     String uri = "${AppConstants.baseUrl}/signup";
 
@@ -2547,6 +2714,7 @@ class ApiService {
             'name':name,
             'email':email,
             'phone':phone,
+            'vechiNo':vechiNo,
           })
       );
       print('first step response from backend in Api_Service ${response}');
@@ -2735,6 +2903,83 @@ class ApiService {
       return {"success": false, "message": "Something went wrong: $e"};
     }
   }
+
+
+
+
+
+
+
+  static Future<Map< String, dynamic>?> fetchTripSheetStatus( String TripId ) async{
+
+    final url = Uri.parse("${AppConstants.baseUrl}/fetchtripstatus/${TripId}");
+
+
+    print("Trip id received for check trip status in api service ${TripId}");
+
+    try{
+      final response = await  http.get(url);
+
+      print("print for fetch trip staus ${response}");
+
+      if(response.statusCode == 200){
+
+        print("responseeeeeee ${response.body}");
+
+        final decoded = jsonDecode(response.body);
+
+        return {
+          "success": true,
+          "status": decoded['status'],
+          "name":decoded['name'],
+        };
+
+      } else {
+
+        print("else condion works");
+
+        return {
+          "success":false,
+          "status":null,
+
+        };
+      }
+
+    } catch(e){
+
+      print('catch bloc works ${e}');
+
+      return {
+        "success":false,
+        "status":null,
+      };
+
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

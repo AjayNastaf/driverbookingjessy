@@ -5,6 +5,7 @@ import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jessy_cabs/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../PickupScreen/PickupScreen.dart';
 import '../NoInternetBanner/NoInternetBanner.dart';
@@ -31,14 +32,14 @@ class StartingKilometer extends StatefulWidget {
   State<StartingKilometer> createState() => _StartingKilometerState();
 }
 
-class _StartingKilometerState extends State<StartingKilometer>  {
+class _StartingKilometerState extends State<StartingKilometer>  with WidgetsBindingObserver{
 
 
   String guestMobileNumber = '';
 
   String guestEmail = '';
-  // final TextEditingController _startKM = TextEditingController();
-  TextEditingController _startKM = TextEditingController(text: "0");
+  // TextEditingController _startKM = TextEditingController(text: "0");
+  TextEditingController _startKM = TextEditingController();
 
   File? _selectedFile;
   final ImagePicker _picker = ImagePicker();
@@ -50,9 +51,14 @@ class _StartingKilometerState extends State<StartingKilometer>  {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance.addObserver(this);
+
     _refreshData();
     _loadTripDetailsData();
     saveScreenData();
+    TripStatusManager().start(context, widget.tripId);
+
   }
 
   Future<void> _refreshData() async {
@@ -92,7 +98,7 @@ class _StartingKilometerState extends State<StartingKilometer>  {
     try {
       // Fetch trip details from the API
       final tripDetails = await ApiService.fetchTripDetails(widget.tripId);
-      print('Trip details values: $tripDetails');
+      print('Trip details valuesder: $tripDetails');
       if (tripDetails != null) {
 
         // var tripIdvalue = tripDetails['tripid'].toString();
@@ -107,7 +113,8 @@ class _StartingKilometerState extends State<StartingKilometer>  {
           guestMobileNumber= tripDetails['guestmobileno'];
           guestEmail= tripDetails['email'];
 
-          print("guest ${guestMobileNumber}");
+          print("guest ${hclhybriddata}");
+          print("guest ${hclhybriddata .runtimeType}");
           print('guest ${guestEmail}');
           print('Trip details guest: $duty');
         });
@@ -183,268 +190,383 @@ class _StartingKilometerState extends State<StartingKilometer>  {
   //   }
   // }
 
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('App lifecycle state: $state');
+  }
+
+  @override
+
+  void dispose() {
+
+    WidgetsBinding.instance.removeObserver(this);
+
+
+    super.dispose();
+
+  }
   // // Navigate to next screen
+//   Future<void> _goToNextScreen() async {
+//     print("object");
+//
+//     if (_selectedFile != null) {
+//       context.read<StartKmBloc>().add(
+//         UploadStartingKilometerImage(
+//           tripId: widget.tripId,
+//           startingKilometerImage: _selectedFile!,
+//         ),
+//       );
+//     } else {
+//       print("Error: No image selected");
+//     }
+//
+//     context.read<StartKmBloc>().add(
+//       SubmitStartingKilometerText(
+//         tripId: widget.tripId,
+//         startKm: _startKM.text,
+//         hclValue: hclhybriddata.toString(),
+//         dutyValue: duty ?? "",
+//       ),
+//     );
+//
+//
+//     if (hclhybriddata == 1) {
+// print('hybrid 1');
+//       Navigator.pushAndRemoveUntil(
+//
+//         context,
+//
+//         MaterialPageRoute(builder: (_) => TrackingPage(address: widget.address, tripId: widget.tripId)),
+//
+//             (route) => false,
+//
+//       );
+//       return;
+//
+//     }
+//
+//     else if(hclhybriddata == 0) {
+//       print('hybrid 0');
+//
+//       Navigator.pushAndRemoveUntil(
+//       context,
+//       MaterialPageRoute(
+//         builder: (context) =>
+//             TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
+//       ), (route) => false
+//   );
+//       return;
+//
+// }
+//   }
   Future<void> _goToNextScreen() async {
     print("object");
+    if (_startKM.text.isEmpty) {
+
+      showInfoSnackBar(context, "Starting Kilometer is required");
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text("Starting Kilometer is required")),
+      // );
+      return; // stop execution
+    }
+
 
     if (_selectedFile != null) {
+      context.read<StartKmBloc>().add(
+        SubmitStartingKilometerText(
+          tripId: widget.tripId,
+          startKm: _startKM.text,
+          hclValue: hclhybriddata.toString(),
+          dutyValue: duty ?? "",
+        ),
+      );
+
       context.read<StartKmBloc>().add(
         UploadStartingKilometerImage(
           tripId: widget.tripId,
           startingKilometerImage: _selectedFile!,
         ),
       );
+
+      if (hclhybriddata == 1) {
+
+        Navigator.pushAndRemoveUntil(
+
+          context,
+
+          MaterialPageRoute(builder: (_) => TrackingPage(address: widget.address, tripId: widget.tripId)),
+
+              (route) => false,
+
+        );
+
+      }
+
+      else {
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
+            ), (route) => false
+        );
+
+      }
+
     } else {
-      print("Error: No image selected");
+      showFailureSnackBar(context, "Please, Upload Stating Kilometer");
     }
 
-    context.read<StartKmBloc>().add(
-      SubmitStartingKilometerText(
-        tripId: widget.tripId,
-        startKm: _startKM.text,
-        hclValue: hclhybriddata.toString(),
-        dutyValue: duty ?? "",
-      ),
-    );
-
-
-    if (hclhybriddata == 1) {
-
-      Navigator.pushAndRemoveUntil(
-
-        context,
-
-        MaterialPageRoute(builder: (_) => TrackingPage(address: widget.address, tripId: widget.tripId)),
-
-            (route) => false,
-
-      );
-
-    }
-
-    else {
-  Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            TrackingWithOutHcl(address: widget.address, tripId: widget.tripId),
-      ), (route) => false
-  );
-
-}
   }
-
   @override
   Widget build(BuildContext context) {
     bool isConnected = Provider.of<NetworkManager>(context).isConnected;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Upload Starting Kilometer", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, )),
-        backgroundColor: AppTheme.Navblue1,
-        // iconTheme: IconThemeData(color: AppTheme.white1),
-        automaticallyImplyLeading: false,
-        elevation: 2,
-      ),
-      body: Stack(
-        children: [
-
-      RefreshIndicator(
-        onRefresh: () async {
-          await _loadTripDetailsData();
-          setState(() {}); // Update UI after refreshing
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-
-          child:
-      Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Upload Starting Kilometer", style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white, )),
+          backgroundColor: AppTheme.Navblue1,
+          // iconTheme: IconThemeData(color: AppTheme.white1),
+          automaticallyImplyLeading: false,
+          elevation: 2,
+        ),
+        body: Stack(
           children: [
 
-        // Text Field with better styling
-            TextField(
-              controller: _startKM,
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly, // ✅ allows only digits (0-9)
-              ],
-              enabled: hclhybriddata != 1, // disable when value is 1
-              decoration: InputDecoration(
-                hintText: "Starting Kilometer",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+        RefreshIndicator(
+          onRefresh: () async {
+            await _loadTripDetailsData();
+            setState(() {}); // Update UI after refreshing
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+
+            child:
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+
+          // Text Field with better styling
+              TextField(
+                controller: _startKM,
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly, // ✅ allows only digits (0-9)
+                ],
+                // enabled: hclhybriddata != 1, // disable when value is 1
+                enabled: true, // disable when value is 1
+                decoration: InputDecoration(
+                  hintText: "Starting Kilometer",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                 ),
-                contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               ),
-            ),
-            SizedBox(height: 24),
+              SizedBox(height: 24),
 
-            // Camera & Upload buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _pickFile(ImageSource.camera),
-                    icon: Icon(Icons.camera_alt),
-                    // label: Text("Open Camera"),
-                    label: Text("Upload File"),
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              // Camera & Upload buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if(_selectedFile == null)...[
 
+                    Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () => _pickFile(ImageSource.camera),
+                      icon: Icon(Icons.camera_alt),
+                      // label: Text("Open Camera"),
+                      label: Text("Upload Starting Kms"),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+
+                      ),
                     ),
                   ),
-                ),
-                // ElevatedButton.icon(
-                //   onPressed: () => _pickFile(ImageSource.gallery),
-                //   icon: Icon(Icons.upload_file),
-                //   label: Text("Upload File"),
-                //   style: ElevatedButton.styleFrom(
-                //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                //   ),
-                // ),
-              ],
-            ),
-            SizedBox(height: 24),
+                  ],
+                  // ElevatedButton.icon(
+                  //   onPressed: () => _pickFile(ImageSource.gallery),
+                  //   icon: Icon(Icons.upload_file),
+                  //   label: Text("Upload File"),
+                  //   style: ElevatedButton.styleFrom(
+                  //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  //   ),
+                  // ),
+                ],
+              ),
+              SizedBox(height: 24),
 
-            // Image Preview inside a card
-            if (_selectedFile != null)
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          _selectedFile!,
-                          height: 200,
+              // Image Preview inside a card
+              if (_selectedFile != null)
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 200, // same as image height
                           width: double.infinity,
-                          fit: BoxFit.cover,
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  _selectedFile!,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedFile = null;
+                                    });
+                                  },
+                                  child: Icon(
+                                    Icons.cancel_outlined,
+                                    color: Colors.red,
+                                    size: 48,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        "Selected Image",
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
-                      ),
-                    ],
+                        SizedBox(height: 10),
+                        Text(
+                          "Selected Image",
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Center(
+                  child: Text(
+                    "No file selected",
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                 ),
-              )
-            else
-              Center(
-                child: Text(
-                  "No file selected",
-                  style: TextStyle(color: Colors.grey, fontSize: 16),
-                ),
-              ),
 
-            // Spacer(),
+              // Spacer(),
 
-            BlocConsumer<StartKmBloc, StartKmState>(
-              listener: (context, state) {
-                if (state is StartKmTextSubmitted) {
-                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("KM Submitted Successfully")));
-                  showSuccessSnackBar(context, "KM Submitted Successfully");
-                } else if (state is StartKmImageUploaded) {
-                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image Uploaded Successfully")));
-                  showSuccessSnackBar(context, "Image Uploaded Successfully");
-                } else if (state is StartKmError) {
-                  // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
-                  showFailureSnackBar(context, state.message);
-                }
-              },
-              builder: (context, state) {
-                if (state is StartKmTextLoading || state is StartKmImageUploading) {
-                  return CircularProgressIndicator();
-                }
+              BlocConsumer<StartKmBloc, StartKmState>(
+                listener: (context, state) {
+                  if (state is StartKmTextSubmitted) {
+                    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("KM Submitted Successfully")));
+                    showSuccessSnackBar(context, "KM Submitted Successfully");
+                    print(" sucrcesfully km inserted");
+                  }
+    // else if (state is StartKmImageUploaded) {
+                  //   // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Image Uploaded Successfully")));
+                  //   showSuccessSnackBar(context, "Image Uploaded Successfully");
+                  // }
+                    else if (state is StartKmError) {
+                    print(" not km inserted");
 
-                return  ElevatedButton(
+                    // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
+                    showFailureSnackBar(context, state.message);
+                  }
+                },
+                builder: (context, state) {
+                  if (state is StartKmTextLoading || state is StartKmImageUploading) {
+                    return CircularProgressIndicator();
+                  }
 
-             onPressed: _goToNextScreen,
-             //      onPressed: () {
-             //        // if (_startKM.text.isEmpty){
-             //        //
-             //        //   showWarningSnackBar(context, "Please enter the Starting Kilometer");
-             //        //   return;
-             //        // }
-             //        //
-             //        // if(_selectedFile == null){
-             //        //
-             //        //   showWarningSnackBar(context, "Please Select Starting Kilometer image");
-             //        //   return;
-             //        //
-             //        // }
-             //
-             //
-             //        // if (_selectedFile != null && _startKM.text.isNotEmpty) {
-             //        //   context.read<StartKmBloc>().add(
-             //        //     UploadStartingKilometerImage(tripId: widget.tripId, startingKilometerImage: _selectedFile!),
-             //        //   );
-             //        //
-             //        //   context.read<StartKmBloc>().add(
-             //        //     SubmitStartingKilometerText(
-             //        //       tripId: widget.tripId,
-             //        //       startKm: _startKM.text,
-             //        //       hclValue: hclhybriddata.toString(),
-             //        //       dutyValue: duty ?? "",
-             //        //     ),
-             //        //   );
-             //        //
-             //        //
-             //        //   Navigator.push(
-             //        //     context,
-             //        //     MaterialPageRoute(
-             //        //       builder: (context) => Pickupscreen(
-             //        //         address: widget.address,
-             //        //         tripId: widget.tripId,
-             //        //       ),
-             //        //     ),
-             //        //   );
-             //        //
-             //        // }
-             //
-             //      },
+                  return  ElevatedButton(
+
+               onPressed: _goToNextScreen,
+               //      onPressed: () {
+               //        // if (_startKM.text.isEmpty){
+               //        //
+               //        //   showWarningSnackBar(context, "Please enter the Starting Kilometer");
+               //        //   return;
+               //        // }
+               //        //
+               //        // if(_selectedFile == null){
+               //        //
+               //        //   showWarningSnackBar(context, "Please Select Starting Kilometer image");
+               //        //   return;
+               //        //
+               //        // }
+               //
+               //
+               //        // if (_selectedFile != null && _startKM.text.isNotEmpty) {
+               //        //   context.read<StartKmBloc>().add(
+               //        //     UploadStartingKilometerImage(tripId: widget.tripId, startingKilometerImage: _selectedFile!),
+               //        //   );
+               //        //
+               //        //   context.read<StartKmBloc>().add(
+               //        //     SubmitStartingKilometerText(
+               //        //       tripId: widget.tripId,
+               //        //       startKm: _startKM.text,
+               //        //       hclValue: hclhybriddata.toString(),
+               //        //       dutyValue: duty ?? "",
+               //        //     ),
+               //        //   );
+               //        //
+               //        //
+               //        //   Navigator.push(
+               //        //     context,
+               //        //     MaterialPageRoute(
+               //        //       builder: (context) => Pickupscreen(
+               //        //         address: widget.address,
+               //        //         tripId: widget.tripId,
+               //        //       ),
+               //        //     ),
+               //        //   );
+               //        //
+               //        // }
+               //
+               //      },
 
 
 
-          style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.Navblue1,
-          padding: EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            minimumSize: Size(double.infinity, 50), // Full width
+            style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.Navblue1,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              minimumSize: Size(double.infinity, 50), // Full width
 
+            ),
+            child: Text(
+            "Upload & Next",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          );
+
+        },
+        ),
+
+            ],
           ),
-          child: Text(
-          "Upload & Next",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        );
+        ),),
+      ),
 
-  },
-  ),
+            Positioned(
+              top: 15,
+              left: 0,
+              right: 0,
+              child: NoInternetBanner(isConnected: isConnected),
+            ),
 
           ],
         ),
-      ),),
-    ),
-
-          Positioned(
-            top: 15,
-            left: 0,
-            right: 0,
-            child: NoInternetBanner(isConnected: isConnected),
-          ),
-
-        ],
       ),
     );
   }

@@ -773,6 +773,7 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
     on<UploadClosingKmText>(_uploadClosingKmText);
     on<UploadClosingKmImage>(_uploadClosingKmImage);
     on<UpdateSignatureStatus>(_updateSignatureStatus);
+    on<UpdateClosingkm>(_updateClosingkm);
   }
 
 
@@ -837,13 +838,33 @@ class TripUploadBloc extends Bloc<TripUploadEvent, TripUploadState> {
         closeKm: event.closeKm,
         hcl: event.hcl,
         duty: event.duty,
+        finalkilometers:event.finalkilometers,
       );
+
+      print('gffffffffmanualclosekmupdatetripsheet ${ event.hcl}');
 
       emit(TripUploadSuccess("Closing Kilometer details updated successfully"));
     } catch (error) {
       emit(TripUploadFailure("Error updating data: $error"));
     }
   }
+
+  Future<void> _updateClosingkm(UpdateClosingkm event, Emitter<TripUploadState> emit) async {
+    emit(TripUploadLoading());
+    try {
+      await ApiService.finalupdateCloseKMToTripDetailsUploadScreen(
+        tripId: event.tripId,
+        finalcloseKm: event.finalcloseKm,
+        hcl: event.hcl,
+        duty: event.duty,
+      );
+      emit(TripUploadSuccess("Closing Kilometer details updated successfully"));
+    } catch (error) {
+      emit(TripUploadFailure("Error updating data: $error"));
+    }
+  }
+
+
 }
 //this the total bloc implementing 3 apis in the Trip details Upload page completed
 
@@ -1229,7 +1250,7 @@ class TripTrackingDetailsBloc extends Bloc<TripTrackingDetailsEvent, TripTrackin
 
         if (vehicleNo.isNotEmpty && tripStatus.isNotEmpty) {
           emit(TripTrackingDetailsLoaded(vehicleNumber: vehicleNo, status: tripStatus));
-          print("object");
+          print("objectxcvygbhunjmkjnhbgvfcd");
         } else {
           print("Trip details missing: vehicleNo=$vehicleNo, tripStatus=$tripStatus");
           emit(TripTrackingDetailsError("Trip details are incomplete"));
@@ -1525,10 +1546,10 @@ class DocumentImagesBloc extends Bloc<DocumentImagesEvent, DocumentImagesState> 
       print("🖼 parking KM Image URL: $ParkingImage");
 
       emit(DocumentImagesLoaded(
+        // startKmImage: startKmImage != null ? "${AppConstants.baseUrl}/uploads/$startKmImage" : null,
         startKmImage: startKmImage != null ? "${AppConstants.baseUrl}/uploads/$startKmImage" : null,
         closingKmImage: closingKmImage != null ? "${AppConstants.baseUrl}/uploads/$closingKmImage" : null,
-        // TollImage: TollImage != null ? "${AppConstants.baseUrl}/uploads/$TollImage" : null,
-        // ParkingImage: ParkingImage != null ? "${AppConstants.baseUrl}/uploads/$ParkingImage" : null,
+
         TollImage: TollImage.map((image) => "${AppConstants.baseUrl}/uploads/$image").toList(),
         ParkingImage: ParkingImage.map((image) => "${AppConstants.baseUrl}/uploads/$image").toList(),
       ));
@@ -1574,6 +1595,38 @@ class GettingClosingKilometerBloc extends Bloc<GettingClosingKilometerEvent, Get
 
 
 
+// class OtpBloc extends Bloc<OtpEvent, OTPState> {
+//   OtpBloc() : super(OTPInitial()) {
+//     on<OtpEvent>(_onOtpRequested);
+//   }
+//
+//   Future<void> _onOtpRequested(OtpEvent event, Emitter<OTPState> emit) async {
+//     print("2 - Bloc processing event"); // Debug
+//     print('Bloc Received data ${event.guestEmail}');
+//     print('Bloc Received data ${event.guestNumber}');
+//     print('Bloc Received data ${event.guestName}');
+//     print("Bloc Received data ${event.tripId}");
+//     emit(OTPLoading());
+//     try {
+//       // final response = await ApiService.sendOtp(event.guestNumber, event.guestEmail);
+//       final response = await ApiService.sendOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName,  senderEmail: event.senderEmail,senderPass: event.senderPass, tripId: event.tripId);
+//       ;
+//       print("responseee for otp ${response}");
+//       if (response['success'] == true) {
+//         emit(OTPSuccess(response['otp'].toString()));
+//         return;
+//       } else if(response['success']== false){
+//         print("OTP not found in response");
+//         emit(OTPFailed('OTP not found in response'));
+//         return;
+//       }
+//     } catch (e) {
+//       emit(OTPFailed(e.toString()));
+//     }
+//   }
+// }
+
+
 class OtpBloc extends Bloc<OtpEvent, OTPState> {
   OtpBloc() : super(OTPInitial()) {
     on<OtpEvent>(_onOtpRequested);
@@ -1584,15 +1637,26 @@ class OtpBloc extends Bloc<OtpEvent, OTPState> {
     print('Bloc Received data ${event.guestEmail}');
     print('Bloc Received data ${event.guestNumber}');
     print('Bloc Received data ${event.guestName}');
+    print("Bloc Received data ${event.tripId}");
     emit(OTPLoading());
     try {
       // final response = await ApiService.sendOtp(event.guestNumber, event.guestEmail);
-      final response = await ApiService.sendOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName,  senderEmail: event.senderEmail,senderPass: event.senderPass,);
+      final response = await ApiService.sendOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName,  senderEmail: event.senderEmail,senderPass: event.senderPass, tripId: event.tripId);
       ;
-      if (response['otp'] != null) {
+      print("responseee for otp ${response}");
+      if (response['success'] == true) {
+        print('just for see the otp ${response['otp'].toString()}');
         emit(OTPSuccess(response['otp'].toString()));
-      } else {
+
+        SharedPreferences pref = await SharedPreferences.getInstance();
+        await pref.setString('otp', response['otp'].toString());
+
+
+        return;
+      } else if(response['success']== false){
+        print("OTP not found in response");
         emit(OTPFailed('OTP not found in response'));
+        return;
       }
     } catch (e) {
       emit(OTPFailed(e.toString()));
@@ -1602,6 +1666,36 @@ class OtpBloc extends Bloc<OtpEvent, OTPState> {
 
 
 
+
+
+
+//
+// class LastOtBloc extends Bloc<OtpVerifyEvent, OtpVerifyState>{
+//   LastOtBloc():super(LastOtpInitial()){
+//     on<OtpVerifyEvent>(_onFetch);
+//   }
+//
+//   Future<void>_onFetch(OtpVerifyEvent event, Emitter<OtpVerifyState> emit) async{
+//
+//     print('Bloc Received Last Otp info ${event.guestName}');
+//     print('Bloc Received Last Otp info ${event.guestEmail}');
+//     print('Bloc Received Last Otp info ${event.guestNumber}');
+//     print('Bloc Received Last Otp info ${event.tripId}');
+//     emit(LastOtpLoading());
+//
+//     try{
+//       final response = await ApiService.verifyOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName, senderEmail: event.senderEmail, senderPass: event.senderPass, tripId: event.tripId);
+//       // if(response['otp'] != null){
+//       if(response['success'] == true){
+//         emit(LastOtpSuccess(response['otp'].toString()));
+//       } else{
+//         emit(LastOtpFailed('OTP not found in response'));
+//       }
+//     } catch(e){
+//       emit(LastOtpFailed(e.toString()));
+//     }
+//   }
+// }
 class LastOtBloc extends Bloc<OtpVerifyEvent, OtpVerifyState>{
   LastOtBloc():super(LastOtpInitial()){
     on<OtpVerifyEvent>(_onFetch);
@@ -1612,12 +1706,21 @@ class LastOtBloc extends Bloc<OtpVerifyEvent, OtpVerifyState>{
     print('Bloc Received Last Otp info ${event.guestName}');
     print('Bloc Received Last Otp info ${event.guestEmail}');
     print('Bloc Received Last Otp info ${event.guestNumber}');
+    print('Bloc Received Last Otp info ${event.tripId}');
     emit(LastOtpLoading());
 
     try{
-      final response = await ApiService.verifyOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName, senderEmail: event.senderEmail, senderPass: event.senderPass);
-      if(response['otp'] != null){
+      final response = await ApiService.verifyOtp(number: event.guestNumber, email: event.guestEmail, name: event.guestName, senderEmail: event.senderEmail, senderPass: event.senderPass, tripId: event.tripId);
+
+      print('response for verify otp in bloc screen ${response}');
+      if(response['success'] == true){
+        print('verify otp received on bloc ${response['otp']}');
         emit(LastOtpSuccess(response['otp'].toString()));
+
+
+        SharedPreferences pref = await SharedPreferences.getInstance();
+        await pref.setString('otps', response['otp'].toString());
+
       } else{
         emit(LastOtpFailed('OTP not found in response'));
       }
@@ -1626,7 +1729,6 @@ class LastOtBloc extends Bloc<OtpVerifyEvent, OtpVerifyState>{
     }
   }
 }
-
 
 class EmailBloc extends Bloc<EmailEvent, EmailState> {
   EmailBloc() : super(EmailInitial()) {
@@ -1653,6 +1755,8 @@ class EmailBloc extends Bloc<EmailEvent, EmailState> {
         ReleaseDate: event.ReleaseDate,
         Startpoint: event.Startpoint,
         Endpoint: event.Endpoint,
+        CustomerEmail: event.CustomerEmail,
+        RequestId: event.RequestId,
       );
 
       if (success) {
@@ -1753,9 +1857,11 @@ void _onSignupAttepmt(SignupRequested event, Emitter<SignupState> emit) async {
   emit(SignUpLoading());
   try {
     final response = await ApiService.signUpStepOne(
-        name: event.name, email: event.email, phone: event.phone);
+        // name: event.name, email: event.email, phone: event.phone);
+    name: event.name, email: event.email, phone: event.phone, vechiNo: event.vechiNo, );
 
-    print('first step response from Api_Service ${response}');
+
+  print('first step response from Api_Service ${response}');
 
     if (response['success'] == true) {
       final otp = response['otp']?.toString() ?? '';
@@ -1882,3 +1988,49 @@ class GetOkayBloc extends Bloc<GetOkayEvent, GetOkayState>{
   }
 }
 //
+
+
+
+
+class CheckTripSheetBloc extends Bloc<checkTripStatusEvent, CheckTripStatusState>{
+
+  CheckTripSheetBloc():super(CheckTripStatusInitial()){
+    on<checkTripEvent>(_checkTripSheetStatus);
+  }
+
+
+  Future<void> _checkTripSheetStatus(
+      checkTripEvent event,
+      Emitter<CheckTripStatusState> emit
+      ) async{
+
+    emit(CheckTripStatusLoading());
+
+    print("Trip id received for check trip status in bloc ${event.TripId}");
+
+    try{
+
+      final response = await ApiService.fetchTripSheetStatus( event.TripId );
+
+      print('response in bloc forrrrr ${response}');
+
+      if( response != null && response['success']== true){
+
+        emit(CheckTripStatusSuccess(response['status'], response['name']));
+
+      } else if ( response != null && response['success'] == false){
+
+        emit(CheckTripStatusFailed('Trip status not yet changed'));
+
+      } else {
+
+        print("uncondionally null positon");
+
+      }
+
+    } catch(e){
+      emit(CheckTripStatusFailed('Trip status not yet changed ${e}'));
+    }
+  }
+}
+

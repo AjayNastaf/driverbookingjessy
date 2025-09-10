@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:jessy_cabs/Screens/CustomerReachedWithouthcl/CustomerReachedWithouthcl.dart';
 import 'package:jessy_cabs/Screens/TrackingWithOutHcl/AnimatedPageTracking.dart';
+import 'package:jessy_cabs/main.dart';
 import 'package:location/location.dart';
 import 'dart:math' as math;
 import 'package:dio/dio.dart';
@@ -72,6 +73,7 @@ class _TrackingWithOutHclState extends State<TrackingWithOutHcl> {
 
 
     saveScreenData();
+    TripStatusManager().start(context, widget.tripId);
 
   }
 

@@ -74,6 +74,7 @@ console.log('ajay4',typeof(duty));
   let sql = "";
   let values = [];
   let hclStartKm = 0;
+  console.log(Hcl,"ajayyyyyyyyyyyyyyyyyyyyyyyyyyy",duty)
   if (Hcl === 1 && duty === "Outstation") {
   console.log('hcl1',Hcl);
     // First condition
@@ -84,7 +85,9 @@ console.log('ajay4',typeof(duty));
 
     // Second condition
     sql = "UPDATE tripsheet SET startkm = ?, vendorshedoutkm = ? WHERE tripid = ?";
-    values = [hclStartKm,hclStartKm, tripId];
+//    values = [hclStartKm,hclStartKm, tripId];
+    values = [startkm,startkm, tripId];
+//    return;
   } else {
     console.log('hcl3');
 
@@ -100,6 +103,7 @@ console.log('ajay4',typeof(duty));
       }
       // console.log(result, "data of the tripsheet data of the tripsheettttt")
 //      return res.status(200).send('Successfully updated');
+console.log(result,"ajjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjresuuuuuuuu")
       return res.status(200).json({ success: true, message: 'Successfully updated' });
 
     }
@@ -116,6 +120,8 @@ console.log('ajay4',typeof(duty));
 
 
 router.put('/closekmupdatetripsheet', (req, res) => {
+console.log("checking received aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
   // const {startkm, tripid } = req.body;
   const { tripId, closekm ,Hcl,duty} = req.body;
   // const query = 'UPDATE tripsheet SET starttime = ?, startdate = ?, startkm = ? WHERE tripid = ?';
@@ -163,5 +169,109 @@ console.log('ajay4',typeof(duty));
   //   res.status(200).json({ message: 'Status updated successfully' });
   // });
 });
+
+
+router.put('/manualclosekmupdatetripsheet', (req, res) => {
+console.log("checking received bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+
+  const { tripId, closekm ,Hcl,duty,finalkilometers} = req.body;
+console.log(tripId, closekm ,Hcl,duty ,finalkilometers, "checking received");
+console.log('ajay',typeof(tripId));
+console.log('ajay2',typeof(closekm));
+console.log('ajay3',typeof(Hcl),Hcl);
+console.log('ajay4',typeof(duty));
+console.log('ajay4',typeof(finalkilometers));
+
+  let sql = "";
+  let values = [];
+
+  if (Hcl === '1' && duty === "Outstation") {
+    // First condition
+    console.log("firstttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
+    sql = "UPDATE tripsheet SET  gpskilometer = ?,manualclosekm = ? WHERE tripid = ?";
+    values = [finalkilometers,closekm,tripId];
+  } else if (Hcl === '1' && duty !== "Outstation") {
+           console.log("secondddddddddd")
+           sql = "UPDATE tripsheet SET  gpskilometer = ?,manualclosekm = ? WHERE tripid = ?";
+          values = [finalkilometers,closekm,tripId];
+  }else if(Hcl === '0'){
+          console.log("non-hcl")
+          sql = "UPDATE tripsheet SET  gpskilometer = ?,closekm = ? WHERE tripid = ?";
+          values = [finalkilometers,closekm,tripId];
+  }
+   else {
+    // Default case or other conditions
+        console.log("thirddddd")
+        sql = "UPDATE tripsheet SET  gpskilometer = ?,manualclosekm = ? WHERE tripid = ?";
+        values = [finalkilometers, closekm,tripId];
+  }
+
+//    sql = "UPDATE tripsheet SET  gpskilometer = ?,manualclosekm = ? WHERE tripid = ?";
+//      values = [finalkilometers,closekm,tripId];
+
+
+
+  db.query(sql,values,(err, result) => {
+      if (err) {
+        console.log('Error updating tripsheet:', err);
+        return res.status(500).send('Failed to update');
+      }
+      // console.log(result, "data of the tripsheet data of the tripsheet")
+      return res.status(200).send('Successfully updated');
+    }
+  );
+
+
+});
+
+
+
+
+router.put('/finalclosekmupdatetripsheet', (req, res) => {
+console.log("checking received cccccccccccccccccccccccccccccccccccccccccc");
+
+  const { tripId, closekm ,Hcl,duty} = req.body;
+console.log(tripId, closekm ,Hcl,duty , "checking received");
+console.log('ajay',typeof(tripId));
+console.log('ajay2',typeof(closekm));
+console.log('ajay3',typeof(Hcl),Hcl);
+console.log('ajay4',typeof(duty));
+
+  let sql = "";
+  let values = [];
+
+  if (Hcl === '1' && duty === "Outstation") {
+    // First condition
+    console.log("firstttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
+    sql = "UPDATE tripsheet SET  closekm = ? WHERE tripid = ?";
+    values = [closekm,tripId];
+  } else if (Hcl === '1' && duty !== "Outstation") {
+    // Second condition
+        console.log("secondddddddddd")
+    sql = "UPDATE tripsheet SET closekm = ?,vendorshedinkm = ? WHERE tripid = ?";
+    values = [ closekm, closekm,tripId];
+  } else {
+    // Default case or other conditions
+        console.log("thirddddd")
+    sql = "UPDATE tripsheet SET  closekm = ? WHERE tripid = ?";
+    values = [ closekm,tripId];
+  }
+
+
+
+  db.query(sql,values,(err, result) => {
+      if (err) {
+        console.log('Error updating tripsheet:', err);
+        return res.status(500).send('Failed to update');
+      }
+      // console.log(result, "data of the tripsheet data of the tripsheet")
+      return res.status(200).send('Successfully updated');
+    }
+  );
+
+
+});
+
+
 
 module.exports = router;

@@ -6,7 +6,7 @@ const nodemailer = require('nodemailer');
 // const path = require('path');
 // const multer=require('multer');
 // const imageFolderPath = require('../imageurl');
-// const imageFolderPath = require('../imageurl')
+ const imageFolderPath = require('../imageurl')
 
 
 // // Define a constant for the base path to save images

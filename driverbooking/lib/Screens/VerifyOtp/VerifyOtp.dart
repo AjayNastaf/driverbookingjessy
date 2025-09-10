@@ -188,9 +188,12 @@
 import 'package:flutter/material.dart';
 import 'package:jessy_cabs/Screens/TripDetailsUpload/TripDetailsUpload.dart';
 import 'package:jessy_cabs/Utils/AllImports.dart';
+import 'package:jessy_cabs/main.dart';
 import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VerifyDeBoardimgOtp extends StatefulWidget {
   final String tripId;
@@ -201,7 +204,7 @@ class VerifyDeBoardimgOtp extends StatefulWidget {
   State<VerifyDeBoardimgOtp> createState() => _VerifyDeBoardimgOtpState();
 }
 
-class _VerifyDeBoardimgOtpState extends State<VerifyDeBoardimgOtp> with SingleTickerProviderStateMixin{
+class _VerifyDeBoardimgOtpState extends State<VerifyDeBoardimgOtp> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _controller;
 
   late AnimationController _textController;
@@ -210,7 +213,7 @@ class _VerifyDeBoardimgOtpState extends State<VerifyDeBoardimgOtp> with SingleTi
 
 
 
-  int _otpTimerCount = 5; // 5 minutes in seconds
+  int _otpTimerCount = 300; // 5 minutes in seconds
   late Timer _otpResendTimer;
 
   String? guestMobileNo;
@@ -254,6 +257,8 @@ class _VerifyDeBoardimgOtpState extends State<VerifyDeBoardimgOtp> with SingleTi
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addObserver(this);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _visible = true;
@@ -271,7 +276,52 @@ class _VerifyDeBoardimgOtpState extends State<VerifyDeBoardimgOtp> with SingleTi
       CurvedAnimation(parent: _textController, curve: Curves.easeInOut),
     );
 
-    _textController.repeat(reverse: true);  // Start the text animation
+    _textController.repeat(reverse: true);
+
+    _getOtpFromLocal();// Start the text animation
+    TripStatusManager().start(context, widget.tripId);
+    saveScreenData();
+  }
+
+
+  Future<void> saveScreenData() async {
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('last_screen', 'verifyOtp');
+
+    await prefs.setString('trip_id', widget.tripId);
+
+
+
+
+
+    print('Saved screen data:');
+
+    print('last_screen: TollParkingUpload');
+
+    print('trip_id: ${widget.tripId}');
+
+
+
+  }
+
+
+
+
+  Future<void> _getOtpFromLocal() async {
+    final pref = await SharedPreferences.getInstance();
+    final getOtp = pref.getString("otps");
+
+    setState(() {
+      otp = getOtp;
+    });
+    if (otp != null) {
+      print("Retrieved OTP from local storage for verify: $otp");
+      // You can use setState or a controller to display it
+    } else {
+      print("No OTP found in local storage for verify");
+    }
   }
 
 
@@ -301,9 +351,16 @@ class _VerifyDeBoardimgOtpState extends State<VerifyDeBoardimgOtp> with SingleTi
     }
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print('App lifecycle state: $state');
+  }
 
   @override
   void dispose() {
+
+    WidgetsBinding.instance.removeObserver(this);
+
     _textController.dispose();
     super.dispose();
     _otpResendTimer.cancel();
@@ -311,166 +368,222 @@ class _VerifyDeBoardimgOtpState extends State<VerifyDeBoardimgOtp> with SingleTi
   }
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<LastOtBloc, OtpVerifyState>(
-            listener: (context, state){
-              if(state is LastOtpSuccess){
-                otp = state.otp;
-                print("Otp received in verifyotppage${state.otp}");
-              }
-            }),
-        BlocListener<LoginViaBloc, LoginViaState>(
-            listener: (context, state){
-              if(state is LoginViaSuccess){
-                setState(() {
-                  otp = state.otp;
-                  print('resend otp received in verifyotp ${otp}');
-                });
-              }
-            })
-      ],
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('OTP Verification', style: TextStyle(color: Colors.white)),
-          backgroundColor: AppTheme.Navblue1,
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Flexible(
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.6,
-                width: MediaQuery.of(context).size.width,
-                child: Lottie.asset(
-                  'assets/animations/otpverify.json',
-                  fit: BoxFit.contain,
+    return WillPopScope(
+      onWillPop: ()async => false,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<LastOtBloc, OtpVerifyState>(
+              listener: (context, state){
+                if(state is LastOtpSuccess){
+                  setState(() {
+                    otp = state.otp;
+                    print("Otp received in verifyotppage${state.otp}");
+                  });
+                }
+              }),
+          BlocListener<LoginViaBloc, LoginViaState>(
+              listener: (context, state){
+                if(state is LoginViaSuccess){
+                  setState(() {
+                    otp = state.otp;
+                    print('resend otp received in verifyotp ${otp}');
+                  });
+                }
+              })
+        ],
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('OTP Verification', style: TextStyle(color: Colors.white)),
+            backgroundColor: AppTheme.Navblue1,
+          ),
+          body: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  width: MediaQuery.of(context).size.width,
+                  child: Lottie.asset(
+                    'assets/animations/otpverify.json',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-            ),
-            // FadeTransition(
-            //   opacity: _textOpacity,
-            //   child: Text(
-            //     'Lets Start the Ride',
-            //     style: GoogleFonts.roboto(
-            //       fontSize: 28,
-            //       color: Colors.black,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //     textAlign: TextAlign.center,
-            //   ),
-            // ),
-            // const SizedBox(height: 8),
-            //
-            AnimatedOpacity(
-              opacity: _visible ? 1.0 : 0.0,
-              duration: const Duration(seconds: 2),
-              child: Text(
-                'Lets  End the Ride',
+              // FadeTransition(
+              //   opacity: _textOpacity,
+              //   child: Text(
+              //     'Lets Start the Ride',
+              //     style: GoogleFonts.roboto(
+              //       fontSize: 28,
+              //       color: Colors.black,
+              //       fontWeight: FontWeight.bold,
+              //     ),
+              //     textAlign: TextAlign.center,
+              //   ),
+              // ),
+              // const SizedBox(height: 8),
+              //
+              AnimatedOpacity(
+                opacity: _visible ? 1.0 : 0.0,
+                duration: const Duration(seconds: 2),
+                child: Text(
+                  'Lets  End the Ride',
+                  style: GoogleFonts.roboto(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Text(
+                'We Hope our customer had a great ride!',
                 style: GoogleFonts.roboto(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
                   color: Colors.black,
                 ),
                 textAlign: TextAlign.center,
               ),
-            ),
-            Text(
-              'We Hope our customer had a great ride!',
-              style: GoogleFonts.roboto(
-                fontSize: 18,
-                color: Colors.black,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(4, (index) {
-                return SizedBox(
-                  width: 35,
-                  child: TextField(
-                    controller: otpControllers[index],
-                    focusNode: otpFocusNodes[index],
-                    maxLength: 1,
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      counterText: '',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12), // Curved edges
+              SizedBox(height: 20,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: List.generate(4, (index) {
+                  return SizedBox(
+                    width: 35,
+                    child: TextField(
+                      controller: otpControllers[index],
+                      focusNode: otpFocusNodes[index],
+                      maxLength: 1,
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        counterText: '',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12), // Curved edges
+                        ),
                       ),
+                      onChanged: (value) {
+                        if (value.isNotEmpty && index < 3) {
+                          FocusScope.of(context).requestFocus(otpFocusNodes[index + 1]);
+                        } else if (value.isEmpty && index > 0) {
+                          FocusScope.of(context).requestFocus(otpFocusNodes[index - 1]);
+                        }
+                      },
                     ),
-                    onChanged: (value) {
-                      if (value.isNotEmpty && index < 3) {
-                        FocusScope.of(context).requestFocus(otpFocusNodes[index + 1]);
-                      } else if (value.isEmpty && index > 0) {
-                        FocusScope.of(context).requestFocus(otpFocusNodes[index - 1]);
+                  );
+                }),
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      '${(_otpTimerCount ~/ 60).toString().padLeft(2, '0')}:${(_otpTimerCount % 60).toString().padLeft(2, '0')}',
+                      style: TextStyle(fontSize: 14, color: const Color.fromARGB(255, 137, 136, 136)),
+                    ),
+                  ],
+                ),
+              ),
+              // const SizedBox(height: 20),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: ElevatedButton(
+              //
+              //     onPressed: () {
+              //       if (!isOtpComplete()) {
+              //         showFailureSnackBar(context, 'Please fill all OTP fields');
+              //
+              //         return;
+              //       }
+              //       if (isOtpValid()) {
+              //         setState(() {
+              //           showCheckmark = false;
+              //           hideButton = false;
+              //         });
+              //
+              //         Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
+              //
+              //       } else {
+              //         showFailureSnackBar(context, 'Invalid OTP ❌');
+              //       }
+              //       // _showEndRideConfirmationDialog(context);
+              //       //  _isLoading ? null : () => _handleSubmit(context),
+              //
+              //     },
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Colors.red,
+              //       padding: EdgeInsets.symmetric(vertical: 16),
+              //       shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.circular(8),
+              //       ),
+              //     ),
+              //     child: Text(
+              //       'Verify OTP',
+              //       style: TextStyle(fontSize: 20.0, color: Colors.white),
+              //     ),
+              //   ),
+              // ),
+              //
+              //
+              // SizedBox(height: 15,),
+
+            ],
+
+          ),
+          bottomNavigationBar: BottomAppBar(
+
+            color: Colors.white,
+            height: 100.0,
+            shape: const CircularNotchedRectangle(), // Optional: for notch design
+            elevation: 18.0,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: SafeArea(
+                top: false,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (!isOtpComplete()) {
+                        showFailureSnackBar(context, 'Please fill all OTP fields');
+                        return;
+                      }
+
+                      if (isOtpValid()) {
+                        setState(() {
+                          showCheckmark = false;
+                          hideButton = false;
+                        });
+
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TripDetailsUpload(tripId: widget.tripId),
+                          ),
+                              (route) => false,
+                        );
+                      } else {
+                        showFailureSnackBar(context, 'Invalid OTP ❌');
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      'Verify OTP',
+                      style: TextStyle(fontSize: 20.0, color: Colors.white),
+                    ),
                   ),
-                );
-              }),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    '${(_otpTimerCount ~/ 60).toString().padLeft(2, '0')}:${(_otpTimerCount % 60).toString().padLeft(2, '0')}',
-                    style: TextStyle(fontSize: 14, color: const Color.fromARGB(255, 137, 136, 136)),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-
-                onPressed: () {
-                  if (!isOtpComplete()) {
-                    showFailureSnackBar(context, 'Please fill all OTP fields');
-
-                    return;
-                  }
-                  if (isOtpValid()) {
-                    setState(() {
-                      showCheckmark = false;
-                      hideButton = false;
-                    });
-
-                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
-
-                  } else {
-                    showFailureSnackBar(context, 'Invalid OTP ❌');
-                  }
-                  // _showEndRideConfirmationDialog(context);
-                  //  _isLoading ? null : () => _handleSubmit(context),
-
-                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>TripDetailsUpload(tripId: widget.tripId,)),(route)=>false);
-
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  'Verify OTP',
-                  style: TextStyle(fontSize: 20.0, color: Colors.white),
                 ),
               ),
             ),
-
-
-            SizedBox(height: 15,),
-
-          ],
+          ),
         ),
       ),
     );

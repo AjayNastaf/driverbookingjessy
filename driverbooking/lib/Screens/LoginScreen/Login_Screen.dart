@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_Events.dart';
 import 'package:jessy_cabs/Bloc/AppBloc_State.dart';
@@ -13,6 +14,7 @@ import 'package:jessy_cabs/Screens/ListScreen/listviewpage.dart';
 import 'package:jessy_cabs/Screens/Registeration/Register.dart';
 import 'package:jessy_cabs/Screens/SignUpScreen/SignUp_Screen.dart';
 import 'package:jessy_cabs/models/login_dats.dart'; // Import the UserInfo model
+import 'package:permission_handler/permission_handler.dart';
 import '../../Networks/Api_Service.dart';
 import '../../Utils/AppConstants.dart';
 import '../../Utils/AppTheme.dart';
@@ -20,6 +22,8 @@ import 'package:jessy_cabs/Utils/AllImports.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jessy_cabs/Screens/LoginViaMobileScreen/LoginViaMobile.dart';
 import 'package:jessy_cabs/Screens/SignUpScreen/SignUp_Screen.dart';
+
+import '../FirstScreen/FirstScreen.dart';
 
 class Login_Screen extends StatefulWidget {
   const Login_Screen({super.key});
@@ -109,25 +113,79 @@ class _Login_ScreenState extends State<Login_Screen> {
     print("SharedPreferences cleared successfully");
   }
 
+  void startServiceIfPermitted() async {
+    bool granted = await requestAllPermissions();
+    if (granted) {
+      const platform = MethodChannel('com.example.jessy_cabs/background');
+      try {
+        await platform.invokeMethod('startMyBackgroundService');
+        print("✅ startMyBackgroundService invoked successfully");
+      } catch (e) {
+        print("❌ Failed to invoke startMyBackgroundService: $e");
+      }
+    } else {
+      print("❌ Permissions not granted");
+    }
+  }
+  Future<bool> requestAllPermissions() async {
+    final locStatus = await Permission.location.request();
+
+    if (locStatus.isGranted) {
+      final bgStatus = await Permission.locationAlways.request();
+      final notifStatus = await Permission.notification.request(); // optional
+      return bgStatus.isGranted;
+    }
+
+    return false;
+  }
+  void requestPermissions() async {
+    var status = await Permission.location.request();
+    if (status.isGranted) {
+      // Permissions granted, proceed with location tracking
+    } else {
+      // Handle the case when permissions are not granted
+    }
+  }
+  // final platform = MethodChannel('com.example.jessy_cabs/background');
+  // final platform = MethodChannel('com.example.jessy_cabs/background').invokeMethod('startMyBackgroundService');;
+  Future<void> startBackgroundService() async {
+    try {
+      // await platform.invokeMethod('startBackgroundService');
+      await MethodChannel('com.example.jessy_cabs/background').invokeMethod('startMyBackgroundService');
+print("com.example.jessy_cabs/background is started through login");
+    } catch (e) {
+
+      print("Error starting service: $e");
+
+    }
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (_) => LoginBloc(),
         child: Scaffold(
+          backgroundColor: Colors.white,
           appBar: AppBar(
-            automaticallyImplyLeading: false,  // Removes the back button
-
-              // title: Text("Login"),
-              // actions: [
-              //   IconButton(onPressed: (){}, icon: Icon(Icons.logout,))
-              // ],
-              ),
+            automaticallyImplyLeading: false,
+            backgroundColor: Colors.white,
+            leading:IconButton(
+                onPressed: (){
+                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>FirstScreen()), (route)=>false);
+                },
+                icon: Icon(Icons.arrow_back_rounded)) ,
+          ),
           body: BlocListener<LoginBloc, LoginState>(listener: (context, state) {
             if (state is LoginCompleted) {
               // ScaffoldMessenger.of(context).showSnackBar(
               //   SnackBar(content: Text("Login Successful! User ID: ${state.userId}")),
               // );
+              // requestPermissions(); // Request permissions before starting the service
+
+              startBackgroundService();
+              startServiceIfPermitted();
               _saveLoginDetails(_usernameController.text, state.userId);
               // context.read<AuthenticationBloc>().add(LoggedIn());
               context.read<AuthenticationBloc>().add(
@@ -294,29 +352,29 @@ class _Login_ScreenState extends State<Login_Screen> {
                             ),
 
 
-                            SizedBox(height: 5.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              Loginviamobile()),
-                                    );
-                                  },
-                                  child: Text(
-                                    'Login Via Phone Number',
-                                    style: TextStyle(
-                                      fontSize: 14.0,
-                                      color: AppTheme.Navblue1,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            SizedBox(height: 10.0),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.center,
+                            //   children: [
+                            //     TextButton(
+                            //       onPressed: () {
+                            //         Navigator.push(
+                            //           context,
+                            //           MaterialPageRoute(
+                            //               builder: (context) =>
+                            //                   Loginviamobile()),
+                            //         );
+                            //       },
+                            //       child: Text(
+                            //         'Login Via Phone Number',
+                            //         style: TextStyle(
+                            //           fontSize: 14.0,
+                            //           color: AppTheme.Navblue1,
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   ],
+                            // ),
                             // Login Button
 
 

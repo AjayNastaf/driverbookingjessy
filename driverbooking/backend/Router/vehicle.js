@@ -19,74 +19,75 @@ router.post("/addvehiclelocation", (req, res) => {
 
 
 
-// router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
-//     const { vehicleno, latitudeloc, longitutdeloc, Trip_id, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at,reach_30minutes } = req.body;
 
-//     console.log('vengy');
 
-//     // Query to check if the trip status is already 'Reached'
-//     const sqlReachedQuery = "SELECT * FROM VehicleAccessLocation WHERE Trip_id = ? AND Trip_Status = 'Reached'";
-
-//     db.query(sqlReachedQuery, [Trip_id], (err, reachedresult) => {
-//         if (err) {
-//             console.log("Error checking trip status:", err);
-//             return res.status(500).send({ message: "Database error while checking trip status." });
-//         }
-
-//         // console.log(reachedresult, "reachhhhhhhhhhhhhhhh");
-
-//         // If trip status is already 'Reached', do not insert
-//         if (reachedresult.length > 0) {
-//             return res.status(200).send({ message: "Trip already marked as 'Reached'. No further insertion required." });
-//         }
-
-//         // Query to get the last location for this trip
-//         const uniquelatlong = `
-//             SELECT * FROM VehicleAccessLocation
-//             WHERE Trip_id = ? AND Runing_Date = ?
-//             ORDER BY veh_id DESC
-//             LIMIT 1;
-//         `;
-
-//         db.query(uniquelatlong, [Trip_id, Runing_Date], (err, result) => {
-//             if (err) {
-//                 return res.status(500).send({ message: "Failed to retrieve last location data." });
-//             }
-
-//             console.log(Trip_id, Runing_Date, "trip result got");
-
-//             if (result.length > 0) {
-//                 const lastLatitude = Number(result[0].Latitude_loc);
-//                 console.log(lastLatitude, "Last recorded latitude");
-
-//                 if (lastLatitude === latitudeloc) {
-//                     console.log("Duplicate location, skipping insert.");
-//                     return res.status(200).send({ message: "Location already recorded. No insert required." });
-//                 }
-//             }
-
-//             // Insert the new location entry since it's a new location
-//             const insertUserSql = `
-//                 INSERT INTO VehicleAccessLocation
-//                 (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at,reach_30minutes)
-//                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
-//             `;
-
-//                if(Trip_Status !== "Reached"){
-
-//             db.query(insertUserSql, [vehicleno, Trip_id, latitudeloc, longitutdeloc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at,reach_30minutes], (err, insertResult) => {
-//                 if (err) {
-//                     console.log("Error inserting vehicle data:", err);
-//                     return res.status(500).send({ message: "Failed to add vehicle data." });
-//                 }
-
-//                 res.status(200).send({ message: "Vehicle registered successfully." });
-//             });
-//             }
-//         });
-//     });
-// });
-
+//router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
+//    const { vehicleno, latitudeloc, longitutdeloc, Trip_id, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at,reach_30minutes } = req.body;
+//
+//    console.log('vengy');
+//
+//    // Query to check if the trip status is already 'Reached'
+//    const sqlReachedQuery = "SELECT * FROM VehicleAccessLocation WHERE Trip_id = ? AND Trip_Status = 'Reached'";
+//
+//    db.query(sqlReachedQuery, [Trip_id], (err, reachedresult) => {
+//        if (err) {
+//            console.log("Error checking trip status:", err);
+//            return res.status(500).send({ message: "Database error while checking trip status." });
+//        }
+//
+//        // console.log(reachedresult, "reachhhhhhhhhhhhhhhh");
+//
+//        // If trip status is already 'Reached', do not insert
+//        if (reachedresult.length > 0) {
+//            return res.status(200).send({ message: "Trip already marked as 'Reached'. No further insertion required." });
+//        }
+//
+//        // Query to get the last location for this trip
+//        const uniquelatlong = `
+//            SELECT * FROM VehicleAccessLocation
+//            WHERE Trip_id = ? AND Runing_Date = ?
+//            ORDER BY veh_id DESC
+//            LIMIT 1;
+//        `;
+//
+//        db.query(uniquelatlong, [Trip_id, Runing_Date], (err, result) => {
+//            if (err) {
+//                return res.status(500).send({ message: "Failed to retrieve last location data." });
+//            }
+//
+//            console.log(Trip_id, Runing_Date, "trip result got");
+//
+//            if (result.length > 0) {
+//                const lastLatitude = Number(result[0].Latitude_loc);
+//                console.log(lastLatitude, "Last recorded latitude");
+//
+//                if (lastLatitude === latitudeloc) {
+//                    console.log("Duplicate location, skipping insert.");
+//                    return res.status(200).send({ message: "Location already recorded. No insert required." });
+//                }
+//            }
+//
+//            // Insert the new location entry since it's a new location
+//            const insertUserSql = `
+//                INSERT INTO VehicleAccessLocation
+//                (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at,reach_30minutes)
+//                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
+//            `;
+//
+//               if(Trip_Status !== "Reached"){
+//
+//            db.query(insertUserSql, [vehicleno, Trip_id, latitudeloc, longitutdeloc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at,reach_30minutes], (err, insertResult) => {
+//                if (err) {
+//                    console.log("Error inserting vehicle data:", err);
+//                    return res.status(500).send({ message: "Failed to add vehicle data." });
+//                }
+//
+//                res.status(200).send({ message: "Vehicle registered successfully." });
+//            });
+//            }
+//        });
+//    });
+//});
 
 
 
@@ -94,7 +95,7 @@ router.post("/addvehiclelocation", (req, res) => {
 router.post("/addvehiclelocationUniqueLatlong", (req, res) => {
     const { vehicleno, latitudeloc, longitutdeloc, Trip_id, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at, reach_30minutes } = req.body;
 
-    console.log('vengy');
+//    console.log('vengy');
 
 if(reach_30minutes == 'okay'){
 console.log(reach_30minutes,'eeeeeeeeeee');
@@ -218,7 +219,7 @@ function addMinutesToTimeStrPure(timeStr, minutesToAdd) {
 
 
 const currentTime = Tripstarttime;                // From frontend
-const addedTime = addMinutesToTimeStrPure(result[0].Tripstarttime, 3); // +3 min from DB
+const addedTime = addMinutesToTimeStrPure(result[0].Tripstarttime, 30); // +3 min from DB
 
 console.log("Current Time:", currentTime);
 console.log("Last + 3min Time:", addedTime);
@@ -264,6 +265,9 @@ if (currentMs < allowedMs) {
     });
  });
 })
+
+
+
 
 
 
@@ -394,18 +398,20 @@ router.post('/insertReachedData', (req, res) => {
     console.log("📝 Request Body:", req.body);
     const { vehicleno, latitudeloc, longitutdeloc, Trip_id, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at } = req.body;
 
-        console.log('vengy');
+//        console.log('vengy');
 
         // Query to check if the trip status is already 'Reached'
-        const sqlReachedQuery = "SELECT * FROM VehicleAccessLocation WHERE Trip_id = ? AND Trip_Status = 'Reached'";
+        const Tripdata = Number(Trip_id); // 123
+        console.log(typeof(Trip_id),typeof(Tripdata))
+        const sqlReachedQuery = "SELECT * FROM VehicleAccessLocation WHERE Trip_id = ? AND Trip_Status = 'Reached' AND reach_30minutes = 'okay'";
 
-        db.query(sqlReachedQuery, [Trip_id], (err, reachedresult) => {
+        db.query(sqlReachedQuery, [Tripdata], (err, reachedresult) => {
             if (err) {
                 console.log("Error checking trip status:", err);
                 return res.status(500).send({ message: "Database error while checking trip status." });
             }
 
-            // console.log(reachedresult, "reachhhhhhhhhhhhhhhh");
+            console.log(reachedresult, "reachhhhhhhhhhhhhhhh");
 
             // If trip status is already 'Reached', do not insert
             if (reachedresult.length > 0) {
@@ -417,8 +423,8 @@ router.post('/insertReachedData', (req, res) => {
 
     const insertUserSql = `
         INSERT INTO VehicleAccessLocation
-        (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (Vehicle_No, Trip_id, Latitude_loc, Longtitude_loc, Runing_Date, Runing_Time, Trip_Status, Tripstarttime, TripEndTime, created_at, reach_30minutes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "okay")
     `;
 
     const values = [
